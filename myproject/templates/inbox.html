@@ -20,6 +20,12 @@
       --border: #dedad0;
       --red: #c0392b;
       --red-light: #fde8e8;
+      --green: #15803d;
+      --green-light: #dcfce7;
+      --green-border: #86efac;
+      --blue: #1d4ed8;
+      --blue-light: #dbeafe;
+      --blue-border: #93c5fd;
     }
  
     body {
@@ -59,11 +65,7 @@
       border-bottom: 1px solid var(--border);
     }
  
-    .header-left {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+    .header-left { display: flex; flex-direction: column; gap: 4px; }
  
     .eyebrow {
       font-size: 10px;
@@ -99,14 +101,8 @@
       top: -4px;
     }
  
-    /* ── Header right actions ── */
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .header-right { display: flex; align-items: center; gap: 10px; }
  
-    /* ── Fetch button ── */
     .fetch-btn {
       display: inline-flex;
       align-items: center;
@@ -119,12 +115,11 @@
       font-family: 'DM Sans', sans-serif;
       font-size: 13px;
       font-weight: 500;
-      letter-spacing: 0.03em;
       cursor: pointer;
       transition: background 0.2s, transform 0.1s;
     }
  
-    .fetch-btn:hover { background: #2a2820; }
+    .fetch-btn:hover  { background: #2a2820; }
     .fetch-btn:active { transform: scale(0.97); }
     .fetch-btn i { font-size: 15px; transition: transform 0.3s; }
     .fetch-btn.loading i { animation: spin 0.8s linear infinite; }
@@ -134,7 +129,6 @@
       to   { transform: rotate(360deg); }
     }
  
-    /* ── Logout button ── */
     .logout-btn {
       display: inline-flex;
       align-items: center;
@@ -146,7 +140,6 @@
       text-decoration: none;
       font-size: 13px;
       font-weight: 400;
-      letter-spacing: 0.02em;
       transition: all 0.2s;
       background: var(--card);
     }
@@ -173,39 +166,31 @@
       gap: 8px;
     }
  
-    /* ── Idle state ── */
-    .idle-state {
+    /* ── Idle / Empty ── */
+    .idle-state, .empty {
       text-align: center;
       padding: 80px 20px;
       color: var(--muted);
       animation: fadeUp 0.4s ease both;
     }
  
-    .idle-state i {
+    .idle-state i, .empty i {
       font-size: 42px;
       display: block;
       margin-bottom: 14px;
       opacity: 0.25;
     }
  
-    .idle-state p {
+    .idle-state p, .empty p {
       font-family: 'Playfair Display', serif;
       font-size: 18px;
       opacity: 0.45;
     }
  
     /* ── Email list ── */
-    .email-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
+    .email-list { display: flex; flex-direction: column; gap: 2px; }
  
-    .email-link {
-      text-decoration: none;
-      color: inherit;
-      display: block;
-    }
+    .email-link { text-decoration: none; color: inherit; display: block; }
  
     .email-card {
       background: var(--card);
@@ -274,10 +259,11 @@
  
     .sender-group {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       gap: 8px;
       min-width: 0;
       overflow: hidden;
+      flex-wrap: wrap;
     }
  
     .email-from {
@@ -289,7 +275,7 @@
       text-overflow: ellipsis;
     }
  
-    /* Ticket number pill next to sender */
+    /* Ticket number chip */
     .ticket-badge {
       font-size: 10px;
       font-weight: 500;
@@ -302,6 +288,21 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
+ 
+    /* ── Status pill (inline on card) ── */
+    .status-pill {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+ 
+    .status-open     { background: var(--blue-light);  color: var(--blue);  border: 1px solid var(--blue-border); }
+    .status-assigned { background: var(--gold-light);  color: #7a5c10;      border: 1px solid #e0c97a; }
+    .status-closed   { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
  
     .email-date {
       font-size: 11px;
@@ -316,7 +317,7 @@
       font-family: 'Playfair Display', serif;
       font-weight: 500;
       font-size: 15px;
-      margin: 5px 0;
+      margin: 5px 0 3px;
       color: var(--ink);
       white-space: nowrap;
       overflow: hidden;
@@ -331,26 +332,64 @@
       overflow: hidden;
       text-overflow: ellipsis;
       line-height: 1.5;
+      margin-bottom: 8px;
     }
  
-    /* ── Empty after fetch ── */
-    .empty {
-      text-align: center;
-      padding: 80px 20px;
+    /* ── Assigned-to chip ── */
+    .assigned-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+ 
+    .assigned-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--ink);
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 9px 2px 4px;
+    }
+ 
+    .assigned-chip-avatar {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      background: var(--gold-light);
+      border: 1px solid #e0c97a;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      font-weight: 700;
+      color: #7a5c10;
+      flex-shrink: 0;
+    }
+ 
+    .unassigned-chip {
+      font-size: 11px;
       color: var(--muted);
+      font-weight: 300;
+      font-style: italic;
     }
- 
-    .empty i {
-      font-size: 40px;
-      display: block;
-      margin-bottom: 12px;
-      opacity: 0.3;
-    }
- 
-    .empty p {
-      font-family: 'Playfair Display', serif;
-      font-size: 18px;
-      opacity: 0.5;
+    #s1{
+          display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--ink);
+    color: var(--gold-light);
+    border: none;
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
     }
   </style>
 </head>
@@ -370,19 +409,16 @@
     </div>
  
     <div class="header-right">
- 
       <button class="fetch-btn" onclick="submitFetch(this)">
         <i class="ti ti-refresh"></i> Fetch Mail
       </button>
- 
+      <a id="s1" href='{% url "ticket_list" %}'>Ticket List</a>
       <a href="{% url 'logout' %}" class="logout-btn">
         <i class="ti ti-logout"></i> Sign out
       </a>
- 
     </div>
   </div>
  
-  <!-- Hidden POST form triggered by the Fetch button -->
   <form id="fetch-form" method="POST" style="display:none;">
     {% csrf_token %}
     <input type="hidden" name="fetch" value="1">
@@ -413,17 +449,35 @@
           <div class="avatar">{{ email.from|slice:":2"|upper }}</div>
  
           <div class="email-body">
+ 
             <div class="email-row">
               <div class="sender-group">
                 <span class="email-from">{{ email.from }}</span>
                 <span class="ticket-badge">{{ email.ticket }}</span>
+                <span class="status-pill status-{{ email.status }}">{{ email.status }}</span>
               </div>
               <span class="email-date">{{ email.date }}</span>
             </div>
+ 
             <div class="email-subject">{{ email.subject }}</div>
             <div class="email-preview">{{ email.body }}</div>
-          </div>
  
+            <!-- Assigned-to row -->
+            <div class="assigned-row">
+              {% if email.assigned_to %}
+                <span class="assigned-chip">
+                  <span class="assigned-chip-avatar">{{ email.assigned_to|slice:":2"|upper }}</span>
+                  {{ email.assigned_to }}
+                </span>
+              {% else %}
+                <span class="unassigned-chip">
+                  <i class="ti ti-user-off" style="font-size:11px; vertical-align:middle;"></i>
+                  Unassigned
+                </span>
+              {% endif %}
+            </div>
+ 
+          </div>
         </div>
       </a>
       {% endfor %}

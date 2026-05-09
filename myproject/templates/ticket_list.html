@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ticket List</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+ 
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+    :root {
+      --ink:          #0f0e0b;
+      --paper:        #f7f5f0;
+      --cream:        #edeae2;
+      --gold:         #c9a84c;
+      --gold-light:   #f0dfa0;
+      --muted:        #7a7669;
+      --card:         #fffefb;
+      --border:       #dedad0;
+      --red:          #c0392b;
+      --red-light:    #fde8e8;
+      --green:        #15803d;
+      --green-light:  #dcfce7;
+      --green-border: #86efac;
+      --blue:         #1d4ed8;
+      --blue-light:   #dbeafe;
+      --blue-border:  #93c5fd;
+    }
+ 
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      min-height: 100vh;
+      color: var(--ink);
+      overflow-x: hidden;
+    }
+ 
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+ 
+    .shell {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+      position: relative;
+      z-index: 1;
+    }
+ 
+    /* ── Top Bar ── */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+ 
+    .header-left { display: flex; flex-direction: column; gap: 4px; }
+ 
+    .eyebrow {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+ 
+    .title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+ 
+    .count-badge {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: var(--gold-light);
+      color: #7a5c10;
+      border: 1px solid #e0c97a;
+      vertical-align: middle;
+      position: relative;
+      top: -4px;
+    }
+ 
+    .header-right { display: flex; align-items: center; gap: 10px; }
+ 
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 9px 16px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 400;
+      transition: all 0.2s;
+      background: var(--card);
+    }
+    .nav-btn:hover { border-color: #ccc9be; color: var(--ink); background: var(--cream); }
+    .nav-btn i { font-size: 15px; }
+ 
+    .logout-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 9px 16px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 400;
+      transition: all 0.2s;
+      background: var(--card);
+    }
+    .logout-btn:hover { border-color: #f5bebe; color: var(--red); background: var(--red-light); }
+    .logout-btn i { font-size: 15px; }
+ 
+    /* ── Stats Row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+ 
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: box-shadow 0.2s, transform 0.15s;
+      animation: fadeUp 0.4s ease both;
+    }
+    .stat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); transform: translateY(-1px); }
+ 
+    .stat-icon {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .stat-icon.open     { background: var(--blue-light);  color: var(--blue);  }
+    .stat-icon.assigned { background: var(--gold-light);  color: #7a5c10;      }
+    .stat-icon.closed   { background: var(--green-light); color: var(--green); }
+ 
+    .stat-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1;
+      margin-top: 2px;
+    }
+ 
+    /* ── Tabs ── */
+    .tab-row {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+ 
+    .tab-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 7px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { border-color: #ccc9be; color: var(--ink); }
+ 
+    .tab-btn.active.all        { background: var(--ink);         color: var(--gold-light); border-color: var(--ink); }
+    .tab-btn.active.open-t     { background: var(--blue-light);  color: var(--blue);       border-color: var(--blue-border); }
+    .tab-btn.active.assigned-t { background: var(--gold-light);  color: #7a5c10;           border-color: #e0c97a; }
+    .tab-btn.active.closed-t   { background: var(--green-light); color: var(--green);      border-color: var(--green-border); }
+ 
+    .tab-count {
+      font-size: 9px;
+      font-weight: 500;
+      padding: 1px 6px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.06);
+    }
+ 
+    /* ── Ticket List ── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .ticket-list { display: flex; flex-direction: column; gap: 2px; }
+ 
+    .ticket-link { text-decoration: none; color: inherit; display: block; }
+ 
+    .ticket-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 22px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      transition: box-shadow 0.2s, transform 0.15s, border-color 0.2s;
+      position: relative;
+      animation: fadeUp 0.4s ease both;
+    }
+ 
+    .ticket-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 14px; bottom: 14px;
+      width: 3px;
+      border-radius: 0 2px 2px 0;
+      background: var(--gold);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+ 
+    .ticket-link:hover .ticket-card {
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      transform: translateY(-1px);
+      border-color: #ccc9be;
+    }
+    .ticket-link:hover .ticket-card::before { opacity: 1; }
+ 
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+ 
+    .ticket-icon {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      background: var(--cream);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .ticket-icon.open     { background: var(--blue-light);  color: var(--blue);  border-color: var(--blue-border); }
+    .ticket-icon.assigned { background: var(--gold-light);  color: #7a5c10;      border-color: #e0c97a; }
+    .ticket-icon.closed   { background: var(--green-light); color: var(--green); border-color: var(--green-border); }
+ 
+    .ticket-body { flex: 1; min-width: 0; }
+ 
+    .ticket-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+ 
+    .ticket-meta {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+ 
+    .ticket-num {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--cream);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+ 
+    .status-pill {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .status-open     { background: var(--blue-light);  color: var(--blue);  border: 1px solid var(--blue-border); }
+    .status-assigned { background: var(--gold-light);  color: #7a5c10;      border: 1px solid #e0c97a; }
+    .status-closed   { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
+ 
+    .ticket-date {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 300;
+      white-space: nowrap;
+      flex-shrink: 0;
+      letter-spacing: 0.02em;
+    }
+ 
+    .ticket-subject {
+      font-family: 'Playfair Display', serif;
+      font-weight: 500;
+      font-size: 15px;
+      margin: 5px 0 3px;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+ 
+    .ticket-sender {
+      color: var(--muted);
+      font-size: 12.5px;
+      font-weight: 300;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 8px;
+    }
+ 
+    .ticket-footer { display: flex; align-items: center; gap: 6px; }
+ 
+    .assigned-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--ink);
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 9px 2px 4px;
+    }
+ 
+    .assigned-chip-avatar {
+      width: 18px; height: 18px;
+      border-radius: 5px;
+      background: var(--gold-light);
+      border: 1px solid #e0c97a;
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      font-size: 8px;
+      font-weight: 700;
+      color: #7a5c10;
+      flex-shrink: 0;
+    }
+ 
+    .unassigned-chip {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 300;
+      font-style: italic;
+    }
+ 
+    .empty {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+      animation: fadeUp 0.4s ease both;
+    }
+    .empty i { font-size: 42px; display: block; margin-bottom: 14px; opacity: 0.25; }
+    .empty p { font-family: 'Playfair Display', serif; font-size: 18px; opacity: 0.45; }
+ 
+    @media (max-width: 600px) {
+      .stats-row { grid-template-columns: 1fr; }
+      .top-bar { flex-direction: column; align-items: flex-start; gap: 14px; }
+    }
+  </style>
+</head>
+ 
+<body>
+<div class="shell">
+ 
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="header-left">
+      <span class="eyebrow">Support</span>
+      <h1 class="title">
+        Tickets
+        <span class="count-badge">{{ all_tickets.count }}</span>
+      </h1>
+    </div>
+    <div class="header-right">
+      <a href="{% url 'inbox' %}" class="nav-btn">
+        <i class="ti ti-inbox"></i> Inbox
+      </a>
+      <a href="{% url 'logout' %}" class="logout-btn">
+        <i class="ti ti-logout"></i> Sign out
+      </a>
+    </div>
+  </div>
+ 
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card" style="animation-delay:0ms;">
+      <div class="stat-icon open"><i class="ti ti-mail-opened"></i></div>
+      <div>
+        <div class="stat-label">Open</div>
+        <div class="stat-value">{{ open_tickets.count }}</div>
+      </div>
+    </div>
+    <div class="stat-card" style="animation-delay:80ms;">
+      <div class="stat-icon assigned"><i class="ti ti-user-check"></i></div>
+      <div>
+        <div class="stat-label">Assigned</div>
+        <div class="stat-value">{{ assigned_tickets.count }}</div>
+      </div>
+    </div>
+    <div class="stat-card" style="animation-delay:160ms;">
+      <div class="stat-icon closed"><i class="ti ti-circle-check"></i></div>
+      <div>
+        <div class="stat-label">Closed</div>
+        <div class="stat-value">{{ closed_tickets.count }}</div>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- TABS -->
+  <div class="tab-row">
+    <button class="tab-btn all active" onclick="switchTab('all', this)">
+      <i class="ti ti-layout-list"></i> All
+      <span class="tab-count">{{ all_tickets.count }}</span>
+    </button>
+    <button class="tab-btn open-t" onclick="switchTab('open', this)">
+      <i class="ti ti-mail-opened"></i> Open
+      <span class="tab-count">{{ open_tickets.count }}</span>
+    </button>
+    <button class="tab-btn assigned-t" onclick="switchTab('assigned', this)">
+      <i class="ti ti-user-check"></i> Assigned
+      <span class="tab-count">{{ assigned_tickets.count }}</span>
+    </button>
+    <button class="tab-btn closed-t" onclick="switchTab('closed', this)">
+      <i class="ti ti-circle-check"></i> Closed
+      <span class="tab-count">{{ closed_tickets.count }}</span>
+    </button>
+  </div>
+ 
+  <!-- ALL -->
+  <div class="tab-panel active" id="panel-all">
+    {% if all_tickets %}
+      <div class="ticket-list">
+        {% for ticket in all_tickets %}
+        <a href="{% url 'email_detail' ticket.mail_id %}" class="ticket-link"
+           style="animation-delay:{{ forloop.counter0 }}0ms;">
+          <div class="ticket-card">
+            <div class="ticket-icon {{ ticket.status }}">
+              {% if ticket.status == 'open' %}<i class="ti ti-mail-opened"></i>
+              {% elif ticket.status == 'assigned' %}<i class="ti ti-user-check"></i>
+              {% else %}<i class="ti ti-circle-check"></i>{% endif %}
+            </div>
+            <div class="ticket-body">
+              <div class="ticket-row-top">
+                <div class="ticket-meta">
+                  <span class="ticket-num">{{ ticket.ticket_number }}</span>
+                  <span class="status-pill status-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+                </div>
+                <span class="ticket-date">{{ ticket.date|truncatechars:22 }}</span>
+              </div>
+              <div class="ticket-subject">{{ ticket.subject }}</div>
+              <div class="ticket-sender">{{ ticket.sender }}</div>
+              <div class="ticket-footer">
+                {% if ticket.assigned_to %}
+                  <span class="assigned-chip">
+                    <span class="assigned-chip-avatar">{{ ticket.assigned_to.name|slice:":2"|upper }}</span>
+                    {{ ticket.assigned_to.name }}
+                  </span>
+                {% else %}
+                  <span class="unassigned-chip">
+                    <i class="ti ti-user-off" style="font-size:11px;vertical-align:middle;"></i> Unassigned
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty"><i class="ti ti-ticket-off"></i><p>No tickets yet.</p></div>
+    {% endif %}
+  </div>
+ 
+  <!-- OPEN -->
+  <div class="tab-panel" id="panel-open">
+    {% if open_tickets %}
+      <div class="ticket-list">
+        {% for ticket in open_tickets %}
+        <a href="{% url 'email_detail' ticket.mail_id %}" class="ticket-link"
+           style="animation-delay:{{ forloop.counter0 }}0ms;">
+          <div class="ticket-card">
+            <div class="ticket-icon open"><i class="ti ti-mail-opened"></i></div>
+            <div class="ticket-body">
+              <div class="ticket-row-top">
+                <div class="ticket-meta">
+                  <span class="ticket-num">{{ ticket.ticket_number }}</span>
+                  <span class="status-pill status-open">Open</span>
+                </div>
+                <span class="ticket-date">{{ ticket.date|truncatechars:22 }}</span>
+              </div>
+              <div class="ticket-subject">{{ ticket.subject }}</div>
+              <div class="ticket-sender">{{ ticket.sender }}</div>
+              <div class="ticket-footer">
+                <span class="unassigned-chip">
+                  <i class="ti ti-user-off" style="font-size:11px;vertical-align:middle;"></i> Unassigned
+                </span>
+              </div>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty"><i class="ti ti-circle-check"></i><p>No open tickets.</p></div>
+    {% endif %}
+  </div>
+ 
+  <!-- ASSIGNED -->
+  <div class="tab-panel" id="panel-assigned">
+    {% if assigned_tickets %}
+      <div class="ticket-list">
+        {% for ticket in assigned_tickets %}
+        <a href="{% url 'email_detail' ticket.mail_id %}" class="ticket-link"
+           style="animation-delay:{{ forloop.counter0 }}0ms;">
+          <div class="ticket-card">
+            <div class="ticket-icon assigned"><i class="ti ti-user-check"></i></div>
+            <div class="ticket-body">
+              <div class="ticket-row-top">
+                <div class="ticket-meta">
+                  <span class="ticket-num">{{ ticket.ticket_number }}</span>
+                  <span class="status-pill status-assigned">Assigned</span>
+                </div>
+                <span class="ticket-date">{{ ticket.date|truncatechars:22 }}</span>
+              </div>
+              <div class="ticket-subject">{{ ticket.subject }}</div>
+              <div class="ticket-sender">{{ ticket.sender }}</div>
+              <div class="ticket-footer">
+                {% if ticket.assigned_to %}
+                  <span class="assigned-chip">
+                    <span class="assigned-chip-avatar">{{ ticket.assigned_to.name|slice:":2"|upper }}</span>
+                    {{ ticket.assigned_to.name }}
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty"><i class="ti ti-user-off"></i><p>No assigned tickets.</p></div>
+    {% endif %}
+  </div>
+ 
+  <!-- CLOSED -->
+  <div class="tab-panel" id="panel-closed">
+    {% if closed_tickets %}
+      <div class="ticket-list">
+        {% for ticket in closed_tickets %}
+        <a href="{% url 'email_detail' ticket.mail_id %}" class="ticket-link"
+           style="animation-delay:{{ forloop.counter0 }}0ms;">
+          <div class="ticket-card">
+            <div class="ticket-icon closed"><i class="ti ti-circle-check"></i></div>
+            <div class="ticket-body">
+              <div class="ticket-row-top">
+                <div class="ticket-meta">
+                  <span class="ticket-num">{{ ticket.ticket_number }}</span>
+                  <span class="status-pill status-closed">Closed</span>
+                </div>
+                <span class="ticket-date">{{ ticket.date|truncatechars:22 }}</span>
+              </div>
+              <div class="ticket-subject">{{ ticket.subject }}</div>
+              <div class="ticket-sender">{{ ticket.sender }}</div>
+              <div class="ticket-footer">
+                {% if ticket.assigned_to %}
+                  <span class="assigned-chip">
+                    <span class="assigned-chip-avatar">{{ ticket.assigned_to.name|slice:":2"|upper }}</span>
+                    {{ ticket.assigned_to.name }}
+                  </span>
+                {% else %}
+                  <span class="unassigned-chip">
+                    <i class="ti ti-user-off" style="font-size:11px;vertical-align:middle;"></i> Unassigned
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty"><i class="ti ti-archive"></i><p>No closed tickets.</p></div>
+    {% endif %}
+  </div>
+ 
+</div><!-- /shell -->
+ 
+<script>
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+ 
+</body>
+</html>

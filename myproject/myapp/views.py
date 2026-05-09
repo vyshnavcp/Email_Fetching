@@ -19,25 +19,31 @@ MY_EMAIL = settings.EMAIL_ACCOUNT
 MY_PASSWORD = settings.EMAIL_APP_PASSWORD
  
  
-# ── LOGIN ────────────────────────────────────────────────
+
 def login_page(request):
- 
+
     if request.method == "POST":
-        entered_email    = request.POST.get("entered_email")
+        entered_email = request.POST.get("entered_email")
         entered_password = request.POST.get("password")
- 
+
         if entered_email == MY_EMAIL and entered_password == MY_PASSWORD:
             request.session["token"] = secrets.token_hex(16)
+            request.session["role"] = "admin"
             return redirect("inbox")
- 
+        staff = Staff.objects.filter(email=entered_email).first()
+
+        if staff:
+            request.session["staff_email"] = staff.email
+            request.session["role"] = "staff"
+            return redirect("staff_asigned_ticket")
+        
         return render(request, "login.html", {
             "error": "Invalid Email or Password"
         })
- 
+
     return render(request, "login.html")
  
  
-# ── INBOX ────────────────────────────────────────────────
 def inbox(request):
  
     if not request.session.get("token"):
@@ -105,6 +111,8 @@ def inbox(request):
                             "date":    date,
                             "body":    body[:300],
                             "ticket":  ticket.ticket_number,   # always a real TKT-XXXX now
+                            "status":      ticket.status,                                          # ← add
+                            "assigned_to": ticket.assigned_to.name if ticket.assigned_to else None,
                         })
  
             mail.logout()
@@ -195,7 +203,6 @@ def email_detail(request, mail_id):
         return HttpResponse(str(e))
  
  
-# ── ASSIGN TICKET ─────────────────────────────────────────
 def assign_ticket(request, ticket_id):
  
     if not request.session.get("token"):
@@ -218,8 +225,57 @@ def assign_ticket(request, ticket_id):
  
     return redirect("email_detail", mail_id=ticket.mail_id)
  
- 
-# ── LOGOUT ────────────────────────────────────────────────
+
 def logout_page(request):
     request.session.flush()
     return redirect("login")
+
+def staff_asigned_ticket(request):
+    staff_email=request.session.get('staff_email')
+    if not staff_email:
+        return redirect("login")
+    staff = get_object_or_404(Staff, email=staff_email)
+
+    tickets = Ticket.objects.filter(assigned_to=staff)
+
+    return render(request, "staff_asigned_ticket.html", {
+        "tickets": tickets,
+        "staff": staff
+    })
+
+def staff_ticket_detail(request, ticket_id):
+    staff_email = request.session.get("staff_email")
+
+    if not staff_email:
+        return redirect("login")
+
+    staff = get_object_or_404(Staff, email=staff_email)
+
+    ticket = get_object_or_404(Ticket, id=ticket_id, assigned_to=staff)
+
+    # CLOSE ACTION
+    if request.method == "POST":
+        if request.POST.get("action") == "close":
+            ticket.status = "closed"
+            ticket.save()
+            return redirect("staff_asigned_ticket")
+
+    return render(request, "staff_ticket_detail.html", {
+        "ticket": ticket
+    })
+
+def ticket_list(request):
+    if not request.session.get("token"):
+        return redirect("login")
+
+    all_tickets      = Ticket.objects.all()
+    open_tickets     = Ticket.objects.filter(status="open")
+    assigned_tickets = Ticket.objects.filter(status="assigned")
+    closed_tickets   = Ticket.objects.filter(status="closed")
+
+    return render(request, "ticket_list.html", {
+        "all_tickets":      all_tickets,
+        "open_tickets":     open_tickets,
+        "assigned_tickets": assigned_tickets,
+        "closed_tickets":   closed_tickets,
+    })

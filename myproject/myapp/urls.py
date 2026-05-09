@@ -10,5 +10,10 @@ urlpatterns = [
     path("email/<mail_id>/", views.email_detail, name="email_detail"),
     path("assign/<int:ticket_id>/", views.assign_ticket, name="assign_ticket"),
     path("logout/", views.logout_page,name="logout"),
+    path("staff/", views.staff_asigned_ticket, name="staff_asigned_ticket"),
+    path("staff/ticket/<int:ticket_id>/", views.staff_ticket_detail, name="staff_ticket_detail"),
+    path("tickets/",views.ticket_list,name="ticket_list"),
+
+  
 
 ]
