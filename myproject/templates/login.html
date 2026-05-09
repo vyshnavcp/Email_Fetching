@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Email Login</title>
+
+    <style>
+
+        body{
+            background:#f5f5f5;
+            font-family:Arial;
+        }
+
+        .login-box{
+            width:350px;
+            background:white;
+            margin:100px auto;
+            padding:30px;
+            border-radius:10px;
+            box-shadow:0px 2px 10px rgba(0,0,0,0.1);
+        }
+
+        input{
+            width:100%;
+            padding:12px;
+            margin-top:10px;
+            border:1px solid #ccc;
+            border-radius:5px;
+        }
+
+        button{
+            width:100%;
+            padding:12px;
+            margin-top:15px;
+            background:black;
+            color:white;
+            border:none;
+            border-radius:5px;
+            cursor:pointer;
+        }
+
+        h2{
+            text-align:center;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="login-box">
+
+    <h2>Email Login</h2>
+
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <input type="email"
+               name="entered_email"
+               placeholder="Enter Email"
+               required>
+
+        <input type="password"
+               name="password"
+               placeholder="Enter App Password"
+               required>
+
+        <button type="submit">
+            Login
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+</html>

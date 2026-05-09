@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ subject }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+ 
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+    :root {
+      --ink: #0f0e0b;
+      --paper: #f7f5f0;
+      --cream: #edeae2;
+      --gold: #c9a84c;
+      --gold-light: #f0dfa0;
+      --muted: #7a7669;
+      --card: #fffefb;
+      --border: #dedad0;
+    }
+ 
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      min-height: 100vh;
+      color: var(--ink);
+      padding: 48px 24px 80px;
+    }
+ 
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+ 
+    .shell {
+      max-width: 760px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      animation: fadeUp 0.4s ease both;
+    }
+ 
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+ 
+    /* ── Back link ── */
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 400;
+      margin-bottom: 28px;
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--card);
+      transition: color 0.2s, border-color 0.2s;
+    }
+ 
+    .back:hover {
+      color: var(--ink);
+      border-color: #ccc9be;
+    }
+ 
+    /* ── Card ── */
+    .container {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+    }
+ 
+    /* ── Card header ── */
+    .email-header {
+      padding: 32px 36px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+ 
+    .eyebrow {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: block;
+      margin-bottom: 10px;
+    }
+ 
+    .subject {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--ink);
+      margin-bottom: 24px;
+    }
+ 
+    /* ── Meta row ── */
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+ 
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--cream);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+ 
+    .meta-info { flex: 1; }
+ 
+    .meta-from {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 2px;
+    }
+ 
+    .meta-date {
+      font-size: 12px;
+      font-weight: 300;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+ 
+    /* ── Body ── */
+    .email-body {
+      padding: 32px 36px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      font-size: 14px;
+      font-weight: 300;
+      color: #2a2820;
+    }
+ 
+    /* ── Footer ── */
+    .email-footer {
+      padding: 18px 36px;
+      border-top: 1px solid var(--border);
+      background: var(--paper);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+ 
+    .footer-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-right: 4px;
+    }
+ 
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 400;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: var(--gold-light);
+      color: #7a5c10;
+      border: 1px solid #e0c97a;
+    }
+  </style>
+</head>
+ 
+<body>
+<div class="shell">
+ 
+  <a href="{% url 'inbox' %}" class="back">
+    <i class="ti ti-arrow-left"></i> Back to Inbox
+  </a>
+ 
+  <div class="container">
+ 
+    <div class="email-header">
+      <span class="eyebrow">Message</span>
+      <div class="subject">{{ subject }}</div>
+ 
+      <div class="meta">
+        <div class="avatar">{{ from|slice:":2"|upper }}</div>
+        <div class="meta-info">
+          <div class="meta-from">{{ from }}</div>
+          <div class="meta-date">
+            <i class="ti ti-clock" style="font-size:12px;"></i>
+            {{ date }}
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="email-body">{{ body }}</div>
+ 
+    <div class="email-footer">
+      <span class="footer-label">Via</span>
+      <span class="tag"><i class="ti ti-mail"></i> Gmail IMAP</span>
+    </div>
+ 
+  </div>
+ 
+</div>
+</body>
+</html>
