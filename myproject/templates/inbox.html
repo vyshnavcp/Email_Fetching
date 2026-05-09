@@ -31,7 +31,6 @@
       overflow-x: hidden;
     }
  
-    /* Grain texture overlay */
     body::before {
       content: '';
       position: fixed;
@@ -100,6 +99,42 @@
       top: -4px;
     }
  
+    /* ── Header right actions ── */
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+ 
+    /* ── Fetch button ── */
+    .fetch-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--ink);
+      color: var(--gold-light);
+      border: none;
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+ 
+    .fetch-btn:hover { background: #2a2820; }
+    .fetch-btn:active { transform: scale(0.97); }
+    .fetch-btn i { font-size: 15px; transition: transform 0.3s; }
+    .fetch-btn.loading i { animation: spin 0.8s linear infinite; }
+ 
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+ 
+    /* ── Logout button ── */
     .logout-btn {
       display: inline-flex;
       align-items: center;
@@ -133,6 +168,30 @@
       padding: 12px 16px;
       font-size: 13px;
       margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+ 
+    /* ── Idle state ── */
+    .idle-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+      animation: fadeUp 0.4s ease both;
+    }
+ 
+    .idle-state i {
+      font-size: 42px;
+      display: block;
+      margin-bottom: 14px;
+      opacity: 0.25;
+    }
+ 
+    .idle-state p {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      opacity: 0.45;
     }
  
     /* ── Email list ── */
@@ -179,14 +238,7 @@
       border-color: #ccc9be;
     }
  
-    .email-link:hover .email-card::before {
-      opacity: 1;
-    }
- 
-    /* staggered fade-in */
-    {% for i in "0123456789" %}
-    .email-list .email-link:nth-child({{ forloop.counter }}) .email-card { animation-delay: {{ forloop.counter0 }}00ms; }
-    {% endfor %}
+    .email-link:hover .email-card::before { opacity: 1; }
  
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(12px); }
@@ -208,10 +260,9 @@
       font-size: 14px;
       color: var(--muted);
       flex-shrink: 0;
-      letter-spacing: 0.02em;
     }
  
-    /* ── Body ── */
+    /* ── Email content ── */
     .email-body { flex: 1; min-width: 0; }
  
     .email-row {
@@ -221,6 +272,14 @@
       gap: 8px;
     }
  
+    .sender-group {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      min-width: 0;
+      overflow: hidden;
+    }
+ 
     .email-from {
       font-weight: 500;
       font-size: 14px;
@@ -228,6 +287,20 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+ 
+    /* Ticket number pill next to sender */
+    .ticket-badge {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--cream);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      white-space: nowrap;
+      flex-shrink: 0;
     }
  
     .email-date {
@@ -243,7 +316,7 @@
       font-family: 'Playfair Display', serif;
       font-weight: 500;
       font-size: 15px;
-      margin: 5px 0 5px;
+      margin: 5px 0;
       color: var(--ink);
       white-space: nowrap;
       overflow: hidden;
@@ -260,7 +333,7 @@
       line-height: 1.5;
     }
  
-    /* ── Empty state ── */
+    /* ── Empty after fetch ── */
     .empty {
       text-align: center;
       padding: 80px 20px;
@@ -290,49 +363,90 @@
       <span class="eyebrow">Mail</span>
       <h1 class="title">
         Inbox
-        <span class="badge">{{ emails|length }}</span>
+        {% if fetched %}
+          <span class="badge">{{ emails|length }}</span>
+        {% endif %}
       </h1>
     </div>
  
-    <a href="{% url 'logout' %}" class="logout-btn">
-      <i class="ti ti-logout"></i> Sign out
-    </a>
+    <div class="header-right">
+ 
+      <button class="fetch-btn" onclick="submitFetch(this)">
+        <i class="ti ti-refresh"></i> Fetch Mail
+      </button>
+ 
+      <a href="{% url 'logout' %}" class="logout-btn">
+        <i class="ti ti-logout"></i> Sign out
+      </a>
+ 
+    </div>
   </div>
+ 
+  <!-- Hidden POST form triggered by the Fetch button -->
+  <form id="fetch-form" method="POST" style="display:none;">
+    {% csrf_token %}
+    <input type="hidden" name="fetch" value="1">
+  </form>
  
   {% if error %}
-    <div class="error-msg">{{ error }}</div>
+    <div class="error-msg">
+      <i class="ti ti-alert-circle"></i>
+      {{ error }}
+    </div>
   {% endif %}
  
-  {% if emails %}
-  <div class="email-list">
-    {% for email in emails %}
-    <a href="{% url 'email_detail' email.id %}" class="email-link">
-      <div class="email-card">
+  {% if not fetched %}
  
-        <div class="avatar">
-          {{ email.from|slice:":2"|upper }}
-        </div>
+    <div class="idle-state">
+      <i class="ti ti-inbox"></i>
+      <p>Press "Fetch Mail" to load your inbox.</p>
+    </div>
  
-        <div class="email-body">
-          <div class="email-row">
-            <span class="email-from">{{ email.from }}</span>
-            <span class="email-date">{{ email.date }}</span>
+  {% elif emails %}
+ 
+    <div class="email-list">
+      {% for email in emails %}
+      <a href="{% url 'email_detail' email.id %}" class="email-link"
+         style="animation-delay: {{ forloop.counter0 }}00ms;">
+        <div class="email-card">
+ 
+          <div class="avatar">{{ email.from|slice:":2"|upper }}</div>
+ 
+          <div class="email-body">
+            <div class="email-row">
+              <div class="sender-group">
+                <span class="email-from">{{ email.from }}</span>
+                <span class="ticket-badge">{{ email.ticket }}</span>
+              </div>
+              <span class="email-date">{{ email.date }}</span>
+            </div>
+            <div class="email-subject">{{ email.subject }}</div>
+            <div class="email-preview">{{ email.body }}</div>
           </div>
-          <div class="email-subject">{{ email.subject }}</div>
-          <div class="email-preview">{{ email.body }}</div>
-        </div>
  
-      </div>
-    </a>
-    {% endfor %}
-  </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+ 
   {% else %}
-  <div class="empty">
-    <i class="ti ti-mail-off"></i>
-    <p>Your inbox is empty.</p>
-  </div>
+ 
+    <div class="empty">
+      <i class="ti ti-mail-off"></i>
+      <p>Your inbox is empty.</p>
+    </div>
+ 
   {% endif %}
  
 </div>
+ 
+<script>
+  function submitFetch(btn) {
+    btn.classList.add('loading');
+    btn.disabled = true;
+    document.getElementById('fetch-form').submit();
+  }
+</script>
+ 
 </body>
 </html>

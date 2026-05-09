@@ -42,90 +42,90 @@ def login_page(request):
 
     return render(request, "login.html")
 
-
 def inbox(request):
-
+ 
     # CHECK TOKEN
     if not request.session.get("token"):
-
         return redirect("login")
-
-    try:
-
-        mail = imaplib.IMAP4_SSL("imap.gmail.com")
-
-        mail.login(MY_EMAIL, MY_PASSWORD)
-
-        mail.select("inbox")
-
-        status, messages = mail.search(None, "ALL")
-
-        email_ids = messages[0].split()
-
-        emails = []
-
-        for mail_id in reversed(email_ids[-20:]):
-
-            status, msg_data = mail.fetch(mail_id, "(RFC822)")
-
-            for response_part in msg_data:
-
-                if isinstance(response_part, tuple):
-
-                    msg = email.message_from_bytes(response_part[1])
-
-                    subject, encoding = decode_header(msg["Subject"])[0]
-
-                    if isinstance(subject, bytes):
-                        subject = subject.decode(encoding or "utf-8")
-
-                    from_email = msg.get("From")
-
-                    date = msg.get("Date")
-
-                    body = ""
-
-                    # GET BODY
-                    if msg.is_multipart():
-
-                        for part in msg.walk():
-
-                            content_type = part.get_content_type()
-
-                            if content_type == "text/plain":
-
-                                try:
-                                    body = part.get_payload(decode=True).decode()
-                                    break
-                                except:
-                                    pass
-
-                    else:
-
-                        try:
-                            body = msg.get_payload(decode=True).decode()
-                        except:
-                            body = ""
-
-                    emails.append({
-                        "id": mail_id.decode(),
-                        "subject": subject,
-                        "from": from_email,
-                        "date": date,
-                        "body": body[:300]
-                    })
-
-        mail.logout()
-
-        return render(request, "inbox.html", {
-            "emails": emails
-        })
-
-    except Exception as e:
-
-        return render(request, "inbox.html", {
-            "error": str(e)
-        })
+ 
+    # Only fetch emails when the button is clicked (POST request)
+    if request.method == "POST" and request.POST.get("fetch") == "1":
+ 
+        try:
+ 
+            mail = imaplib.IMAP4_SSL("imap.gmail.com")
+            mail.login(MY_EMAIL, MY_PASSWORD)
+            mail.select("inbox")
+ 
+            status, messages = mail.search(None, "ALL")
+            email_ids = messages[0].split()
+ 
+            emails = []
+ 
+            for index, mail_id in enumerate(reversed(email_ids[-20:])):
+ 
+                status, msg_data = mail.fetch(mail_id, "(RFC822)")
+ 
+                for response_part in msg_data:
+ 
+                    if isinstance(response_part, tuple):
+ 
+                        msg = email.message_from_bytes(response_part[1])
+ 
+                        subject, encoding = decode_header(msg["Subject"])[0]
+                        if isinstance(subject, bytes):
+                            subject = subject.decode(encoding or "utf-8")
+ 
+                        from_email = msg.get("From")
+                        date = msg.get("Date")
+                        body = ""
+ 
+                        if msg.is_multipart():
+                            for part in msg.walk():
+                                if part.get_content_type() == "text/plain":
+                                    try:
+                                        body = part.get_payload(decode=True).decode()
+                                        break
+                                    except:
+                                        pass
+                        else:
+                            try:
+                                body = msg.get_payload(decode=True).decode()
+                            except:
+                                body = ""
+ 
+                        # Generate ticket number: TKT-XXXX (padded index, 1-based)
+                        ticket_number = f"TKT-{(index + 1):04d}"
+ 
+                        emails.append({
+                            "id": mail_id.decode(),
+                            "subject": subject,
+                            "from": from_email,
+                            "date": date,
+                            "body": body[:300],
+                            "ticket": ticket_number,
+                        })
+ 
+            mail.logout()
+ 
+            return render(request, "inbox.html", {
+                "emails": emails,
+                "fetched": True,
+            })
+ 
+        except Exception as e:
+ 
+            return render(request, "inbox.html", {
+                "error": str(e),
+                "fetched": True,
+            })
+ 
+    # GET request — show empty inbox with just the Fetch button
+    return render(request, "inbox.html", {
+        "emails": [],
+        "fetched": False,
+    })
+ 
 def email_detail(request, mail_id):
 
     if not request.session.get("token"):
