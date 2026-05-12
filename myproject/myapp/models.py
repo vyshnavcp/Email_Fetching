@@ -63,3 +63,16 @@ class Ticket(models.Model):
  
     def __str__(self):
         return f"{self.ticket_number} — {self.subject[:50]}"
+    
+class TicketAttachment(models.Model):
+    ticket = models.ForeignKey(
+        Ticket,
+        on_delete=models.CASCADE,
+        related_name="attachments"
+    )
+    file = models.FileField(upload_to="ticket_attachments/")
+    filename = models.CharField(max_length=255)
+    content_type = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return self.filename
