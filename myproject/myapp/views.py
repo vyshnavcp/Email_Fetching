@@ -11,6 +11,8 @@ import email
 from email.header import decode_header
 import secrets
 from django.conf import settings
+from django.core.paginator import Paginator  
+
 # Create your views here.
 
 
@@ -204,25 +206,24 @@ def email_detail(request, mail_id):
  
  
 def assign_ticket(request, ticket_id):
- 
     if not request.session.get("token"):
         return redirect("login")
- 
+
     ticket = get_object_or_404(Ticket, id=ticket_id)
- 
+
     if request.method == "POST":
         staff_id   = request.POST.get("staff_id")
         status_val = request.POST.get("status")
- 
+
         if staff_id:
             ticket.assigned_to = get_object_or_404(Staff, id=staff_id)
             ticket.status = "assigned"
- 
-        if status_val in dict(Ticket.STATUS_CHOICES):
+        elif status_val in dict(Ticket.STATUS_CHOICES):
+            # Only update status manually if no staff assignment is happening
             ticket.status = status_val
- 
+
         ticket.save()
- 
+
     return redirect("email_detail", mail_id=ticket.mail_id)
  
 
@@ -267,15 +268,29 @@ def staff_ticket_detail(request, ticket_id):
 def ticket_list(request):
     if not request.session.get("token"):
         return redirect("login")
-
-    all_tickets      = Ticket.objects.all()
-    open_tickets     = Ticket.objects.filter(status="open")
-    assigned_tickets = Ticket.objects.filter(status="assigned")
-    closed_tickets   = Ticket.objects.filter(status="closed")
-
+ 
+    from django.core.paginator import Paginator
+ 
+    # ── Unassigned ──
+    unassigned_qs = Ticket.objects.filter(status="unassigned")
+    unassigned_page = request.GET.get("unassigned_page", 1)
+    unassigned_paginator = Paginator(unassigned_qs, 10)
+    unassigned_tickets = unassigned_paginator.get_page(unassigned_page)
+ 
+    # ── Assigned ──
+    assigned_qs = Ticket.objects.filter(status="assigned")
+    assigned_page = request.GET.get("assigned_page", 1)
+    assigned_paginator = Paginator(assigned_qs, 10)
+    assigned_tickets = assigned_paginator.get_page(assigned_page)
+ 
+    # ── Closed ──
+    closed_qs = Ticket.objects.filter(status="closed")
+    closed_page = request.GET.get("closed_page", 1)
+    closed_paginator = Paginator(closed_qs, 10)
+    closed_tickets = closed_paginator.get_page(closed_page)
+ 
     return render(request, "ticket_list.html", {
-        "all_tickets":      all_tickets,
-        "open_tickets":     open_tickets,
-        "assigned_tickets": assigned_tickets,
-        "closed_tickets":   closed_tickets,
+        "unassigned_tickets": unassigned_tickets,
+        "assigned_tickets":   assigned_tickets,
+        "closed_tickets":     closed_tickets,
     })

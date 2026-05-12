@@ -300,9 +300,9 @@
       flex-shrink: 0;
     }
  
-    .status-open     { background: var(--blue-light);  color: var(--blue);  border: 1px solid var(--blue-border); }
-    .status-assigned { background: var(--gold-light);  color: #7a5c10;      border: 1px solid #e0c97a; }
-    .status-closed   { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
+    .status-unassigned { background: var(--blue-light);  color: var(--blue);  border: 1px solid var(--blue-border); }
+    .status-assigned   { background: var(--gold-light);  color: #7a5c10;      border: 1px solid #e0c97a; }
+    .status-closed     { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
  
     .email-date {
       font-size: 11px;
@@ -376,21 +376,25 @@
       font-weight: 300;
       font-style: italic;
     }
-    #s1{
-          display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--ink);
-    color: var(--gold-light);
-    border: none;
-    border-radius: 8px;
-    padding: 9px 16px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
+ 
+    #s1 {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--ink);
+      color: var(--gold-light);
+      border: none;
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      text-decoration: none;
     }
+ 
+    #s1:hover { background: #2a2820; }
   </style>
 </head>
  

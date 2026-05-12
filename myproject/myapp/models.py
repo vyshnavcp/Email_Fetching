@@ -24,7 +24,7 @@ class Staff(models.Model):
 class Ticket(models.Model):
  
     STATUS_CHOICES = [
-        ("open",        "Open"),
+        ("unassigned",        "Unassigned"),
         ("assigned",    "Assigned"),
         ("closed",      "Closed"),
     ]
@@ -46,7 +46,7 @@ class Ticket(models.Model):
         on_delete=models.SET_NULL,
         related_name="tickets"
     )
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="open")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="unassigned")
  
     created_at = models.DateTimeField(auto_now_add=True)
  
