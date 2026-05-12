@@ -10,7 +10,7 @@ from django.contrib.auth.hashers import make_password, check_password
 class Staff(models.Model):
     name  = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
-    password = models.CharField(max_length=255)  # hashed password
+    password = models.CharField(max_length=255)  
 
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
@@ -28,24 +28,17 @@ class Ticket(models.Model):
         ("assigned",    "Assigned"),
         ("closed",      "Closed"),
     ]
- 
-    # Auto ticket number  e.g.  TKT-0001
+
     ticket_number = models.CharField(max_length=20, unique=True, editable=False)
- 
-    # Email fields (saved once on first open)
-    mail_id  = models.CharField(max_length=50, unique=True)   # IMAP mail id
+
+    mail_id  = models.CharField(max_length=50, unique=True)  
     subject  = models.TextField(blank=True)
     sender   = models.CharField(max_length=255, blank=True)
     date     = models.CharField(max_length=100, blank=True)
     body     = models.TextField(blank=True)
  
-    # Assignment
-    assigned_to = models.ForeignKey(
-        Staff,
-        null=True, blank=True,
-        on_delete=models.SET_NULL,
-        related_name="tickets"
-    )
+ 
+    assigned_to = models.ForeignKey(Staff, null=True, blank=True, on_delete=models.SET_NULL, related_name="tickets" )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="unassigned")
  
     created_at = models.DateTimeField(auto_now_add=True)
@@ -54,7 +47,7 @@ class Ticket(models.Model):
         ordering = ["-created_at"]
  
     def save(self, *args, **kwargs):
-        # Generate ticket number only on first save
+       
         if not self.ticket_number:
             last = Ticket.objects.order_by("id").last()
             next_id = (last.id + 1) if last else 1
@@ -76,3 +69,13 @@ class TicketAttachment(models.Model):
 
     def __str__(self):
         return self.filename
+
+class TicketNote(models.Model):
+    ticket=models.ForeignKey(Ticket,on_delete=models.CASCADE,related_name='notes')
+    staff=models.ForeignKey(Staff,on_delete=models.CASCADE)
+    note= models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.staff.name} - {self.created_at}"

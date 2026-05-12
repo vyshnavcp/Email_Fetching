@@ -234,8 +234,6 @@ def email_detail(request, mail_id):
                     pass
  
         mail_conn.logout()
- 
-        # ── Ensure ticket exists ──
         ticket, created = Ticket.objects.get_or_create(
             mail_id=mail_id,
             defaults={
@@ -245,8 +243,6 @@ def email_detail(request, mail_id):
                 "body": text_body or html_body,
             }
         )
- 
-        # ── Save attachments (avoid duplicates) ──
         for att in attachments:
             if not ticket.attachments.filter(filename=att["filename"]).exists():
                 TicketAttachment.objects.create(
@@ -257,8 +253,6 @@ def email_detail(request, mail_id):
                 )
  
         all_staff = Staff.objects.all()
- 
-        # Strip all <img> tags from html_body to prevent broken external images
         import re as _re
         safe_html = _re.sub(r'<img[^>]*>', '', html_body, flags=_re.IGNORECASE) if html_body else ""
  
@@ -266,8 +260,8 @@ def email_detail(request, mail_id):
             "subject":    subject,
             "from_email": from_email,
             "date":       date,
-            "body":       text_body,   # plain text — preferred
-            "html_body":  safe_html,   # html with <img> stripped
+            "body":       text_body,  
+            "html_body":  safe_html,   
             "ticket":     ticket,
             "all_staff":  all_staff,
         })
@@ -290,7 +284,6 @@ def assign_ticket(request, ticket_id):
             ticket.assigned_to = get_object_or_404(Staff, id=staff_id)
             ticket.status = "assigned"
         elif status_val in dict(Ticket.STATUS_CHOICES):
-            # Only update status manually if no staff assignment is happening
             ticket.status = status_val
 
         ticket.save()
@@ -315,24 +308,51 @@ def staff_asigned_ticket(request):
         "staff": staff
     })
 
+
+
 def staff_ticket_detail(request, ticket_id):
     staff_email = request.session.get("staff_email")
- 
+
     if not staff_email:
         return redirect("login")
- 
+
     staff = get_object_or_404(Staff, email=staff_email)
     ticket = get_object_or_404(Ticket, id=ticket_id, assigned_to=staff)
 
     if request.method == "POST":
+
+        # CLOSE
         if request.POST.get("action") == "close":
             ticket.status = "closed"
             ticket.save()
-            return redirect("staff_asigned_ticket")
- 
+            return redirect("staff_assigned_ticket")
+
+        # ADD NOTE
+        if request.POST.get("action") == "add_note":
+            note_text = request.POST.get("note")
+            if note_text:
+                TicketNote.objects.create(
+                    ticket=ticket,
+                    staff=staff,
+                    note=note_text
+                )
+            return redirect("staff_ticket_detail", ticket_id=ticket.id)
+
+        # ✏️ EDIT NOTE
+        if request.POST.get("action") == "edit_note":
+            note_id = request.POST.get("note_id")
+            new_text = request.POST.get("note")
+
+            note = get_object_or_404(TicketNote, id=note_id, staff=staff)
+            note.note = new_text
+            note.save()
+
+            return redirect("staff_ticket_detail", ticket_id=ticket.id)
+
     return render(request, "staff_ticket_detail.html", {
         "ticket": ticket,
         "attachments": ticket.attachments.all(),
+        "notes": ticket.notes.all().order_by("-created_at")
     })
 
 def ticket_list(request):

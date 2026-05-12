@@ -417,6 +417,35 @@
       padding: 10px 14px;
     }
  
+    /* ── Notes toggle button ── */
+    .notes-toggle-btn {
+      width: 100%;
+      padding: 7px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--cream);
+      color: var(--ink);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: background 0.2s, border-color 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+ 
+    .notes-toggle-btn:hover {
+      background: var(--gold-light);
+      border-color: var(--gold);
+    }
+ 
+    /* Hidden notes (beyond first 5) */
+    .note-item.note-hidden {
+      display: none;
+    }
+ 
     @media (max-width: 640px) {
       .layout { grid-template-columns: 1fr; }
     }
@@ -471,7 +500,6 @@
           <div class="att-filename">{{ att.filename }}</div>
  
           {% if "image" in att.content_type %}
-            <!-- Image: inline preview + lightbox -->
             <img
               src="{{ att.file.url }}"
               class="att-image"
@@ -483,7 +511,6 @@
             </a>
  
           {% elif "pdf" in att.content_type %}
-            <!-- PDF: embedded viewer + download -->
             <iframe
               src="{{ att.file.url }}"
               class="att-pdf"
@@ -494,7 +521,6 @@
             </a>
  
           {% else %}
-            <!-- Generic: download link -->
             <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download">
               <i class="ti ti-download"></i> {{ att.filename }}
             </a>
@@ -544,6 +570,76 @@
         </div>
         <div class="sidebar-card-body">
  
+          <!-- ADD NOTE -->
+          <form method="POST" style="margin-bottom:14px;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_note">
+ 
+            <textarea name="note"
+              placeholder="Add note about this ticket..."
+              style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; margin-bottom:8px; resize:vertical;"
+            ></textarea>
+ 
+            <button type="submit" class="close-btn" style="background: var(--blue); color:white;">
+              <i class="ti ti-plus"></i> Add Note
+            </button>
+          </form>
+ 
+          <!-- VIEW NOTES (show 5, with show more/less toggle) -->
+          {% if notes %}
+          <div style="margin-bottom:14px;">
+ 
+            {% for note in notes %}
+            {# Notes beyond index 4 (i.e. 6th and onwards) start hidden #}
+            <div class="note-item {% if forloop.counter > 5 %}note-hidden{% endif %}"
+                 style="border:1px solid var(--border); border-radius:8px; padding:8px; margin-bottom:8px; background:var(--paper); position:relative;">
+ 
+              <!-- Header -->
+              <div style="font-size:10px; color:var(--muted); margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+                <span>{{ note.staff.name }} • {{ note.created_at }}</span>
+ 
+                <button type="button"
+                  onclick="toggleEdit({{ note.id }})"
+                  style="font-size:10px; border:none; background:none; color:var(--blue); cursor:pointer;">
+                  Edit
+                </button>
+              </div>
+ 
+              <!-- Note text -->
+              <div id="note-text-{{ note.id }}" style="font-size:12px; color:var(--ink);">
+                {{ note.note }}
+              </div>
+ 
+              <!-- Hidden edit form -->
+              <form method="POST" id="edit-form-{{ note.id }}" style="display:none; margin-top:6px;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="edit_note">
+                <input type="hidden" name="note_id" value="{{ note.id }}">
+ 
+                <textarea name="note"
+                  style="width:100%; padding:6px; border-radius:6px; border:1px solid #ccc; font-size:12px;">{{ note.note }}</textarea>
+ 
+                <button type="submit"
+                  style="margin-top:6px; font-size:11px; padding:4px 8px; border:none; background:var(--blue); color:white; border-radius:6px;">
+                  Save
+                </button>
+              </form>
+ 
+            </div>
+            {% endfor %}
+ 
+            <!-- Show more / show less — only if more than 5 notes exist -->
+            {% if notes|length > 5 %}
+            <button type="button" class="notes-toggle-btn" id="notes-toggle-btn" onclick="toggleNotes({{ notes|length }})">
+              <i class="ti ti-chevron-down" id="notes-toggle-icon"></i>
+              <span id="notes-toggle-label">Show all {{ notes|length }} notes</span>
+            </button>
+            {% endif %}
+ 
+          </div>
+          {% endif %}
+ 
+          <!-- CLOSE TICKET -->
           {% if ticket.status != "closed" %}
           <form method="POST">
             {% csrf_token %}
@@ -585,5 +681,46 @@
   });
 </script>
  
+<script>
+  function toggleEdit(id) {
+    const form = document.getElementById("edit-form-" + id);
+    const text = document.getElementById("note-text-" + id);
+ 
+    if (form.style.display === "none") {
+      form.style.display = "block";
+      text.style.display = "none";
+    } else {
+      form.style.display = "none";
+      text.style.display = "block";
+    }
+  }
+ 
+  // Notes show more / show less
+  let notesExpanded = false;
+ 
+  function toggleNotes(total) {
+    const hiddenNotes = document.querySelectorAll('.note-item.note-hidden, .note-item[data-overflow]');
+    const allNotes    = document.querySelectorAll('.note-item');
+    const btn         = document.getElementById('notes-toggle-btn');
+    const icon        = document.getElementById('notes-toggle-icon');
+    const label       = document.getElementById('notes-toggle-label');
+ 
+    notesExpanded = !notesExpanded;
+ 
+    allNotes.forEach(function(note, index) {
+      if (index >= 5) {
+        note.style.display = notesExpanded ? 'block' : 'none';
+      }
+    });
+ 
+    if (notesExpanded) {
+      icon.className  = 'ti ti-chevron-up';
+      label.textContent = 'Show less';
+    } else {
+      icon.className  = 'ti ti-chevron-down';
+      label.textContent = 'Show all ' + total + ' notes';
+    }
+  }
+</script>
 </body>
 </html>
