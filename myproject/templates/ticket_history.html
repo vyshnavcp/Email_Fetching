@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>History — {{ ticket.ticket_number }}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #0f0e0b;
+      --paper: #f7f5f0;
+      --cream: #edeae2;
+      --gold: #c9a84c;
+      --gold-light: #f0dfa0;
+      --muted: #7a7669;
+      --card: #fffefb;
+      --border: #dedad0;
+      --green: #15803d;
+      --green-light: #dcfce7;
+      --green-border: #86efac;
+      --blue: #1d4ed8;
+      --blue-light: #dbeafe;
+      --blue-border: #93c5fd;
+      --red: #b91c1c;
+      --red-light: #fee2e2;
+      --red-border: #fca5a5;
+      --purple: #7c3aed;
+      --purple-light: #ede9fe;
+      --purple-border: #c4b5fd;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      min-height: 100vh;
+      color: var(--ink);
+      padding: 48px 24px 80px;
+    }
+
+    .shell {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Back */
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 28px;
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--card);
+    }
+
+    .back:hover { color: var(--ink); }
+
+    /* Header */
+    .eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .page-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 30px;
+    }
+
+    /* Timeline */
+    .timeline {
+      border-left: 2px solid var(--border);
+      padding-left: 20px;
+    }
+
+    .block {
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      position: absolute;
+      left: -27px;
+      top: 10px;
+      background: var(--blue);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      background: var(--paper);
+    }
+
+    .pill {
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: var(--blue-light);
+      color: var(--blue);
+    }
+
+    .time {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .card-body {
+      padding: 12px 16px;
+      font-size: 13px;
+    }
+
+    .notes {
+      border-top: 1px solid var(--border);
+      padding: 10px 16px;
+    }
+
+    .note {
+      background: var(--paper);
+      padding: 8px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      margin-top: 50px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="shell">
+
+  <!-- ✅ SMART BACK BUTTON -->
+  {% if request.session.token %}
+    <a href="{% url 'email_detail' mail_id=ticket.mail_id %}" class="back">
+  {% else %}
+    <a href="{% url 'staff_ticket_detail' ticket.id %}" class="back">
+  {% endif %}
+    <i class="ti ti-arrow-left"></i> Back
+  </a>
+
+  <div class="eyebrow">Audit Trail</div>
+  <div class="page-title">History — {{ ticket.ticket_number }}</div>
+  <div class="page-sub">{{ ticket.subject }}</div>
+
+  {% if grouped_history %}
+  <div class="timeline">
+
+    {% for block in grouped_history %}
+    <div class="block">
+
+      <div class="dot"></div>
+
+      <div class="card">
+
+        <div class="card-header">
+          <div>
+            <span class="pill">{{ block.event.get_action_display }}</span>
+            {% if block.event.staff %}
+              — {{ block.event.staff.name }}
+            {% endif %}
+          </div>
+          <div class="time">
+            {{ block.event.created_at|date:"M d, Y H:i" }}
+          </div>
+        </div>
+
+        <div class="card-body">
+          {{ block.event.description }}
+        </div>
+
+        <div class="notes">
+          {% if block.notes %}
+            {% for note in block.notes %}
+              <div class="note">
+                {{ note.description }}<br>
+                <small>{{ note.created_at }}</small>
+              </div>
+            {% endfor %}
+          {% else %}
+            <small>No notes</small>
+          {% endif %}
+        </div>
+
+      </div>
+
+    </div>
+    {% endfor %}
+
+  </div>
+  {% else %}
+    <div class="empty">
+      No history found
+    </div>
+  {% endif %}
+
+</div>
+
+</body>
+</html>

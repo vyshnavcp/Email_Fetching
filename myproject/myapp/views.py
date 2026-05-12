@@ -277,16 +277,31 @@ def assign_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
     if request.method == "POST":
-        staff_id   = request.POST.get("staff_id")
-        status_val = request.POST.get("status")
+        staff_id = request.POST.get("staff_id")
+
+        old_staff = ticket.assigned_to
 
         if staff_id:
-            ticket.assigned_to = get_object_or_404(Staff, id=staff_id)
+            new_staff = get_object_or_404(Staff, id=staff_id)
+            ticket.assigned_to = new_staff
             ticket.status = "assigned"
-        elif status_val in dict(Ticket.STATUS_CHOICES):
-            ticket.status = status_val
+            ticket.save()
 
-        ticket.save()
+            # 🟢 HISTORY LOGIC
+            if not old_staff:
+                TicketHistory.objects.create(
+                    ticket=ticket,
+                    staff=new_staff,
+                    action="assigned",
+                    description=f"Assigned to {new_staff.name}"
+                )
+            else:
+                TicketHistory.objects.create(
+                    ticket=ticket,
+                    staff=new_staff,
+                    action="reassigned",
+                    description=f"Reassigned from {old_staff.name} to {new_staff.name}"
+                )
 
     return redirect("email_detail", mail_id=ticket.mail_id)
  
@@ -325,17 +340,27 @@ def staff_ticket_detail(request, ticket_id):
         if request.POST.get("action") == "close":
             ticket.status = "closed"
             ticket.save()
-            return redirect("staff_assigned_ticket")
+            return redirect("staff_asigned_ticket")
 
         # ADD NOTE
         if request.POST.get("action") == "add_note":
             note_text = request.POST.get("note")
+
             if note_text:
                 TicketNote.objects.create(
                     ticket=ticket,
                     staff=staff,
                     note=note_text
                 )
+
+                # 🟢 HISTORY ENTRY
+                TicketHistory.objects.create(
+                    ticket=ticket,
+                    staff=staff,
+                    action="note",
+                    description=note_text
+                )
+
             return redirect("staff_ticket_detail", ticket_id=ticket.id)
 
         # ✏️ EDIT NOTE
@@ -383,4 +408,42 @@ def ticket_list(request):
         "unassigned_tickets": unassigned_tickets,
         "assigned_tickets":   assigned_tickets,
         "closed_tickets":     closed_tickets,
+    })
+def ticket_history(request, ticket_id):
+
+    admin_logged = request.session.get("token")
+    staff_email = request.session.get("staff_email")
+
+    # ❌ if neither admin nor staff
+    if not admin_logged and not staff_email:
+        return redirect("login")
+
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    # 🔒 Restrict staff: only see their own tickets
+    # ✅ KEY FIX: only apply this restriction if they're a staff (not admin)
+    if staff_email and not admin_logged:
+        staff = get_object_or_404(Staff, email=staff_email)
+        if ticket.assigned_to != staff:
+            return redirect("staff_asigned_ticket")
+
+    history = ticket.history.all().order_by("created_at")
+
+    grouped_history = []
+    current_block = None
+
+    for h in history:
+        if h.action in ["assigned", "reassigned", "closed", "reopened"]:
+            current_block = {
+                "event": h,
+                "notes": []
+            }
+            grouped_history.append(current_block)
+
+        elif h.action == "note" and current_block:
+            current_block["notes"].append(h)
+
+    return render(request, "ticket_history.html", {
+        "ticket": ticket,
+        "grouped_history": grouped_history
     })

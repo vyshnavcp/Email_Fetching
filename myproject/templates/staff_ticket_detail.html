@@ -6,7 +6,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
  
-  <!-- Block external images from email html body -->
   <meta http-equiv="Content-Security-Policy" content="img-src 'self' data: blob: /media/">
  
   <style>
@@ -63,7 +62,6 @@
       to   { opacity: 1; transform: translateY(0); }
     }
  
-    /* ── Back ── */
     .back {
       display: inline-flex;
       align-items: center;
@@ -78,10 +76,8 @@
       background: var(--card);
       transition: color 0.2s, border-color 0.2s;
     }
- 
     .back:hover { color: var(--ink); border-color: #ccc9be; }
  
-    /* ── Layout ── */
     .layout {
       display: grid;
       grid-template-columns: 1fr 260px;
@@ -89,7 +85,6 @@
       align-items: start;
     }
  
-    /* ── Main email card ── */
     .email-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -122,43 +117,21 @@
       margin-bottom: 20px;
     }
  
-    .meta {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .meta { display: flex; align-items: center; gap: 12px; }
  
     .avatar {
-      width: 40px;
-      height: 40px;
+      width: 40px; height: 40px;
       border-radius: 10px;
       background: var(--cream);
       border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       font-family: 'Playfair Display', serif;
-      font-weight: 700;
-      font-size: 13px;
-      color: var(--muted);
-      flex-shrink: 0;
+      font-weight: 700; font-size: 13px;
+      color: var(--muted); flex-shrink: 0;
     }
  
-    .meta-from {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--ink);
-      margin-bottom: 2px;
-    }
- 
-    .meta-date {
-      font-size: 11px;
-      font-weight: 300;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
+    .meta-from { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+    .meta-date { font-size: 11px; font-weight: 300; color: var(--muted); display: flex; align-items: center; gap: 4px; }
  
     .email-body-text {
       padding: 28px 32px;
@@ -173,278 +146,123 @@
       padding: 14px 32px;
       border-top: 1px solid var(--border);
       background: var(--paper);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      display: flex; align-items: center; gap: 8px;
     }
  
-    .footer-label {
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
+    .footer-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
  
     .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      padding: 2px 9px;
-      border-radius: 20px;
-      background: var(--gold-light);
-      color: #7a5c10;
-      border: 1px solid #e0c97a;
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; padding: 2px 9px; border-radius: 20px;
+      background: var(--gold-light); color: #7a5c10; border: 1px solid #e0c97a;
     }
  
-    /* ── Attachments ── */
-    .attachments-section {
-      padding: 20px 32px 28px;
-      border-top: 1px solid var(--border);
-    }
+    .attachments-section { padding: 20px 32px 28px; border-top: 1px solid var(--border); }
  
     .attachments-title {
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      font-size: 10px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
     }
  
-    .attachment-item {
-      margin-bottom: 16px;
-    }
- 
+    .attachment-item { margin-bottom: 16px; }
     .attachment-item:last-child { margin-bottom: 0; }
- 
-    .att-filename {
-      font-size: 11px;
-      color: var(--muted);
-      margin-bottom: 7px;
-      font-weight: 400;
-    }
+    .att-filename { font-size: 11px; color: var(--muted); margin-bottom: 7px; font-weight: 400; }
  
     .att-image {
-      max-width: 100%;
-      max-height: 320px;
-      object-fit: contain;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      display: block;
-      cursor: zoom-in;
-      transition: opacity 0.2s;
+      max-width: 100%; max-height: 320px; object-fit: contain;
+      border-radius: 10px; border: 1px solid var(--border);
+      display: block; cursor: zoom-in; transition: opacity 0.2s;
     }
- 
     .att-image:hover { opacity: 0.9; }
  
-    .att-pdf {
-      width: 100%;
-      height: 420px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      display: block;
-    }
+    .att-pdf { width: 100%; height: 420px; border: 1px solid var(--border); border-radius: 10px; display: block; }
  
     .att-download {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--ink);
-      background: var(--cream);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 14px;
-      text-decoration: none;
-      transition: border-color 0.2s, background 0.2s;
-      margin-top: 8px;
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: 13px; font-weight: 500; color: var(--ink);
+      background: var(--cream); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 14px; text-decoration: none;
+      transition: border-color 0.2s, background 0.2s; margin-top: 8px;
     }
+    .att-download:hover { border-color: var(--gold); background: var(--gold-light); }
  
-    .att-download:hover {
-      border-color: var(--gold);
-      background: var(--gold-light);
-    }
- 
-    /* ── Lightbox ── */
     .lightbox {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.88);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-      cursor: zoom-out;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.88); z-index: 9999;
+      align-items: center; justify-content: center; cursor: zoom-out;
     }
- 
     .lightbox.open { display: flex; }
- 
-    .lightbox img {
-      max-width: 92vw;
-      max-height: 92vh;
-      border-radius: 10px;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
-    }
- 
-    .lightbox-close {
-      position: absolute;
-      top: 18px;
-      right: 24px;
-      color: #fff;
-      font-size: 30px;
-      cursor: pointer;
-      opacity: 0.7;
-      line-height: 1;
-      transition: opacity 0.2s;
-    }
- 
+    .lightbox img { max-width: 92vw; max-height: 92vh; border-radius: 10px; box-shadow: 0 24px 80px rgba(0,0,0,0.6); }
+    .lightbox-close { position: absolute; top: 18px; right: 24px; color: #fff; font-size: 30px; cursor: pointer; opacity: 0.7; line-height: 1; transition: opacity 0.2s; }
     .lightbox-close:hover { opacity: 1; }
  
-    /* ── Sidebar ── */
-    .sidebar {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    .sidebar { display: flex; flex-direction: column; gap: 12px; }
  
-    .sidebar-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-    }
+    .sidebar-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
  
-    .sidebar-card-header {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--border);
-      background: var(--paper);
-    }
+    .sidebar-card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); background: var(--paper); }
  
-    .sidebar-card-title {
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
+    .sidebar-card-title { font-size: 10px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
  
     .sidebar-card-body { padding: 16px 18px; }
  
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
- 
+    .info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .info-row:last-child { margin-bottom: 0; }
- 
-    .info-label {
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--muted);
-    }
- 
-    .info-value {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--ink);
-      text-align: right;
-    }
+    .info-label { font-size: 11px; font-weight: 500; color: var(--muted); }
  
     .ticket-chip {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      padding: 3px 10px;
-      border-radius: 6px;
-      background: var(--cream);
-      color: var(--muted);
-      border: 1px solid var(--border);
+      font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+      padding: 3px 10px; border-radius: 6px;
+      background: var(--cream); color: var(--muted); border: 1px solid var(--border);
     }
  
-    .status-pill {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 3px 10px;
-      border-radius: 20px;
-    }
- 
+    .status-pill { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; }
     .status-unassigned { background: var(--blue-light);  color: var(--blue);  border: 1px solid var(--blue-border); }
     .status-assigned   { background: var(--gold-light);  color: #7a5c10;      border: 1px solid #e0c97a; }
     .status-closed     { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
  
-    /* ── Action buttons ── */
+    /* ── Buttons ── */
     .close-btn {
-      width: 100%;
-      padding: 10px;
-      background: var(--ink);
-      color: var(--gold-light);
-      border: none;
-      border-radius: 8px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
+      width: 100%; padding: 10px;
+      background: var(--ink); color: var(--gold-light);
+      border: none; border-radius: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
       transition: background 0.2s, transform 0.1s;
     }
- 
     .close-btn:hover  { background: #2a2820; }
     .close-btn:active { transform: scale(0.97); }
  
+    /* ── FIX 1: History button ── */
+    .history-btn {
+      width: 100%; padding: 10px; margin-bottom: 10px;
+      background: var(--cream); color: var(--ink);
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+      text-decoration: none; transition: background 0.2s, border-color 0.2s;
+    }
+    .history-btn:hover { background: var(--gold-light); border-color: var(--gold); color: var(--ink); }
+ 
     .closed-notice {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--green);
-      background: var(--green-light);
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 500;
+      color: var(--green); background: var(--green-light);
       border: 1px solid var(--green-border);
-      border-radius: 8px;
-      padding: 10px 14px;
+      border-radius: 8px; padding: 10px 14px;
     }
  
-    /* ── Notes toggle button ── */
     .notes-toggle-btn {
-      width: 100%;
-      padding: 7px;
-      font-size: 12px;
-      font-weight: 500;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--cream);
-      color: var(--ink);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
+      width: 100%; padding: 7px; font-size: 12px; font-weight: 500;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--cream); color: var(--ink); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
       transition: background 0.2s, border-color 0.2s;
       font-family: 'DM Sans', sans-serif;
     }
+    .notes-toggle-btn:hover { background: var(--gold-light); border-color: var(--gold); }
  
-    .notes-toggle-btn:hover {
-      background: var(--gold-light);
-      border-color: var(--gold);
-    }
- 
-    /* Hidden notes (beyond first 5) */
-    .note-item.note-hidden {
-      display: none;
-    }
+    .note-item.note-hidden { display: none; }
  
     @media (max-width: 640px) {
       .layout { grid-template-columns: 1fr; }
@@ -461,13 +279,12 @@
  
   <div class="layout">
  
-    <!-- ── Left: Email body ── -->
+    <!-- ── Email body ── -->
     <div class="email-card">
  
       <div class="email-header">
         <span class="eyebrow">Ticket Detail</span>
         <div class="subject">{{ ticket.subject }}</div>
- 
         <div class="meta">
           <div class="avatar">{{ ticket.sender|slice:":2"|upper }}</div>
           <div>
@@ -487,60 +304,38 @@
         <span class="tag"><i class="ti ti-mail"></i> Gmail IMAP</span>
       </div>
  
-      <!-- ── Attachments ── -->
       {% if attachments %}
       <div class="attachments-section">
         <div class="attachments-title">
           <i class="ti ti-paperclip" style="font-size:11px;"></i>
           Attachments ({{ attachments|length }})
         </div>
- 
         {% for att in attachments %}
         <div class="attachment-item">
           <div class="att-filename">{{ att.filename }}</div>
- 
           {% if "image" in att.content_type %}
-            <img
-              src="{{ att.file.url }}"
-              class="att-image"
-              alt="{{ att.filename }}"
-              onclick="openLightbox('{{ att.file.url }}')"
-            >
-            <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download">
-              <i class="ti ti-download"></i> Download image
-            </a>
- 
+            <img src="{{ att.file.url }}" class="att-image" alt="{{ att.filename }}" onclick="openLightbox('{{ att.file.url }}')">
+            <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download"><i class="ti ti-download"></i> Download image</a>
           {% elif "pdf" in att.content_type %}
-            <iframe
-              src="{{ att.file.url }}"
-              class="att-pdf"
-              title="{{ att.filename }}"
-            ></iframe>
-            <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download">
-              <i class="ti ti-download"></i> Download PDF
-            </a>
- 
+            <iframe src="{{ att.file.url }}" class="att-pdf" title="{{ att.filename }}"></iframe>
+            <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download"><i class="ti ti-download"></i> Download PDF</a>
           {% else %}
-            <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download">
-              <i class="ti ti-download"></i> {{ att.filename }}
-            </a>
+            <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download"><i class="ti ti-download"></i> {{ att.filename }}</a>
           {% endif %}
- 
         </div>
         {% endfor %}
       </div>
       {% endif %}
  
     </div>
-    <!-- end email card -->
  
-    <!-- ── Lightbox overlay ── -->
+    <!-- Lightbox -->
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
       <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
       <img id="lightbox-img" src="" alt="Preview">
     </div>
  
-    <!-- ── Right: Sidebar ── -->
+    <!-- ── Sidebar ── -->
     <div class="sidebar">
  
       <!-- Ticket Info -->
@@ -549,17 +344,14 @@
           <span class="sidebar-card-title">Ticket Info</span>
         </div>
         <div class="sidebar-card-body">
- 
           <div class="info-row">
             <span class="info-label">Number</span>
             <span class="ticket-chip">{{ ticket.ticket_number }}</span>
           </div>
- 
           <div class="info-row">
             <span class="info-label">Status</span>
             <span class="status-pill status-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
           </div>
- 
         </div>
       </div>
  
@@ -570,65 +362,70 @@
         </div>
         <div class="sidebar-card-body">
  
-          <!-- ADD NOTE -->
+          {# ✅ FIX 1 — View History button links to the history page #}
+          <a href="{% url 'ticket_history' ticket_id=ticket.id %}" class="history-btn">
+            <i class="ti ti-history"></i> View History
+          </a>
+ 
+          <!-- Add Note -->
           <form method="POST" style="margin-bottom:14px;">
             {% csrf_token %}
             <input type="hidden" name="action" value="add_note">
- 
             <textarea name="note"
               placeholder="Add note about this ticket..."
               style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; margin-bottom:8px; resize:vertical;"
             ></textarea>
- 
-            <button type="submit" class="close-btn" style="background: var(--blue); color:white;">
+            <button type="submit" class="close-btn" style="background:var(--blue); color:white;">
               <i class="ti ti-plus"></i> Add Note
             </button>
           </form>
  
-          <!-- VIEW NOTES (show 5, with show more/less toggle) -->
+          <!-- Notes list -->
           {% if notes %}
           <div style="margin-bottom:14px;">
  
             {% for note in notes %}
-            {# Notes beyond index 4 (i.e. 6th and onwards) start hidden #}
             <div class="note-item {% if forloop.counter > 5 %}note-hidden{% endif %}"
-                 style="border:1px solid var(--border); border-radius:8px; padding:8px; margin-bottom:8px; background:var(--paper); position:relative;">
+                 style="border:1px solid var(--border); border-radius:8px; padding:8px; margin-bottom:8px; background:var(--paper);">
  
-              <!-- Header -->
               <div style="font-size:10px; color:var(--muted); margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+ 
                 <span>{{ note.staff.name }} • {{ note.created_at }}</span>
  
+                {# ✅ FIX 2 — Edit button only for the staff member who wrote this note #}
+                {% if note.staff.email == request.session.staff_email %}
                 <button type="button"
                   onclick="toggleEdit({{ note.id }})"
-                  style="font-size:10px; border:none; background:none; color:var(--blue); cursor:pointer;">
-                  Edit
+                  style="font-size:10px; border:none; background:none; color:var(--blue); cursor:pointer; display:flex; align-items:center; gap:3px;">
+                  <i class="ti ti-pencil" style="font-size:10px;"></i> Edit
                 </button>
+                {% endif %}
+ 
               </div>
  
-              <!-- Note text -->
+              <!-- Note text (read mode) -->
               <div id="note-text-{{ note.id }}" style="font-size:12px; color:var(--ink);">
                 {{ note.note }}
               </div>
  
-              <!-- Hidden edit form -->
+              {# Edit form — only rendered in HTML for the author, so nobody else can submit it either #}
+              {% if note.staff.email == request.session.staff_email %}
               <form method="POST" id="edit-form-{{ note.id }}" style="display:none; margin-top:6px;">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="edit_note">
                 <input type="hidden" name="note_id" value="{{ note.id }}">
- 
                 <textarea name="note"
                   style="width:100%; padding:6px; border-radius:6px; border:1px solid #ccc; font-size:12px;">{{ note.note }}</textarea>
- 
                 <button type="submit"
                   style="margin-top:6px; font-size:11px; padding:4px 8px; border:none; background:var(--blue); color:white; border-radius:6px;">
                   Save
                 </button>
               </form>
+              {% endif %}
  
             </div>
             {% endfor %}
  
-            <!-- Show more / show less — only if more than 5 notes exist -->
             {% if notes|length > 5 %}
             <button type="button" class="notes-toggle-btn" id="notes-toggle-btn" onclick="toggleNotes({{ notes|length }})">
               <i class="ti ti-chevron-down" id="notes-toggle-icon"></i>
@@ -639,7 +436,7 @@
           </div>
           {% endif %}
  
-          <!-- CLOSE TICKET -->
+          <!-- Close ticket -->
           {% if ticket.status != "closed" %}
           <form method="POST">
             {% csrf_token %}
@@ -659,33 +456,25 @@
       </div>
  
     </div>
-    <!-- end sidebar -->
- 
   </div>
 </div>
  
-<!-- ── Lightbox script ── -->
 <script>
   function openLightbox(url) {
     document.getElementById('lightbox-img').src = url;
     document.getElementById('lightbox').classList.add('open');
   }
- 
   function closeLightbox() {
     document.getElementById('lightbox').classList.remove('open');
     document.getElementById('lightbox-img').src = '';
   }
- 
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeLightbox();
-  });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
 </script>
  
 <script>
   function toggleEdit(id) {
     const form = document.getElementById("edit-form-" + id);
     const text = document.getElementById("note-text-" + id);
- 
     if (form.style.display === "none") {
       form.style.display = "block";
       text.style.display = "none";
@@ -695,31 +484,17 @@
     }
   }
  
-  // Notes show more / show less
   let notesExpanded = false;
- 
   function toggleNotes(total) {
-    const hiddenNotes = document.querySelectorAll('.note-item.note-hidden, .note-item[data-overflow]');
-    const allNotes    = document.querySelectorAll('.note-item');
-    const btn         = document.getElementById('notes-toggle-btn');
-    const icon        = document.getElementById('notes-toggle-icon');
-    const label       = document.getElementById('notes-toggle-label');
- 
-    notesExpanded = !notesExpanded;
- 
+    const allNotes = document.querySelectorAll('.note-item');
+    const icon     = document.getElementById('notes-toggle-icon');
+    const label    = document.getElementById('notes-toggle-label');
+    notesExpanded  = !notesExpanded;
     allNotes.forEach(function(note, index) {
-      if (index >= 5) {
-        note.style.display = notesExpanded ? 'block' : 'none';
-      }
+      if (index >= 5) note.style.display = notesExpanded ? 'block' : 'none';
     });
- 
-    if (notesExpanded) {
-      icon.className  = 'ti ti-chevron-up';
-      label.textContent = 'Show less';
-    } else {
-      icon.className  = 'ti ti-chevron-down';
-      label.textContent = 'Show all ' + total + ' notes';
-    }
+    icon.className    = notesExpanded ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
+    label.textContent = notesExpanded ? 'Show less' : 'Show all ' + total + ' notes';
   }
 </script>
 </body>

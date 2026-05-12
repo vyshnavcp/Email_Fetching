@@ -484,6 +484,32 @@
     @media (max-width: 640px) {
       .layout { grid-template-columns: 1fr; }
     }
+    .history-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px;
+  margin-top: 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+
+  background: var(--blue-light);
+  color: var(--blue);
+  border: 1px solid var(--blue-border);
+
+  transition: all 0.2s ease;
+}
+
+.history-btn:hover {
+  background: var(--blue);
+  color: white;
+  border-color: var(--blue);
+  transform: translateY(-1px);
+}
   </style>
 </head>
  
@@ -592,35 +618,49 @@
         <div class="sidebar-card-header">
           <span class="sidebar-card-title">Ticket Info</span>
         </div>
+
         <div class="sidebar-card-body">
- 
+
           <div class="info-row">
             <span class="info-label">Number</span>
             <span class="ticket-chip">{{ ticket.ticket_number }}</span>
           </div>
- 
+
           <div class="info-row">
             <span class="info-label">Status</span>
-            <span class="status-pill status-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+            <span class="status-pill status-{{ ticket.status }}">
+              {{ ticket.get_status_display }}
+            </span>
           </div>
- 
+
           <div class="info-row">
             <span class="info-label">Assigned to</span>
             {% if ticket.assigned_to %}
               <span class="staff-chip">
-                <span class="staff-avatar-sm">{{ ticket.assigned_to.name|slice:":2"|upper }}</span>
+                <span class="staff-avatar-sm">
+                  {{ ticket.assigned_to.name|slice:":2"|upper }}
+                </span>
                 {{ ticket.assigned_to.name }}
               </span>
             {% else %}
-              <span class="info-value" style="color:var(--muted); font-weight:300;">Unassigned</span>
+              <span class="info-value" style="color:var(--muted); font-weight:300;">
+                Unassigned
+              </span>
             {% endif %}
           </div>
- 
+
+          <!-- 🔥 PERFECT HISTORY BUTTON -->
+          <a href="{% url 'ticket_history' ticket.id %}" class="history-btn">
+            <i class="ti ti-history"></i> View Full History
+          </a>
+
         </div>
       </div>
  
       <!-- Assign Form -->
       <div class="sidebar-card">
+        <div style="margin-top:14px;">
+      
         <div class="sidebar-card-header">
           <span class="sidebar-card-title">Assign to Staff</span>
         </div>
