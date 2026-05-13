@@ -108,6 +108,7 @@ class TicketHistory(models.Model):
 
 
 class SentEmail(models.Model):
+    sender_email = models.EmailField()
     subject = models.CharField(max_length=255)
     body = models.TextField()
     to_email = models.TextField()

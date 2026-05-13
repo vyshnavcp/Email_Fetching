@@ -39,7 +39,7 @@ body{
 }
 
 .wrapper{
-    max-width:1450px;
+    max-width:1500px;
     margin:auto;
 }
 
@@ -83,7 +83,7 @@ input:focus{
 table{
     width:100%;
     border-collapse:collapse;
-    min-width:1200px;
+    min-width:1300px;
 }
 
 thead{
@@ -110,7 +110,7 @@ td{
 }
 
 .message{
-    max-width:280px;
+    max-width:250px;
     overflow:hidden;
     text-overflow:ellipsis;
     white-space:nowrap;
@@ -220,6 +220,8 @@ td{
 
                         <th>ID</th>
 
+                        <th>Sender</th>
+
                         <th>Subject</th>
 
                         <th>To</th>
@@ -247,6 +249,12 @@ td{
                         <td>
 
                             #{{ email.id }}
+
+                        </td>
+
+                        <td>
+
+                            {{ email.sender_email }}
 
                         </td>
 
@@ -318,7 +326,7 @@ td{
 
                     <tr>
 
-                        <td colspan="8">
+                        <td colspan="9">
 
                             <div class="empty">
 
@@ -409,7 +417,6 @@ fromDateInput.addEventListener("change", function(){
     loadEmails();
 
 });
-
 
 toDateInput.addEventListener("change", function(){
 

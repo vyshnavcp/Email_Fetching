@@ -25,62 +25,30 @@ from django.core.mail import EmailMessage
 
 # Create your views here.
 
-
-
 MY_EMAIL = settings.EMAIL_HOST_USER
 MY_PASSWORD = settings.EMAIL_HOST_PASSWORD
- 
- 
-
 
 def login_page(request):
-
     if request.method == "POST":
-
         entered_email = request.POST.get("entered_email")
-
         entered_password = request.POST.get("password")
-
         if entered_email == MY_EMAIL and entered_password == MY_PASSWORD:
-
             request.session["token"] = secrets.token_hex(16)
-
             request.session["role"] = "admin"
-
             return redirect("inbox")
-
-        staff = Staff.objects.filter(
-            email=entered_email
-        ).first()
-
+        staff = Staff.objects.filter(email=entered_email).first()
         if staff:
-
-
             if staff.status == "inactive":
-
                 return render(request, "login.html", {
-
-                    "error": "Your account is inactive"
-
-                })
-
-
+                    "error": "Your account is inactive"})
             if staff.check_password(entered_password):
-
                 request.session["staff_id"] = staff.id
-
                 request.session["staff_email"] = staff.email
-
                 request.session["role"] = "staff"
-
                 return redirect("staff_asigned_ticket")
-
         return render(request, "login.html", {
-
             "error": "Invalid Email or Password"
-
         })
-
     return render(request, "login.html")
 
 def inbox(request):
@@ -704,25 +672,20 @@ def filter_tickets(request):
     })
   
 def send_email(request):
-
     if request.method == "POST":
-
         to_email = request.POST.get("to_email")
         cc_email = request.POST.get("cc_email")
         bcc_email = request.POST.get("bcc_email")
         subject = request.POST.get("subject")
         body = request.POST.get("body")
-
-        # SAVE EMAIL
         sent_email = SentEmail.objects.create(
+            sender_email=settings.EMAIL_HOST_USER,
             to_email=to_email,
             cc_email=cc_email,
             bcc_email=bcc_email,
             subject=subject,
             body=body,
         )
-
-        # CREATE EMAIL
         email = EmailMessage(
             subject=subject,
             body=body,
@@ -731,29 +694,19 @@ def send_email(request):
             cc=[x.strip() for x in cc_email.split(",") if x.strip()] if cc_email else [],
             bcc=[x.strip() for x in bcc_email.split(",") if x.strip()] if bcc_email else [],
         )
-
-        # FILES
         files = request.FILES.getlist("attachments")
-
         for uploaded_file in files:
-
-            # SAVE TO DATABASE
             attachment = EmailAttachment.objects.create(
                 email=sent_email,
                 file=uploaded_file
             )
-
-            # IMPORTANT
             uploaded_file.seek(0)
-
-            # ATTACH FILE
             email.attach(
                 uploaded_file.name,
                 uploaded_file.read(),
                 uploaded_file.content_type
             )
 
-        # SEND EMAIL
         email.send(fail_silently=False)
 
         return redirect("send_email")
@@ -762,14 +715,23 @@ def send_email(request):
 
 
 
-
 def email_list(request):
-    emails = SentEmail.objects.all().order_by("-id")
+
+    emails = SentEmail.objects.all().prefetch_related(
+        "attachments"
+    ).order_by("-id")
+
     search = request.GET.get("search")
+
     from_date = request.GET.get("from_date")
+
     to_date = request.GET.get("to_date")
+
     if search:
+
         emails = emails.filter(
+
+            Q(sender_email__icontains=search) |
             Q(subject__icontains=search) |
             Q(body__icontains=search) |
             Q(to_email__icontains=search) |
@@ -777,15 +739,20 @@ def email_list(request):
             Q(bcc_email__icontains=search)
 
         )
+
     if from_date:
+
         emails = emails.filter(
             created_at__date__gte=from_date
         )
     if to_date:
+
         emails = emails.filter(
             created_at__date__lte=to_date
         )
+
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
+
         table_html = ""
 
         for email in emails:
@@ -795,21 +762,26 @@ def email_list(request):
             for file in email.attachments.all():
 
                 attachments += f"""
+
                     <div class="badge">
+
                         {file.file.name.replace('email_attachments/', '')}
+
                     </div>
+
                 """
 
             if not attachments:
 
                 attachments = "-"
 
-
             table_html += f"""
 
             <tr>
 
                 <td>#{email.id}</td>
+
+                <td>{email.sender_email}</td>
 
                 <td>
 
@@ -845,7 +817,7 @@ def email_list(request):
 
                 <td>
 
-                    {email.created_at}
+                    {email.created_at.strftime('%d %b %Y %I:%M %p')}
 
                 </td>
 
@@ -853,11 +825,33 @@ def email_list(request):
 
             """
 
+        if not table_html:
+
+            table_html = """
+
+            <tr>
+
+                <td colspan="9">
+
+                    <div class="empty">
+
+                        No Emails Found
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            """
 
         return JsonResponse({
             "table": table_html
         })
+
     context = {
-        "emails": emails
+        "emails": emails,
+        "sender_email": settings.EMAIL_HOST_USER
     }
+
     return render(request, "email_list.html", context)
