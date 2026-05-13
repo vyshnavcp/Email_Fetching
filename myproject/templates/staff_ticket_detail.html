@@ -85,6 +85,7 @@
       align-items: start;
     }
  
+    /* ── Email card ── */
     .email-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -133,6 +134,63 @@
     .meta-from { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
     .meta-date { font-size: 11px; font-weight: 300; color: var(--muted); display: flex; align-items: center; gap: 4px; }
  
+    /* ── HTML/plain toggle bar ── */
+    .view-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--paper);
+    }
+ 
+    .toggle-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-right: 4px;
+    }
+ 
+    .toggle-btn {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+ 
+    .toggle-btn.active {
+      background: var(--ink);
+      color: var(--gold-light);
+      border-color: var(--ink);
+    }
+ 
+    .toggle-btn:hover:not(.active) {
+      border-color: var(--gold);
+      color: var(--ink);
+    }
+ 
+    /* ── iframe wrapper ── */
+    .email-iframe-wrapper { padding: 20px 24px; }
+ 
+    .email-iframe {
+      width: 100%;
+      min-height: 120px;
+      border: none;
+      display: block;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: height 0.25s ease;
+    }
+ 
+    /* ── Plain text body ── */
     .email-body-text {
       padding: 28px 32px;
       line-height: 1.8;
@@ -142,6 +200,15 @@
       color: #2a2820;
     }
  
+    .no-content {
+      padding: 40px 32px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      font-style: italic;
+    }
+ 
+    /* ── Footer ── */
     .email-footer {
       padding: 14px 32px;
       border-top: 1px solid var(--border);
@@ -157,6 +224,7 @@
       background: var(--gold-light); color: #7a5c10; border: 1px solid #e0c97a;
     }
  
+    /* ── Attachments ── */
     .attachments-section { padding: 20px 32px 28px; border-top: 1px solid var(--border); }
  
     .attachments-title {
@@ -186,6 +254,7 @@
     }
     .att-download:hover { border-color: var(--gold); background: var(--gold-light); }
  
+    /* ── Lightbox ── */
     .lightbox {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.88); z-index: 9999;
@@ -196,6 +265,7 @@
     .lightbox-close { position: absolute; top: 18px; right: 24px; color: #fff; font-size: 30px; cursor: pointer; opacity: 0.7; line-height: 1; transition: opacity 0.2s; }
     .lightbox-close:hover { opacity: 1; }
  
+    /* ── Sidebar ── */
     .sidebar { display: flex; flex-direction: column; gap: 12px; }
  
     .sidebar-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
@@ -221,7 +291,6 @@
     .status-assigned   { background: var(--gold-light);  color: #7a5c10;      border: 1px solid #e0c97a; }
     .status-closed     { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
  
-    /* ── Buttons ── */
     .close-btn {
       width: 100%; padding: 10px;
       background: var(--ink); color: var(--gold-light);
@@ -233,7 +302,6 @@
     .close-btn:hover  { background: #2a2820; }
     .close-btn:active { transform: scale(0.97); }
  
-    /* ── FIX 1: History button ── */
     .history-btn {
       width: 100%; padding: 10px; margin-bottom: 10px;
       background: var(--cream); color: var(--ink);
@@ -266,6 +334,9 @@
  
     @media (max-width: 640px) {
       .layout { grid-template-columns: 1fr; }
+      .email-header { padding: 20px; }
+      .email-body-text,
+      .email-iframe-wrapper { padding: 20px; }
     }
   </style>
 </head>
@@ -279,9 +350,10 @@
  
   <div class="layout">
  
-    <!-- ── Email body ── -->
+    <!-- ── Left: Email Card ── -->
     <div class="email-card">
  
+      <!-- Header -->
       <div class="email-header">
         <span class="eyebrow">Ticket Detail</span>
         <div class="subject">{{ ticket.subject }}</div>
@@ -297,13 +369,57 @@
         </div>
       </div>
  
-      <div class="email-body-text">{{ ticket.body }}</div>
+      <!-- Toggle bar: only show when BOTH html and plain text exist -->
+      {% if has_html and body %}
+      <div class="view-toggle">
+        <span class="toggle-label">View as</span>
+        <button class="toggle-btn active" id="btn-html" onclick="showHTML()">
+          <i class="ti ti-code"></i> HTML
+        </button>
+        <button class="toggle-btn" id="btn-text" onclick="showText()">
+          <i class="ti ti-align-left"></i> Plain Text
+        </button>
+      </div>
+      {% endif %}
  
+      <!-- HTML email rendered in sandboxed iframe -->
+      {% if has_html %}
+      <div class="email-iframe-wrapper" id="html-view">
+        <iframe
+          id="email-iframe"
+          class="email-iframe"
+          sandbox="allow-same-origin"
+          scrolling="no"
+          frameborder="0"
+          title="Email Content"
+        ></iframe>
+      </div>
+      {% endif %}
+ 
+      <!-- Plain text fallback (hidden when HTML view is active) -->
+      {% if body %}
+      <div
+        class="email-body-text"
+        id="text-view"
+        {% if has_html %}style="display:none;"{% endif %}
+      >{{ body }}</div>
+      {% endif %}
+ 
+      <!-- No content at all -->
+      {% if not has_html and not body %}
+      <div class="no-content">
+        <i class="ti ti-mail-off" style="font-size:24px; display:block; margin-bottom:8px;"></i>
+        No message content available.
+      </div>
+      {% endif %}
+ 
+      <!-- Footer -->
       <div class="email-footer">
         <span class="footer-label">Via</span>
         <span class="tag"><i class="ti ti-mail"></i> Gmail IMAP</span>
       </div>
  
+      <!-- Attachments -->
       {% if attachments %}
       <div class="attachments-section">
         <div class="attachments-title">
@@ -328,6 +444,7 @@
       {% endif %}
  
     </div>
+    <!-- end email card -->
  
     <!-- Lightbox -->
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
@@ -335,7 +452,7 @@
       <img id="lightbox-img" src="" alt="Preview">
     </div>
  
-    <!-- ── Sidebar ── -->
+    <!-- ── Right: Sidebar (unchanged) ── -->
     <div class="sidebar">
  
       <!-- Ticket Info -->
@@ -362,7 +479,6 @@
         </div>
         <div class="sidebar-card-body">
  
-          {# ✅ FIX 1 — View History button links to the history page #}
           <a href="{% url 'ticket_history' ticket_id=ticket.id %}" class="history-btn">
             <i class="ti ti-history"></i> View History
           </a>
@@ -383,16 +499,12 @@
           <!-- Notes list -->
           {% if notes %}
           <div style="margin-bottom:14px;">
- 
             {% for note in notes %}
             <div class="note-item {% if forloop.counter > 5 %}note-hidden{% endif %}"
                  style="border:1px solid var(--border); border-radius:8px; padding:8px; margin-bottom:8px; background:var(--paper);">
  
               <div style="font-size:10px; color:var(--muted); margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
- 
                 <span>{{ note.staff.name }} • {{ note.created_at }}</span>
- 
-                {# ✅ FIX 2 — Edit button only for the staff member who wrote this note #}
                 {% if note.staff.email == request.session.staff_email %}
                 <button type="button"
                   onclick="toggleEdit({{ note.id }})"
@@ -400,15 +512,10 @@
                   <i class="ti ti-pencil" style="font-size:10px;"></i> Edit
                 </button>
                 {% endif %}
- 
               </div>
  
-              <!-- Note text (read mode) -->
-              <div id="note-text-{{ note.id }}" style="font-size:12px; color:var(--ink);">
-                {{ note.note }}
-              </div>
+              <div id="note-text-{{ note.id }}" style="font-size:12px; color:var(--ink);">{{ note.note }}</div>
  
-              {# Edit form — only rendered in HTML for the author, so nobody else can submit it either #}
               {% if note.staff.email == request.session.staff_email %}
               <form method="POST" id="edit-form-{{ note.id }}" style="display:none; margin-top:6px;">
                 {% csrf_token %}
@@ -432,7 +539,6 @@
               <span id="notes-toggle-label">Show all {{ notes|length }} notes</span>
             </button>
             {% endif %}
- 
           </div>
           {% endif %}
  
@@ -455,11 +561,13 @@
         </div>
       </div>
  
-    </div>
+    </div><!-- end sidebar -->
+ 
   </div>
 </div>
  
 <script>
+  /* ── Lightbox ── */
   function openLightbox(url) {
     document.getElementById('lightbox-img').src = url;
     document.getElementById('lightbox').classList.add('open');
@@ -469,12 +577,56 @@
     document.getElementById('lightbox-img').src = '';
   }
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
-</script>
  
-<script>
+  /* ── HTML / Plain-text toggle ── */
+  function showHTML() {
+    document.getElementById('html-view').style.display = 'block';
+    document.getElementById('text-view').style.display = 'none';
+    document.getElementById('btn-html').classList.add('active');
+    document.getElementById('btn-text').classList.remove('active');
+  }
+  function showText() {
+    document.getElementById('html-view').style.display = 'none';
+    document.getElementById('text-view').style.display = 'block';
+    document.getElementById('btn-text').classList.add('active');
+    document.getElementById('btn-html').classList.remove('active');
+  }
+ 
+  /* ── Inject HTML into sandboxed iframe & auto-resize ── */
+  {% if has_html %}
+  (function () {
+    var iframe = document.getElementById('email-iframe');
+    if (!iframe) return;
+ 
+    var htmlContent = "{{ html_body|escapejs }}";
+ 
+    var doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(htmlContent);
+    doc.close();
+ 
+    function resizeIframe() {
+      try {
+        var body = doc.body;
+        var html = doc.documentElement;
+        var height = Math.max(
+          body.scrollHeight, body.offsetHeight,
+          html.clientHeight, html.scrollHeight, html.offsetHeight
+        );
+        iframe.style.height = (height + 24) + 'px';
+      } catch (e) {}
+    }
+ 
+    iframe.addEventListener('load', resizeIframe);
+    setTimeout(resizeIframe, 300);
+    setTimeout(resizeIframe, 900);
+  })();
+  {% endif %}
+ 
+  /* ── Note edit toggle ── */
   function toggleEdit(id) {
-    const form = document.getElementById("edit-form-" + id);
-    const text = document.getElementById("note-text-" + id);
+    var form = document.getElementById("edit-form-" + id);
+    var text = document.getElementById("note-text-" + id);
     if (form.style.display === "none") {
       form.style.display = "block";
       text.style.display = "none";
@@ -484,12 +636,13 @@
     }
   }
  
-  let notesExpanded = false;
+  /* ── Notes expand/collapse ── */
+  var notesExpanded = false;
   function toggleNotes(total) {
-    const allNotes = document.querySelectorAll('.note-item');
-    const icon     = document.getElementById('notes-toggle-icon');
-    const label    = document.getElementById('notes-toggle-label');
-    notesExpanded  = !notesExpanded;
+    var allNotes = document.querySelectorAll('.note-item');
+    var icon     = document.getElementById('notes-toggle-icon');
+    var label    = document.getElementById('notes-toggle-label');
+    notesExpanded = !notesExpanded;
     allNotes.forEach(function(note, index) {
       if (index >= 5) note.style.display = notesExpanded ? 'block' : 'none';
     });
@@ -497,5 +650,6 @@
     label.textContent = notesExpanded ? 'Show less' : 'Show all ' + total + ' notes';
   }
 </script>
+ 
 </body>
 </html>

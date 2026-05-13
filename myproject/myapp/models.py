@@ -39,6 +39,7 @@ class Ticket(models.Model):
  
  
     assigned_to = models.ForeignKey(Staff, null=True, blank=True, on_delete=models.SET_NULL, related_name="tickets" )
+    created_by=models.ForeignKey(Staff, null=True, blank=True, on_delete=models.SET_NULL, related_name="created_tickets" )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="unassigned")
  
     created_at = models.DateTimeField(auto_now_add=True)

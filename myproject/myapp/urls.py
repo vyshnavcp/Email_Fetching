@@ -16,6 +16,8 @@ urlpatterns = [
     path("ticket/<int:ticket_id>/history/", views.ticket_history, name="ticket_history"),
     path("create-staff/", views.create_staff, name="create_staff"),
     path("staff-list/", views.staff_list, name="staff_list"),
+    path("create-ticket/", views.create_ticket, name="create_ticket"),
+    
 
   
 

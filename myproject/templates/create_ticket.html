@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Ticket</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --ink:#0f0e0b;
+    --paper:#f7f5f0;
+    --cream:#edeae2;
+    --gold:#c9a84c;
+    --gold-light:#f0dfa0;
+    --muted:#7a7669;
+    --card:#fffefb;
+    --border:#dedad0;
+}
+
+body{
+    font-family:'DM Sans',sans-serif;
+    background:var(--paper);
+    min-height:100vh;
+    color:var(--ink);
+    overflow-x:hidden;
+}
+
+body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;
+    opacity:.6;
+}
+
+.shell{
+    max-width:900px;
+    margin:auto;
+    padding:50px 24px;
+    position:relative;
+    z-index:1;
+}
+
+.top-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-bottom:40px;
+    padding-bottom:24px;
+    border-bottom:1px solid var(--border);
+}
+
+.eyebrow{
+    font-size:10px;
+    font-weight:500;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--gold);
+}
+
+.title{
+    font-family:'Playfair Display',serif;
+    font-size:38px;
+    font-weight:700;
+}
+
+.back-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--ink);
+    color:var(--gold-light);
+    border:none;
+    border-radius:10px;
+    padding:10px 18px;
+    text-decoration:none;
+    font-size:13px;
+    transition:.3s;
+}
+
+.back-btn:hover{
+    background:#2a2820;
+}
+
+.card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:40px;
+    box-shadow:0 4px 25px rgba(0,0,0,0.05);
+}
+
+.form-group{
+    margin-bottom:24px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:10px;
+    font-size:13px;
+    font-weight:500;
+    color:var(--muted);
+}
+
+.form-group input,
+.form-group textarea{
+    width:100%;
+    padding:15px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:white;
+    font-size:14px;
+    outline:none;
+    transition:.3s;
+    font-family:'DM Sans',sans-serif;
+}
+
+.form-group textarea{
+    min-height:180px;
+    resize:vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus{
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(201,168,76,0.1);
+}
+
+/* UPLOAD AREA */
+
+.upload-area{
+    border:2px dashed var(--border);
+    border-radius:18px;
+    padding:40px;
+    text-align:center;
+    background:var(--cream);
+    cursor:pointer;
+    transition:.3s;
+    position:relative;
+}
+
+.upload-area:hover{
+    border-color:var(--gold);
+    background:#f8f3e3;
+}
+
+.upload-area i{
+    font-size:46px;
+    color:var(--gold);
+    margin-bottom:12px;
+    display:block;
+}
+
+.upload-title{
+    font-size:15px;
+    font-weight:500;
+    margin-bottom:6px;
+}
+
+.upload-sub{
+    font-size:12px;
+    color:var(--muted);
+}
+
+#attachments{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    opacity:0;
+    cursor:pointer;
+}
+
+/* FILE LIST */
+
+.preview-box{
+    margin-top:18px;
+}
+
+.preview-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--cream);
+    border:1px solid var(--border);
+    padding:12px 14px;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+.preview-item i{
+    font-size:18px;
+    color:var(--gold);
+}
+
+.preview-item span{
+    font-size:13px;
+    color:var(--ink);
+}
+
+/* SUBMIT */
+
+.submit-btn{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:12px;
+    background:var(--ink);
+    color:var(--gold-light);
+    font-size:14px;
+    font-weight:500;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.submit-btn:hover{
+    background:#2a2820;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="shell">
+
+    <div class="top-bar">
+
+        <div>
+            <div class="eyebrow">Support</div>
+            <h1 class="title">Create Ticket</h1>
+        </div>
+
+        <a href="{% url 'staff_asigned_ticket' %}" class="back-btn">
+            <i class="ti ti-arrow-left"></i>
+            Back
+        </a>
+
+    </div>
+
+    <div class="card">
+
+        <form method="POST" enctype="multipart/form-data">
+
+            {% csrf_token %}
+
+            <!-- SUBJECT -->
+
+            <div class="form-group">
+
+                <label>Subject</label>
+
+                <input
+                    type="text"
+                    name="subject"
+                    placeholder="Enter ticket subject"
+                    required
+                >
+
+            </div>
+
+            <!-- SENDER -->
+
+            <div class="form-group">
+
+                <label>Sender</label>
+
+                <input
+                    type="text"
+                    name="sender"
+                    placeholder="Enter sender email or name"
+                    required
+                >
+
+            </div>
+
+            <!-- BODY -->
+
+            <div class="form-group">
+
+                <label>Message</label>
+
+                <textarea
+                    name="body"
+                    placeholder="Write your ticket message..."
+                    required
+                ></textarea>
+
+            </div>
+
+            <!-- ATTACHMENTS -->
+
+            <div class="form-group">
+
+                <label>Attachments</label>
+
+                <div class="upload-area">
+
+                    <input
+                        type="file"
+                        name="attachments"
+                        id="attachments"
+                        multiple
+                    >
+
+                    <i class="ti ti-cloud-upload"></i>
+
+                    <div class="upload-title">
+                        Click or Drop Files Here
+                    </div>
+
+                    <div class="upload-sub">
+                        Upload multiple images, PDFs or documents
+                    </div>
+
+                </div>
+
+                <div
+                    class="preview-box"
+                    id="preview-box"
+                ></div>
+
+            </div>
+
+            <!-- SUBMIT -->
+
+            <button type="submit" class="submit-btn">
+                Create Ticket
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+const input = document.getElementById("attachments");
+
+const previewBox = document.getElementById("preview-box");
+
+input.addEventListener("change", function(){
+
+    previewBox.innerHTML = "";
+
+    Array.from(this.files).forEach((file,index)=>{
+
+        const item = document.createElement("div");
+
+        item.classList.add("preview-item");
+
+        item.innerHTML = `
+            <i class="ti ti-file"></i>
+            <span>${index + 1}. ${file.name}</span>
+        `;
+
+        previewBox.appendChild(item);
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>
