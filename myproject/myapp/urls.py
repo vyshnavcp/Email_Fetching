@@ -17,6 +17,11 @@ urlpatterns = [
     path("create-staff/", views.create_staff, name="create_staff"),
     path("staff-list/", views.staff_list, name="staff_list"),
     path("create-ticket/", views.create_ticket, name="create_ticket"),
+    path("tickets_list/", views.tickets_list, name="tickets_list"),
+    path("filter-tickets/", views.filter_tickets, name="filter_tickets"),
+    path("filter-staffs/", views.filter_staffs, name="filter_staffs"),
+    path("change-staff-status/<int:staff_id>/",views.change_staff_status,name="change_staff_status"),
+    path("send-email/", views.send_email, name="send_email" ),
     
 
 ]

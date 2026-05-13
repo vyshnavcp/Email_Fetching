@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Staff List</title>
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<title>Staff List</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
 
@@ -17,16 +20,17 @@
     padding:0;
 }
 
-:root {
-  --ink: #0f0e0b;
-  --paper: #f7f5f0;
-  --cream: #edeae2;
-  --gold: #c9a84c;
-  --gold-light: #f0dfa0;
-  --muted: #7a7669;
-  --card: #fffefb;
-  --border: #dedad0;
-  --red: #c0392b;
+:root{
+    --ink:#0f0e0b;
+    --paper:#f7f5f0;
+    --cream:#edeae2;
+    --gold:#c9a84c;
+    --gold-light:#f0dfa0;
+    --muted:#7a7669;
+    --card:#fffefb;
+    --border:#dedad0;
+    --red:#c0392b;
+    --green:#2e7d32;
 }
 
 body{
@@ -47,7 +51,7 @@ body::before{
 }
 
 .shell{
-    max-width:900px;
+    max-width:1300px;
     margin:auto;
     padding:50px 24px;
     position:relative;
@@ -58,7 +62,7 @@ body::before{
     display:flex;
     justify-content:space-between;
     align-items:flex-end;
-    margin-bottom:40px;
+    margin-bottom:35px;
     padding-bottom:20px;
     border-bottom:1px solid var(--border);
 }
@@ -87,44 +91,95 @@ body::before{
     text-decoration:none;
     font-size:13px;
     transition:.3s;
+    border:none;
+    cursor:pointer;
 }
 
 .add-btn:hover{
     background:#2a2820;
 }
 
-.staff-list{
+.filter-bar{
     display:flex;
-    flex-direction:column;
-    gap:16px;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-bottom:28px;
 }
 
-.staff-card{
+.search-box{
+    position:relative;
+}
+
+.search-box i{
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--muted);
+}
+
+input,
+select{
     background:var(--card);
     border:1px solid var(--border);
-    border-radius:16px;
-    padding:22px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+    border-radius:12px;
+    padding:12px 16px;
+    font-size:14px;
+    outline:none;
     transition:.3s;
+    min-width:220px;
 }
 
-.staff-card:hover{
-    transform:translateY(-2px);
-    box-shadow:0 5px 20px rgba(0,0,0,0.05);
+input{
+    padding-left:42px;
 }
 
-.staff-left{
+input:focus,
+select:focus{
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(201,168,76,.12);
+}
+
+.table-wrap{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    overflow:hidden;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+table th{
+    background:var(--cream);
+    padding:18px;
+    text-align:left;
+    font-size:13px;
+    color:var(--muted);
+    text-transform:uppercase;
+}
+
+table td{
+    padding:18px;
+    border-bottom:1px solid var(--border);
+}
+
+tbody tr:hover{
+    background:#faf8f3;
+}
+
+.staff-box{
     display:flex;
     align-items:center;
-    gap:16px;
+    gap:14px;
 }
 
 .avatar{
-    width:50px;
-    height:50px;
-    border-radius:14px;
+    width:45px;
+    height:45px;
+    border-radius:12px;
     background:var(--cream);
     border:1px solid var(--border);
     display:flex;
@@ -132,26 +187,47 @@ body::before{
     justify-content:center;
     font-weight:700;
     color:var(--gold);
-    font-size:16px;
 }
 
-.staff-info h3{
-    font-size:16px;
+.staff-info h4{
     margin-bottom:4px;
 }
 
 .staff-info p{
-    font-size:13px;
     color:var(--muted);
+    font-size:13px;
 }
 
-.staff-id{
-    font-size:12px;
-    color:var(--muted);
-    background:var(--cream);
-    padding:6px 10px;
+.badge{
+    padding:6px 12px;
     border-radius:20px;
-    border:1px solid var(--border);
+    color:white;
+    font-size:12px;
+}
+
+.active{
+    background:var(--green);
+}
+
+.inactive{
+    background:var(--red);
+}
+
+.action-btn{
+    border:none;
+    padding:8px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    color:white;
+    font-size:12px;
+}
+
+.btn-active{
+    background:var(--green);
+}
+
+.btn-inactive{
+    background:var(--red);
 }
 
 .empty{
@@ -167,12 +243,6 @@ body::before{
     opacity:.3;
 }
 
-.empty p{
-    font-family:'Playfair Display',serif;
-    font-size:20px;
-    opacity:.5;
-}
-
 </style>
 
 </head>
@@ -184,58 +254,231 @@ body::before{
     <div class="top-bar">
 
         <div>
+
             <div class="eyebrow">Management</div>
+
             <h1 class="title">Staff List</h1>
+
         </div>
 
         <a href="{% url 'create_staff' %}" class="add-btn">
+
             <i class="ti ti-user-plus"></i>
+
             Create Staff
+
         </a>
 
     </div>
 
-    {% if staffs %}
+    <!-- FILTER -->
+    <div class="filter-bar">
 
-    <div class="staff-list">
+        <div class="search-box">
 
-        {% for staff in staffs %}
+            <i class="ti ti-search"></i>
 
-        <div class="staff-card">
-
-            <div class="staff-left">
-
-                <div class="avatar">
-                    {{ staff.name|slice:":2"|upper }}
-                </div>
-
-                <div class="staff-info">
-                    <h3>{{ staff.name }}</h3>
-                    <p>{{ staff.email }}</p>
-                </div>
-
-            </div>
-
-            <div class="staff-id">
-                ID : {{ staff.id }}
-            </div>
+            <input
+                type="text"
+                id="search"
+                placeholder="Search name or email"
+            >
 
         </div>
 
-        {% endfor %}
+        <select id="status">
+
+            <option value="">All Status</option>
+
+            <option value="active">
+                Active
+            </option>
+
+            <option value="inactive">
+                Inactive
+            </option>
+
+        </select>
 
     </div>
 
-    {% else %}
+    <!-- TABLE -->
+    <div class="table-wrap">
 
-    <div class="empty">
-        <i class="ti ti-users"></i>
-        <p>No Staff Found</p>
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Staff</th>
+
+                    <th>Email</th>
+
+                    <th>Status</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="staff-body">
+
+            </tbody>
+
+        </table>
+
     </div>
-
-    {% endif %}
 
 </div>
+
+<script>
+
+function loadStaffs(){
+
+    $.ajax({
+
+        url: "{% url 'filter_staffs' %}",
+
+        data: {
+
+            search: $("#search").val(),
+
+            status: $("#status").val(),
+
+        },
+
+        success: function(response){
+
+            let rows = "";
+
+            if(response.staffs.length > 0){
+
+                response.staffs.forEach(function(staff){
+
+                    rows += `
+
+                    <tr>
+
+                        <td>
+
+                            <div class="staff-box">
+
+                                <div class="avatar">
+
+                                    ${staff.name.substring(0,2).toUpperCase()}
+
+                                </div>
+
+                                <div class="staff-info">
+
+                                    <h4>${staff.name}</h4>
+
+                                    <p>ID : ${staff.id}</p>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                        <td>${staff.email}</td>
+
+                        <td>
+
+                            <span class="badge ${staff.status}">
+
+                                ${staff.status}
+
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <button
+                                onclick="changeStatus(${staff.id})"
+                                class="action-btn ${staff.status == 'active' ? 'btn-inactive' : 'btn-active'}"
+                            >
+
+                                ${staff.status == 'active'
+                                    ? 'Make Inactive'
+                                    : 'Make Active'}
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                    `;
+
+                });
+
+            }else{
+
+                rows = `
+
+                <tr>
+
+                    <td colspan="4" class="empty">
+
+                        <i class="ti ti-users"></i>
+
+                        No Staff Found
+
+                    </td>
+
+                </tr>
+
+                `;
+
+            }
+
+            $("#staff-body").html(rows);
+
+        }
+
+    });
+
+}
+
+
+function changeStatus(staffId){
+
+    $.ajax({
+
+        url: "/change-staff-status/" + staffId + "/",
+
+        success: function(){
+
+            loadStaffs();
+
+        }
+
+    });
+
+}
+
+
+loadStaffs();
+
+
+$("#search").keyup(function(){
+
+    loadStaffs();
+
+});
+
+
+$("#status").change(function(){
+
+    loadStaffs();
+
+});
+
+</script>
 
 </body>
 </html>

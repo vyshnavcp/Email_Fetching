@@ -26,6 +26,7 @@
       --blue: #1d4ed8;
       --blue-light: #dbeafe;
       --blue-border: #93c5fd;
+      --sidebar-w: 240px;
     }
  
     body {
@@ -33,7 +34,7 @@
       background: var(--paper);
       min-height: 100vh;
       color: var(--ink);
-      padding: 0;
+      display: flex;
       overflow-x: hidden;
     }
  
@@ -47,12 +48,246 @@
       opacity: 0.6;
     }
  
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--ink);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 100;
+      transition: width 0.25s ease;
+      overflow: hidden;
+    }
+ 
+    .sidebar.collapsed { width: 60px; }
+ 
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 22px 18px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      min-width: var(--sidebar-w);
+    }
+ 
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--ink);
+      font-size: 16px;
+    }
+ 
+    .logo-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--gold-light);
+      white-space: nowrap;
+      opacity: 1;
+      transition: opacity 0.2s;
+    }
+ 
+    .sidebar.collapsed .logo-text { opacity: 0; }
+ 
+    .sidebar-toggle {
+      position: absolute;
+      top: 22px;
+      right: -12px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: 2px solid var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--ink);
+      font-size: 11px;
+      transition: transform 0.25s;
+      z-index: 10;
+    }
+ 
+    .sidebar.collapsed .sidebar-toggle { transform: rotate(180deg); }
+ 
+    /* Nav */
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+ 
+    .nav-section-label {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      padding: 14px 18px 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity 0.2s;
+    }
+ 
+    .sidebar.collapsed .nav-section-label { opacity: 0; }
+ 
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 18px;
+      cursor: pointer;
+      border-radius: 0;
+      color: rgba(255,255,255,0.55);
+      font-size: 13.5px;
+      font-weight: 400;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+      position: relative;
+    }
+ 
+    .nav-item i { font-size: 17px; flex-shrink: 0; }
+ 
+    .nav-item:hover {
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.9);
+    }
+ 
+    .nav-item.active {
+      background: rgba(201,168,76,0.12);
+      color: var(--gold-light);
+    }
+ 
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 6px;
+      bottom: 6px;
+      width: 3px;
+      border-radius: 0 2px 2px 0;
+      background: var(--gold);
+    }
+ 
+    /* Dropdown nav item */
+    .nav-group { width: 100%; }
+ 
+    .nav-group-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 18px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.55);
+      font-size: 13.5px;
+      font-weight: 400;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+      user-select: none;
+    }
+ 
+    .nav-group-toggle:hover {
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.9);
+    }
+ 
+    .nav-group-toggle i.group-icon { font-size: 17px; flex-shrink: 0; }
+ 
+    .nav-group-label { flex: 1; }
+ 
+    .nav-group-arrow {
+      font-size: 12px;
+      transition: transform 0.22s;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+ 
+    .sidebar.collapsed .nav-group-label,
+    .sidebar.collapsed .nav-group-arrow { display: none; }
+ 
+    .nav-group.open .nav-group-arrow { transform: rotate(90deg); }
+ 
+    .nav-group-children {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.25s ease;
+    }
+ 
+    .nav-group.open .nav-group-children { max-height: 200px; }
+    .sidebar.collapsed .nav-group-children { max-height: 0; }
+ 
+    .nav-child {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 18px 7px 44px;
+      color: rgba(255,255,255,0.42);
+      font-size: 12.5px;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+ 
+    .nav-child i { font-size: 14px; }
+ 
+    .nav-child:hover {
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.8);
+    }
+ 
+    /* Sidebar bottom */
+    .sidebar-bottom {
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 14px;
+    }
+ 
+    .logout-side {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      color: rgba(255,255,255,0.4);
+      font-size: 13px;
+      text-decoration: none;
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+ 
+    .logout-side i { font-size: 17px; flex-shrink: 0; }
+    .logout-side:hover { background: rgba(192,57,43,0.18); color: #f5bebe; }
+ 
+    .sidebar.collapsed .logout-side span { display: none; }
+ 
+    /* ── Main content ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-height: 100vh;
+      transition: margin-left 0.25s ease;
+      position: relative;
+      z-index: 1;
+    }
+ 
+    .main.sidebar-collapsed { margin-left: 60px; }
+ 
     .shell {
       max-width: 760px;
       margin: 0 auto;
       padding: 48px 24px 80px;
-      position: relative;
-      z-index: 1;
     }
  
     /* ── Header ── */
@@ -101,8 +336,6 @@
       top: -4px;
     }
  
-    .header-right { display: flex; align-items: center; gap: 10px; }
- 
     .fetch-btn {
       display: inline-flex;
       align-items: center;
@@ -128,29 +361,6 @@
       from { transform: rotate(0deg); }
       to   { transform: rotate(360deg); }
     }
- 
-    .logout-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      border-radius: 8px;
-      padding: 9px 16px;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 400;
-      transition: all 0.2s;
-      background: var(--card);
-    }
- 
-    .logout-btn:hover {
-      border-color: #f5bebe;
-      color: var(--red);
-      background: var(--red-light);
-    }
- 
-    .logout-btn i { font-size: 15px; }
  
     /* ── Error ── */
     .error-msg {
@@ -230,7 +440,6 @@
       to   { opacity: 1; transform: translateY(0); }
     }
  
-    /* ── Avatar ── */
     .avatar {
       width: 42px;
       height: 42px;
@@ -247,7 +456,6 @@
       flex-shrink: 0;
     }
  
-    /* ── Email content ── */
     .email-body { flex: 1; min-width: 0; }
  
     .email-row {
@@ -275,7 +483,6 @@
       text-overflow: ellipsis;
     }
  
-    /* Ticket number chip */
     .ticket-badge {
       font-size: 10px;
       font-weight: 500;
@@ -289,7 +496,6 @@
       flex-shrink: 0;
     }
  
-    /* ── Status pill (inline on card) ── */
     .status-pill {
       font-size: 9px;
       font-weight: 600;
@@ -335,12 +541,7 @@
       margin-bottom: 8px;
     }
  
-    /* ── Assigned-to chip ── */
-    .assigned-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .assigned-row { display: flex; align-items: center; gap: 6px; }
  
     .assigned-chip {
       display: inline-flex;
@@ -377,137 +578,247 @@
       font-style: italic;
     }
  
-    #s1 {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--ink);
-      color: var(--gold-light);
-      border: none;
-      border-radius: 8px;
-      padding: 9px 16px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      text-decoration: none;
+    /* Tooltip for collapsed sidebar icons */
+    .nav-item[data-tip],
+    .nav-group-toggle[data-tip] {
+      position: relative;
     }
  
-    #s1:hover { background: #2a2820; }
+    .sidebar.collapsed .nav-item[data-tip]:hover::after,
+    .sidebar.collapsed .nav-group-toggle[data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: 60px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #1e1c18;
+      color: rgba(255,255,255,0.9);
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      pointer-events: none;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+ 
+    .nav-item-label { transition: opacity 0.2s; }
+    .sidebar.collapsed .nav-item-label { opacity: 0; width: 0; overflow: hidden; }
   </style>
 </head>
  
 <body>
-<div class="shell">
  
-  <div class="top-bar">
-    <div class="header-left">
-      <span class="eyebrow">Mail</span>
-      <h1 class="title">
-        Inbox
-        {% if fetched %}
-          <span class="badge">{{ emails|length }}</span>
-        {% endif %}
-      </h1>
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" id="sidebar">
+ 
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class="ti ti-mail"></i></div>
+      <span class="logo-text">TicketDesk</span>
     </div>
  
-    <div class="header-right">
-      <button class="fetch-btn" onclick="submitFetch(this)">
-        <i class="ti ti-refresh"></i> Fetch Mail
-      </button>
-    
-      <a id="s1" href='{% url "create_staff" %}'>Create Staff</a>
-    
-      <a id="s1" href='{% url "ticket_list" %}'>Ticket List</a>
-      <a href="{% url 'logout' %}" class="logout-btn">
-        <i class="ti ti-logout"></i> Sign out
+    <div class="sidebar-toggle" onclick="toggleSidebar()">
+      <i class="ti ti-chevron-left"></i>
+    </div>
+ 
+    <nav class="sidebar-nav">
+ 
+      <!-- Main -->
+      <div class="nav-section-label">Main</div>
+ 
+      <a href="{% url 'inbox' %}" class="nav-item active" data-tip="Inbox">
+        <i class="ti ti-inbox"></i>
+        <span class="nav-item-label">Inbox</span>
       </a>
-    </div>
-  </div>
  
-  <form id="fetch-form" method="POST" style="display:none;">
-    {% csrf_token %}
-    <input type="hidden" name="fetch" value="1">
-  </form>
+      <!-- Staff dropdown -->
+      <div class="nav-section-label">Management</div>
  
-  {% if error %}
-    <div class="error-msg">
-      <i class="ti ti-alert-circle"></i>
-      {{ error }}
-    </div>
-  {% endif %}
- 
-  {% if not fetched %}
- 
-    <div class="idle-state">
-      <i class="ti ti-inbox"></i>
-      <p>Press "Fetch Mail" to load your inbox.</p>
-    </div>
- 
-  {% elif emails %}
- 
-    <div class="email-list">
-      {% for email in emails %}
-      <a href="{% url 'email_detail' email.id %}" class="email-link"
-         style="animation-delay: {{ forloop.counter0 }}00ms;">
-        <div class="email-card">
- 
-          <div class="avatar">{{ email.sender|slice:":2"|upper }}</div>
- 
-          <div class="email-body">
- 
-            <div class="email-row">
-              <div class="sender-group">
-                <span class="email-from">{{ email.sender }}</span>
-                <span class="ticket-badge">{{ email.ticket }}</span>
-                <span class="status-pill status-{{ email.status }}">{{ email.status }}</span>
-              </div>
-              <span class="email-date">{{ email.date }}</span>
-            </div>
- 
-            <div class="email-subject">{{ email.subject }}</div>
-            <div class="email-preview">{{ email.body }}</div>
- 
-            <!-- Assigned-to row -->
-            <div class="assigned-row">
-              {% if email.assigned_to %}
-                <span class="assigned-chip">
-                  <span class="assigned-chip-avatar">{{ email.assigned_to|slice:":2"|upper }}</span>
-                  {{ email.assigned_to }}
-                </span>
-              {% else %}
-                <span class="unassigned-chip">
-                  <i class="ti ti-user-off" style="font-size:11px; vertical-align:middle;"></i>
-                  Unassigned
-                </span>
-              {% endif %}
-            </div>
- 
-          </div>
+      <div class="nav-group" id="group-staff">
+        <div class="nav-group-toggle" onclick="toggleGroup('group-staff')" data-tip="Staff">
+          <i class="ti ti-users group-icon"></i>
+          <span class="nav-group-label">Staff</span>
+          <i class="ti ti-chevron-right nav-group-arrow"></i>
         </div>
+        <div class="nav-group-children">
+          <a href="{% url 'create_staff' %}" class="nav-child">
+            <i class="ti ti-user-plus"></i> Create Staff
+          </a>
+          <a href="{% url 'staff_list' %}" class="nav-child">
+            <i class="ti ti-list"></i> Staff List
+          </a>
+        </div>
+      </div>
+ 
+      <!-- Tickets dropdown -->
+      <div class="nav-group" id="group-tickets">
+        <div class="nav-group-toggle" onclick="toggleGroup('group-tickets')" data-tip="Tickets">
+          <i class="ti ti-ticket group-icon"></i>
+          <span class="nav-group-label">Tickets</span>
+          <i class="ti ti-chevron-right nav-group-arrow"></i>
+        </div>
+        <div class="nav-group-children">
+          <a href="{% url 'ticket_list' %}" class="nav-child">
+            <i class="ti ti-ticket"></i> Ticket Assign
+        </a>
+          <a href="{% url 'tickets_list' %}" class="nav-child">
+            <i class="ti ti-list-details"></i> Ticket List 
+          </a>
+          <a href="{% url 'create_ticket' %}" class="nav-child">
+            <i class="ti ti-plus"></i> Create Ticket
+          </a>
+        </div>
+      </div>
+      <div class="nav-group" id="group-mail">
+
+        <div class="nav-group-toggle" onclick="toggleGroup('group-mail')"data-tip="Mail">
+              <i class="ti ti-mail group-icon"></i>
+              <span class="nav-group-label">Mail</span>
+              <i class="ti ti-chevron-right nav-group-arrow"></i>
+          </div>
+
+          <div class="nav-group-children">
+              <a href="{% url 'send_email' %}" class="nav-child">
+                  <i class="ti ti-send"></i>Send Mail
+              </a>
+          </div>
+
+      </div>
+ 
+    </nav>
+ 
+    <div class="sidebar-bottom">
+      <a href="{% url 'logout' %}" class="logout-side">
+        <i class="ti ti-logout"></i>
+        <span>Sign out</span>
       </a>
-      {% endfor %}
     </div>
  
-  {% else %}
+  </aside>
  
-    <div class="empty">
-      <i class="ti ti-mail-off"></i>
-      <p>Your inbox is empty.</p>
+  <!-- ── Main ── -->
+  <main class="main" id="main">
+    <div class="shell">
+ 
+      <div class="top-bar">
+        <div class="header-left">
+          <span class="eyebrow">Mail</span>
+          <h1 class="title">
+            Inbox
+            {% if fetched %}
+              <span class="badge">{{ emails|length }}</span>
+            {% endif %}
+          </h1>
+        </div>
+ 
+        <div>
+          <button class="fetch-btn" onclick="submitFetch(this)">
+            <i class="ti ti-refresh"></i> Fetch Mail
+          </button>
+        </div>
+      </div>
+ 
+      <form id="fetch-form" method="POST" style="display:none;">
+        {% csrf_token %}
+        <input type="hidden" name="fetch" value="1">
+      </form>
+ 
+      {% if error %}
+        <div class="error-msg">
+          <i class="ti ti-alert-circle"></i>
+          {{ error }}
+        </div>
+      {% endif %}
+ 
+      {% if not fetched %}
+ 
+        <div class="idle-state">
+          <i class="ti ti-inbox"></i>
+          <p>Press "Fetch Mail" to load your inbox.</p>
+        </div>
+ 
+      {% elif emails %}
+ 
+        <div class="email-list">
+          {% for email in emails %}
+          <a href="{% url 'email_detail' email.id %}" class="email-link"
+             style="animation-delay: {{ forloop.counter0 }}00ms;">
+            <div class="email-card">
+ 
+              <div class="avatar">{{ email.sender|slice:":2"|upper }}</div>
+ 
+              <div class="email-body">
+                <div class="email-row">
+                  <div class="sender-group">
+                    <span class="email-from">{{ email.sender }}</span>
+                    <span class="ticket-badge">{{ email.ticket }}</span>
+                    <span class="status-pill status-{{ email.status }}">{{ email.status }}</span>
+                  </div>
+                  <span class="email-date">{{ email.date }}</span>
+                </div>
+ 
+                <div class="email-subject">{{ email.subject }}</div>
+                <div class="email-preview">{{ email.body }}</div>
+ 
+                <div class="assigned-row">
+                  {% if email.assigned_to %}
+                    <span class="assigned-chip">
+                      <span class="assigned-chip-avatar">{{ email.assigned_to|slice:":2"|upper }}</span>
+                      {{ email.assigned_to }}
+                    </span>
+                  {% else %}
+                    <span class="unassigned-chip">
+                      <i class="ti ti-user-off" style="font-size:11px; vertical-align:middle;"></i>
+                      Unassigned
+                    </span>
+                  {% endif %}
+                </div>
+ 
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+ 
+      {% else %}
+ 
+        <div class="empty">
+          <i class="ti ti-mail-off"></i>
+          <p>Your inbox is empty.</p>
+        </div>
+ 
+      {% endif %}
+ 
     </div>
+  </main>
  
-  {% endif %}
+  <script>
+    function toggleSidebar() {
+      const sb = document.getElementById('sidebar');
+      const main = document.getElementById('main');
+      sb.classList.toggle('collapsed');
+      main.classList.toggle('sidebar-collapsed');
+      localStorage.setItem('sidebar-collapsed', sb.classList.contains('collapsed'));
+    }
  
-</div>
+    function toggleGroup(id) {
+      const group = document.getElementById(id);
+      // Don't open dropdowns when sidebar is collapsed
+      if (document.getElementById('sidebar').classList.contains('collapsed')) return;
+      group.classList.toggle('open');
+    }
  
-<script>
-  function submitFetch(btn) {
-    btn.classList.add('loading');
-    btn.disabled = true;
-    document.getElementById('fetch-form').submit();
-  }
-</script>
+    function submitFetch(btn) {
+      btn.classList.add('loading');
+      btn.disabled = true;
+      document.getElementById('fetch-form').submit();
+    }
+ 
+    // Restore sidebar state
+    if (localStorage.getItem('sidebar-collapsed') === 'true') {
+      document.getElementById('sidebar').classList.add('collapsed');
+      document.getElementById('main').classList.add('sidebar-collapsed');
+    }
+  </script>
  
 </body>
 </html>

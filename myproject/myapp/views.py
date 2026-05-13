@@ -1,3 +1,5 @@
+from myapp.models import SentEmail
+from django.http import JsonResponse
 from urllib.request import Request
 from django.http import HttpResponse
 import imaplib
@@ -17,6 +19,9 @@ from django.core.paginator import Paginator
 import email as _email
 import re as _re
 from email.header import decode_header
+from django.db.models import Q
+from django.core.mail import EmailMessage
+
 # Create your views here.
 
 
@@ -32,29 +37,47 @@ def login_page(request):
     if request.method == "POST":
 
         entered_email = request.POST.get("entered_email")
+
         entered_password = request.POST.get("password")
 
-        # ADMIN LOGIN
         if entered_email == MY_EMAIL and entered_password == MY_PASSWORD:
 
             request.session["token"] = secrets.token_hex(16)
+
             request.session["role"] = "admin"
 
             return redirect("inbox")
 
-        # STAFF LOGIN
-        staff = Staff.objects.filter(email=entered_email).first()
+        staff = Staff.objects.filter(
+            email=entered_email
+        ).first()
 
-        if staff and staff.check_password(entered_password):
+        if staff:
 
-            request.session["staff_id"] = staff.id
-            request.session["staff_email"] = staff.email
-            request.session["role"] = "staff"
 
-            return redirect("staff_asigned_ticket")
+            if staff.status == "inactive":
+
+                return render(request, "login.html", {
+
+                    "error": "Your account is inactive"
+
+                })
+
+
+            if staff.check_password(entered_password):
+
+                request.session["staff_id"] = staff.id
+
+                request.session["staff_email"] = staff.email
+
+                request.session["role"] = "staff"
+
+                return redirect("staff_asigned_ticket")
 
         return render(request, "login.html", {
+
             "error": "Invalid Email or Password"
+
         })
 
     return render(request, "login.html")
@@ -203,8 +226,6 @@ def email_detail(request, mail_id):
             "ticket":     ticket,
             "all_staff":  all_staff,
         })
-
-    # ── Real IMAP email ──
     try:
         mail_conn = imaplib.IMAP4_SSL("imap.gmail.com")
         mail_conn.login(MY_EMAIL, MY_PASSWORD)
@@ -510,23 +531,65 @@ def ticket_history(request, ticket_id):
     })
 
 def create_staff(request):
+
     if request.method == 'POST':
         name = request.POST.get("name")
         email = request.POST.get("email")
         password = request.POST.get("password")
-        staff = Staff.objects.create(
-            name=name,
-            email=email,
-        )
+        staff = Staff.objects.create(name=name,email=email, status="active")
         staff.set_password(password)
         staff.save()
         return redirect('staff_list')
+
     return render(request,'create_staff.html')
 
 def staff_list(request):
-    staffs=Staff.objects.all()
-    return render(request,'staff_list.html',{'staffs':staffs})
+    staffs = Staff.objects.all().order_by("-id")
+    return render(request,'staff_list.html',{
+        'staffs': staffs
+    })
 
+
+def filter_staffs(request):
+    staffs = Staff.objects.all().order_by("-id")
+    search = request.GET.get("search")
+    status = request.GET.get("status")
+    if search:
+        staffs = staffs.filter(
+            Q(name__icontains=search) |
+            Q(email__icontains=search)
+        )
+
+    # STATUS FILTER
+    if status:
+        staffs = staffs.filter(status=status)
+    data = []
+    for staff in staffs:
+        data.append({
+
+            "id": staff.id,
+
+            "name": staff.name,
+
+            "email": staff.email,
+
+            "status": staff.status,
+        })
+    return JsonResponse({
+        "staffs": data
+    })
+
+
+def change_staff_status(request, staff_id):
+    staff = get_object_or_404(Staff, id=staff_id)
+    if staff.status == "active":
+        staff.status = "inactive"
+    else:
+        staff.status = "active"
+    staff.save()
+    return JsonResponse({
+        "success": True
+    })
 
 def create_ticket(request):
 
@@ -551,12 +614,8 @@ def create_ticket(request):
             created_by=staff,
             date=datetime.now().strftime("%d %b %Y %I:%M %p")
         )
-
-        # FILES
         files = request.FILES.getlist("attachments")
-
         for file in files:
-
             TicketAttachment.objects.create(
                 ticket=ticket,
                 file=file,
@@ -570,3 +629,153 @@ def create_ticket(request):
     return render(request, "create_ticket.html", {
         "staff": staff
     })
+
+def tickets_list(request):
+
+    staffs = Staff.objects.all()
+
+    return render(request, 'tickets_list.html', {
+        'staffs': staffs
+    })
+
+
+def filter_tickets(request):
+
+    tickets = Ticket.objects.select_related(
+        "assigned_to"
+    ).all().order_by("-created_at")
+
+    # SEARCH
+    search = request.GET.get("search")
+
+    if search:
+
+        tickets = tickets.filter(
+
+            Q(subject__icontains=search) |
+
+            Q(ticket_number__icontains=search) |
+
+            Q(sender__icontains=search) |
+
+            Q(assigned_to__name__icontains=search)
+
+        )
+
+    # STATUS FILTER
+    status = request.GET.get("status")
+
+    if status:
+        tickets = tickets.filter(status=status)
+
+    # STAFF FILTER
+    staff = request.GET.get("staff")
+
+    if staff:
+        tickets = tickets.filter(assigned_to_id=staff)
+
+    # DATE FILTER
+    from_date = request.GET.get("from_date")
+    to_date = request.GET.get("to_date")
+
+    if from_date:
+        tickets = tickets.filter(created_at__date__gte=from_date)
+
+    if to_date:
+        tickets = tickets.filter(created_at__date__lte=to_date)
+
+    data = []
+
+    for ticket in tickets:
+
+        data.append({
+
+            "ticket_number": ticket.ticket_number,
+
+            "subject": ticket.subject,
+
+            "sender": ticket.sender,
+
+            "status": ticket.status,
+
+            "staff": ticket.assigned_to.name if ticket.assigned_to else "Not Assigned",
+
+            "date": ticket.created_at.strftime("%d-%m-%Y"),
+
+        })
+
+    return JsonResponse({
+        "tickets": data
+    })
+    
+def send_email(request):
+
+    if request.method == "POST":
+
+        to_email = request.POST.get("to_email")
+
+        cc_email = request.POST.get("cc_email")
+
+        bcc_email = request.POST.get("bcc_email")
+
+        subject = request.POST.get("subject")
+
+        body = request.POST.get("body")
+
+        # SAVE EMAIL
+        sent_email = SentEmail.objects.create(
+
+            to_email=to_email,
+
+            cc_email=cc_email,
+
+            bcc_email=bcc_email,
+
+            subject=subject,
+
+            body=body,
+
+        )
+
+        # EMAIL MESSAGE
+        email = EmailMessage(
+
+            subject=subject,
+
+            body=body,
+
+            from_email=settings.EMAIL_HOST_USER,
+
+            to=[x.strip() for x in to_email.split(",") if x.strip()],
+
+            cc=[x.strip() for x in cc_email.split(",") if x.strip()] if cc_email else [],
+
+            bcc=[x.strip() for x in bcc_email.split(",") if x.strip()] if bcc_email else [],
+
+        )
+
+        # MULTIPLE FILES
+        files = request.FILES.getlist("attachments")
+
+        for file in files:
+
+            # SAVE FILE
+            EmailAttachment.objects.create(
+                email=sent_email,
+                file=file
+            )
+
+            # ATTACH FILE TO MAIL
+            email.attach(
+                file.name,
+                file.read(),
+                file.content_type
+            )
+
+        # SEND MAIL
+        email.send()
+
+        return redirect("send_email")
+
+    return render(request, "send_email.html")
+

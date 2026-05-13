@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Send Email</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+
+*,*::before,*::after{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --ink:#0f0e0b;
+    --paper:#f7f5f0;
+    --cream:#edeae2;
+    --gold:#c9a84c;
+    --gold-light:#f0dfa0;
+    --muted:#7a7669;
+    --card:#fffefb;
+    --border:#dedad0;
+}
+
+body{
+    font-family:'DM Sans',sans-serif;
+    background:var(--paper);
+    min-height:100vh;
+    padding:40px 20px;
+    color:var(--ink);
+}
+
+.shell{
+    max-width:900px;
+    margin:auto;
+}
+
+.title{
+    font-family:'Playfair Display',serif;
+    font-size:42px;
+    margin-bottom:30px;
+}
+
+.form-box{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:24px;
+    padding:30px;
+}
+
+.field{
+    margin-bottom:20px;
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    font-size:14px;
+    color:var(--muted);
+}
+
+input,
+textarea{
+    width:100%;
+    border:1px solid var(--border);
+    background:white;
+    border-radius:12px;
+    padding:14px;
+    font-size:14px;
+    outline:none;
+}
+
+textarea{
+    min-height:220px;
+    resize:vertical;
+}
+
+input:focus,
+textarea:focus{
+    border-color:var(--gold);
+}
+
+.drop-zone{
+    border:2px dashed var(--gold);
+    border-radius:16px;
+    padding:40px;
+    text-align:center;
+    background:var(--cream);
+    cursor:pointer;
+    transition:.3s;
+}
+
+.drop-zone.dragover{
+    background:#f9f1d7;
+}
+
+.drop-zone i{
+    font-size:42px;
+    margin-bottom:10px;
+    color:var(--gold);
+}
+
+.file-list{
+    margin-top:15px;
+}
+
+.file-item{
+    padding:10px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    margin-bottom:10px;
+    background:white;
+}
+
+.send-btn{
+    background:var(--ink);
+    color:var(--gold-light);
+    border:none;
+    padding:14px 24px;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:15px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+}
+
+.send-btn:hover{
+    background:#24211c;
+}
+
+.note{
+    margin-top:12px;
+    color:var(--muted);
+    font-size:13px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="shell">
+
+    <h1 class="title">Send Email</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+
+        {% csrf_token %}
+
+        <div class="form-box">
+
+            <div class="field">
+
+                <label>To</label>
+
+                <input
+                    type="text"
+                    name="to_email"
+                    placeholder="example@gmail.com"
+                    required
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label>CC</label>
+
+                <input
+                    type="text"
+                    name="cc_email"
+                    placeholder="cc@gmail.com"
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label>BCC</label>
+
+                <input
+                    type="text"
+                    name="bcc_email"
+                    placeholder="bcc@gmail.com"
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label>Subject</label>
+
+                <input
+                    type="text"
+                    name="subject"
+                    required
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label>Message</label>
+
+                <textarea
+                    name="body"
+                    required
+                ></textarea>
+
+            </div>
+
+            <!-- DRAG DROP -->
+            <div class="field">
+
+                <label>Attachments</label>
+
+                <div class="drop-zone" id="drop-zone">
+
+                    <i class="ti ti-upload"></i>
+
+                    <p>
+                        Drag & Drop files here
+                    </p>
+
+                    <p class="note">
+                        Supports ZIP, PNG, JPG, PDF, DOCX
+                    </p>
+
+                    <input
+                        type="file"
+                        id="file-input"
+                        name="attachments"
+                        multiple
+                        hidden
+                    >
+
+                </div>
+
+                <div class="file-list" id="file-list">
+
+                </div>
+
+            </div>
+
+            <button type="submit" class="send-btn">
+
+                <i class="ti ti-send"></i>
+
+                Send Email
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+
+const dropZone = document.getElementById("drop-zone");
+
+const fileInput = document.getElementById("file-input");
+
+const fileList = document.getElementById("file-list");
+
+
+dropZone.addEventListener("click", () => {
+
+    fileInput.click();
+
+});
+
+
+dropZone.addEventListener("dragover", (e) => {
+
+    e.preventDefault();
+
+    dropZone.classList.add("dragover");
+
+});
+
+
+dropZone.addEventListener("dragleave", () => {
+
+    dropZone.classList.remove("dragover");
+
+});
+
+
+dropZone.addEventListener("drop", (e) => {
+
+    e.preventDefault();
+
+    dropZone.classList.remove("dragover");
+
+    fileInput.files = e.dataTransfer.files;
+
+    showFiles();
+
+});
+
+
+fileInput.addEventListener("change", showFiles);
+
+
+function showFiles(){
+
+    fileList.innerHTML = "";
+
+    Array.from(fileInput.files).forEach(file => {
+
+        fileList.innerHTML += `
+
+            <div class="file-item">
+
+                ${file.name}
+
+            </div>
+
+        `;
+
+    });
+
+}
+
+</script>
+
+</body>
+</html>
