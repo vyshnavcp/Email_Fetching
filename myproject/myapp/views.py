@@ -180,12 +180,31 @@ def inbox(request):
         "emails":  [],
         "fetched": False,
     })
- 
 def email_detail(request, mail_id):
 
     if not request.session.get("token"):
         return redirect("login")
 
+    # ── Detect manually-created tickets (mail_id like "MAIL-21") ──
+    is_manual = not mail_id.isdigit()
+
+    if is_manual:
+        # No IMAP fetch needed — load everything from DB
+        ticket = get_object_or_404(Ticket, mail_id=mail_id)
+        all_staff = Staff.objects.all()
+
+        return render(request, "email_detail.html", {
+            "subject":    ticket.subject,
+            "from_email": ticket.sender,
+            "date":       ticket.date,
+            "body":       ticket.body,
+            "html_body":  "",
+            "has_html":   False,
+            "ticket":     ticket,
+            "all_staff":  all_staff,
+        })
+
+    # ── Real IMAP email ──
     try:
         mail_conn = imaplib.IMAP4_SSL("imap.gmail.com")
         mail_conn.login(MY_EMAIL, MY_PASSWORD)
@@ -268,8 +287,6 @@ def email_detail(request, mail_id):
 
         all_staff = Staff.objects.all()
 
-        # ✅ FIX: Sanitize HTML — remove <img> tags only, keep all other HTML intact
-        import re as _re
         safe_html = ""
         if html_body:
             safe_html = _re.sub(r'<img[^>]*>', '', html_body, flags=_re.IGNORECASE)
@@ -280,7 +297,6 @@ def email_detail(request, mail_id):
             "date":       date,
             "body":       text_body,
             "html_body":  safe_html,
-            # ✅ FIX: Tell template whether HTML exists so it can prefer it
             "has_html":   bool(safe_html.strip()),
             "ticket":     ticket,
             "all_staff":  all_staff,
