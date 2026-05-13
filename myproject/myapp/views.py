@@ -1,3 +1,4 @@
+from django.template.loader import render_to_string
 from myapp.models import SentEmail
 from django.http import JsonResponse
 from urllib.request import Request
@@ -759,17 +760,16 @@ def send_email(request):
 
     return render(request, "send_email.html")
 
+
+
+
 def email_list(request):
-
     emails = SentEmail.objects.all().order_by("-id")
-
     search = request.GET.get("search")
     from_date = request.GET.get("from_date")
     to_date = request.GET.get("to_date")
     if search:
-
         emails = emails.filter(
-
             Q(subject__icontains=search) |
             Q(body__icontains=search) |
             Q(to_email__icontains=search) |
@@ -778,10 +778,85 @@ def email_list(request):
 
         )
     if from_date:
-
-        emails = emails.filter(created_at__date__gte=from_date)
+        emails = emails.filter(
+            created_at__date__gte=from_date
+        )
     if to_date:
-        emails = emails.filter(created_at__date__lte=to_date)
+        emails = emails.filter(
+            created_at__date__lte=to_date
+        )
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        table_html = ""
+
+        for email in emails:
+
+            attachments = ""
+
+            for file in email.attachments.all():
+
+                attachments += f"""
+                    <div class="badge">
+                        {file.file.name.replace('email_attachments/', '')}
+                    </div>
+                """
+
+            if not attachments:
+
+                attachments = "-"
+
+
+            table_html += f"""
+
+            <tr>
+
+                <td>#{email.id}</td>
+
+                <td>
+
+                    <div class="subject">
+
+                        {email.subject}
+
+                    </div>
+
+                </td>
+
+                <td>{email.to_email}</td>
+
+                <td>{email.cc_email or '-'}</td>
+
+                <td>{email.bcc_email or '-'}</td>
+
+                <td>
+
+                    <div class="message">
+
+                        {email.body}
+
+                    </div>
+
+                </td>
+
+                <td>
+
+                    {attachments}
+
+                </td>
+
+                <td>
+
+                    {email.created_at}
+
+                </td>
+
+            </tr>
+
+            """
+
+
+        return JsonResponse({
+            "table": table_html
+        })
     context = {
         "emails": emails
     }

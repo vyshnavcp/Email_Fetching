@@ -39,7 +39,7 @@ body{
 }
 
 .wrapper{
-    max-width:1400px;
+    max-width:1450px;
     margin:auto;
 }
 
@@ -58,7 +58,7 @@ body{
 
 .filters{
     display:grid;
-    grid-template-columns:2fr 1fr 1fr auto;
+    grid-template-columns:2fr 1fr 1fr;
     gap:15px;
     margin-bottom:25px;
 }
@@ -69,19 +69,11 @@ input{
     border-radius:12px;
     border:1px solid var(--border);
     outline:none;
+    font-size:14px;
 }
 
 input:focus{
     border-color:var(--gold);
-}
-
-.filter-btn{
-    background:#111;
-    color:#fff;
-    border:none;
-    border-radius:12px;
-    padding:14px 20px;
-    cursor:pointer;
 }
 
 .table-wrap{
@@ -118,7 +110,7 @@ td{
 }
 
 .message{
-    max-width:300px;
+    max-width:280px;
     overflow:hidden;
     text-overflow:ellipsis;
     white-space:nowrap;
@@ -132,6 +124,31 @@ td{
     padding:5px 10px;
     border-radius:999px;
     font-size:12px;
+    margin-bottom:6px;
+}
+
+.loader{
+    display:none;
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.loader i{
+    font-size:28px;
+    color:var(--gold);
+    animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+
+    from{
+        transform:rotate(0deg);
+    }
+
+    to{
+        transform:rotate(360deg);
+    }
+
 }
 
 .empty{
@@ -156,45 +173,41 @@ td{
 
 <div class="wrapper">
 
-    <h1 class="title">Email List</h1>
+    <h1 class="title">
+
+        Email List
+
+    </h1>
 
     <div class="card">
 
         <!-- FILTERS -->
-        <form method="GET">
+        <div class="filters">
 
-            <div class="filters">
+            <input
+                type="text"
+                id="search"
+                placeholder="Search subject, message, email..."
+            >
 
-                <input
-                    type="text"
-                    name="search"
-                    placeholder="Search subject, message, email..."
-                    value="{{ request.GET.search }}"
-                >
+            <input
+                type="date"
+                id="from_date"
+            >
 
-                <input
-                    type="date"
-                    name="from_date"
-                    value="{{ request.GET.from_date }}"
-                >
+            <input
+                type="date"
+                id="to_date"
+            >
 
-                <input
-                    type="date"
-                    name="to_date"
-                    value="{{ request.GET.to_date }}"
-                >
+        </div>
 
-                <button class="filter-btn">
+        <!-- LOADER -->
+        <div class="loader" id="loader">
 
-                    <i class="ti ti-search"></i>
+            <i class="ti ti-loader-2"></i>
 
-                    Filter
-
-                </button>
-
-            </div>
-
-        </form>
+        </div>
 
         <!-- TABLE -->
         <div class="table-wrap">
@@ -225,7 +238,7 @@ td{
 
                 </thead>
 
-                <tbody>
+                <tbody id="email-table-body">
 
                     {% for email in emails %}
 
@@ -277,25 +290,19 @@ td{
 
                         <td>
 
-                            {% if email.attachments.all %}
+                            {% for file in email.attachments.all %}
 
-                                {% for file in email.attachments.all %}
+                                <div class="badge">
 
-                                    <div class="badge">
+                                    {{ file.file.name|cut:"email_attachments/" }}
 
-                                        {{ file.file.name|cut:"email_attachments/" }}
+                                </div>
 
-                                    </div>
-
-                                    <br><br>
-
-                                {% endfor %}
-
-                            {% else %}
+                            {% empty %}
 
                                 -
 
-                            {% endif %}
+                            {% endfor %}
 
                         </td>
 
@@ -334,6 +341,83 @@ td{
     </div>
 
 </div>
+
+<script>
+
+const searchInput = document.getElementById("search");
+
+const fromDateInput = document.getElementById("from_date");
+
+const toDateInput = document.getElementById("to_date");
+
+const tableBody = document.getElementById("email-table-body");
+
+const loader = document.getElementById("loader");
+
+
+// LOAD EMAILS
+function loadEmails(){
+
+    let search = searchInput.value;
+
+    let from_date = fromDateInput.value;
+
+    let to_date = toDateInput.value;
+
+    loader.style.display = "block";
+
+    fetch(
+
+        `?search=${search}&from_date=${from_date}&to_date=${to_date}`,
+
+        {
+
+            headers:{
+
+                "X-Requested-With":"XMLHttpRequest"
+
+            }
+
+        }
+
+    )
+
+    .then(response => response.json())
+
+    .then(data => {
+
+        tableBody.innerHTML = data.table;
+
+        loader.style.display = "none";
+
+    });
+
+}
+
+
+// LIVE SEARCH
+searchInput.addEventListener("keyup", function(){
+
+    loadEmails();
+
+});
+
+
+// DATE FILTER
+fromDateInput.addEventListener("change", function(){
+
+    loadEmails();
+
+});
+
+
+toDateInput.addEventListener("change", function(){
+
+    loadEmails();
+
+});
+
+</script>
 
 </body>
 </html>
