@@ -368,7 +368,6 @@ def staff_ticket_detail(request, ticket_id):
     staff  = get_object_or_404(Staff, email=staff_email)
     ticket = get_object_or_404(Ticket, id=ticket_id, assigned_to=staff)
  
-    # ── POST actions (unchanged) ───────────────────────────────────────────
     if request.method == "POST":
  
         if request.POST.get("action") == "close":
@@ -393,18 +392,13 @@ def staff_ticket_detail(request, ticket_id):
             note.note = new_text
             note.save()
             return redirect("staff_ticket_detail", ticket_id=ticket.id)
- 
-    # ── Re-fetch HTML body from IMAP ──────────────────────────────────────
     html_body  = ""
-    text_body  = ticket.body or ""   # DB plain-text is the fallback
+    text_body  = ticket.body or ""  
  
     try:
         mail_conn = imaplib.IMAP4_SSL("imap.gmail.com")
         mail_conn.login(MY_EMAIL, MY_PASSWORD)
         mail_conn.select("inbox")
- 
-        # ticket.mail_id is the IMAP sequence number stored when the ticket
-        # was first created in email_detail.
         status, msg_data = mail_conn.fetch(str(ticket.mail_id), "(RFC822)")
  
         for part in msg_data:
@@ -438,10 +432,7 @@ def staff_ticket_detail(request, ticket_id):
         mail_conn.logout()
  
     except Exception:
-        # If IMAP fetch fails for any reason, we still render with what we have
         pass
- 
-    # Sanitize: strip <img> tags from HTML (same approach as email_detail)
     safe_html = ""
     if html_body:
         safe_html = _re.sub(r'<img[^>]*>', '', html_body, flags=_re.IGNORECASE)
@@ -450,7 +441,6 @@ def staff_ticket_detail(request, ticket_id):
         "ticket":      ticket,
         "attachments": ticket.attachments.all(),
         "notes":       ticket.notes.all().order_by("-created_at"),
-        # ── new context vars for iframe rendering ──
         "body":        text_body,
         "html_body":   safe_html,
         "has_html":    bool(safe_html.strip()),
