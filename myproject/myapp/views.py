@@ -52,62 +52,45 @@ def login_page(request):
     return render(request, "login.html")
 
 def inbox(request):
- 
     if not request.session.get("token"):
         return redirect("login")
- 
     if request.method == "POST" and request.POST.get("fetch") == "1":
         try:
             mail_conn = imaplib.IMAP4_SSL("imap.gmail.com")
             mail_conn.login(MY_EMAIL, MY_PASSWORD)
             mail_conn.select("inbox")
- 
             status, messages = mail_conn.search(None, "ALL")
-            email_ids = messages[0].split()
- 
-            emails = []
- 
+            email_ids = messages[0].split() 
+            emails = [] 
             for mail_id in reversed(email_ids[-20:]):
- 
                 status, msg_data = mail_conn.fetch(mail_id, "(RFC822)")
- 
                 for response_part in msg_data:
                     if not isinstance(response_part, tuple):
                         continue
- 
                     msg = email.message_from_bytes(response_part[1])
- 
                     subject, encoding = decode_header(msg["Subject"])[0]
                     if isinstance(subject, bytes):
                         subject = subject.decode(encoding or "utf-8")
- 
                     from_email = msg.get("From")
                     date = msg.get("Date")
- 
                     text_body = ""
                     html_body = ""
                     attachments = []
- 
                     mail_id_str = mail_id.decode()
- 
-                    # ── Parse email parts ──
                     if msg.is_multipart():
                         for part in msg.walk():
                             content_type = part.get_content_type()
                             content_disposition = str(part.get("Content-Disposition", ""))
- 
                             if content_type == "text/plain" and "attachment" not in content_disposition:
                                 try:
                                     text_body = part.get_payload(decode=True).decode(errors="ignore")
                                 except:
                                     pass
- 
                             elif content_type == "text/html" and "attachment" not in content_disposition:
                                 try:
                                     html_body = part.get_payload(decode=True).decode(errors="ignore")
                                 except:
                                     pass
- 
                             elif "attachment" in content_disposition or part.get_filename():
                                 filename = part.get_filename()
                                 if filename:
@@ -122,8 +105,6 @@ def inbox(request):
                             text_body = msg.get_payload(decode=True).decode(errors="ignore")
                         except:
                             pass
- 
-                    # ── Get or create ticket ──
                     ticket, created = Ticket.objects.get_or_create(
                         mail_id=mail_id_str,
                         defaults={
@@ -133,8 +114,6 @@ def inbox(request):
                             "body": text_body or html_body,
                         }
                     )
- 
-                    # ── Save attachments (avoid duplicates) ──
                     for att in attachments:
                         if not ticket.attachments.filter(filename=att["filename"]).exists():
                             TicketAttachment.objects.create(
@@ -143,7 +122,6 @@ def inbox(request):
                                 content_type=att["content_type"],
                                 file=ContentFile(att["data"], name=att["filename"]),
                             )
- 
                     emails.append({
                         "id":          mail_id_str,
                         "subject":     subject,
@@ -156,32 +134,24 @@ def inbox(request):
                     })
  
             mail_conn.logout()
- 
             return render(request, "inbox.html", {
                 "emails":  emails,
                 "fetched": True,
             })
- 
         except Exception as e:
             return render(request, "inbox.html", {
                 "error":   str(e),
                 "fetched": True,
             })
- 
     return render(request, "inbox.html", {
         "emails":  [],
         "fetched": False,
     })
 def email_detail(request, mail_id):
-
     if not request.session.get("token"):
         return redirect("login")
-
-    # ── Detect manually-created tickets (mail_id like "MAIL-21") ──
     is_manual = not mail_id.isdigit()
-
     if is_manual:
-        # No IMAP fetch needed — load everything from DB
         ticket = get_object_or_404(Ticket, mail_id=mail_id)
         all_staff = Staff.objects.all()
 
@@ -712,11 +682,7 @@ def send_email(request):
         return redirect("send_email")
 
     return render(request, "send_email.html")
-
-
-
 def email_list(request):
-
     emails = SentEmail.objects.all().prefetch_related(
         "attachments"
     ).order_by("-id")
