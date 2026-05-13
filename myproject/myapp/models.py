@@ -106,21 +106,25 @@ class TicketHistory(models.Model):
     def __str__(self):
         return f"{self.ticket.ticket_number} - {self.action}"
 
+
 class SentEmail(models.Model):
-    subject =models.CharField(max_length=255)
+    subject = models.CharField(max_length=255)
     body = models.TextField()
-    to_email=models.TextField()
-    cc_email=models.TextField(blank=True,null=True)
-    bcc_email=models.TextField(blank=True,null=True)
-    created_at=models.DateField(auto_now=True)
-    def __str__(self):
-        return self.subject
-    
-class EmailAttachment(models.Model):
-    email = models.ForeignKey(SentEmail,on_delete=models.CASCADE,related_name='attachments')
-    file = models.FileField(upload_to="email_attachments/")
+    to_email = models.TextField()
+    cc_email = models.TextField(blank=True, null=True)
+    bcc_email = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
 
+        return self.subject
+
+
+class EmailAttachment(models.Model):
+
+    email = models.ForeignKey( SentEmail, on_delete=models.CASCADE, related_name='attachments')
+    file = models.FileField(upload_to="email_attachments/")
+    def __str__(self):
         return self.file.name
     
     

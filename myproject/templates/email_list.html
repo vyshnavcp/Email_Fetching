@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Email List</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#f5f3ee;
+    --card:#ffffff;
+    --border:#ddd8cd;
+    --gold:#caa64d;
+    --text:#111111;
+    --muted:#6d6d6d;
+}
+
+body{
+    font-family:'DM Sans',sans-serif;
+    background:var(--bg);
+    padding:40px 20px;
+    color:var(--text);
+}
+
+.wrapper{
+    max-width:1400px;
+    margin:auto;
+}
+
+.title{
+    font-family:'Playfair Display',serif;
+    font-size:42px;
+    margin-bottom:25px;
+}
+
+.card{
+    background:var(--card);
+    border-radius:24px;
+    padding:25px;
+    border:1px solid var(--border);
+}
+
+.filters{
+    display:grid;
+    grid-template-columns:2fr 1fr 1fr auto;
+    gap:15px;
+    margin-bottom:25px;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+    border:1px solid var(--border);
+    outline:none;
+}
+
+input:focus{
+    border-color:var(--gold);
+}
+
+.filter-btn{
+    background:#111;
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    padding:14px 20px;
+    cursor:pointer;
+}
+
+.table-wrap{
+    overflow:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1200px;
+}
+
+thead{
+    background:#faf7ef;
+}
+
+th{
+    text-align:left;
+    padding:16px;
+    font-size:14px;
+    color:#555;
+    border-bottom:1px solid var(--border);
+}
+
+td{
+    padding:16px;
+    border-bottom:1px solid #eee;
+    vertical-align:top;
+    font-size:14px;
+}
+
+.subject{
+    font-weight:600;
+}
+
+.message{
+    max-width:300px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color:#666;
+}
+
+.badge{
+    display:inline-block;
+    background:#f3ecd4;
+    color:#8b6a17;
+    padding:5px 10px;
+    border-radius:999px;
+    font-size:12px;
+}
+
+.empty{
+    text-align:center;
+    padding:40px;
+    color:#888;
+}
+
+@media(max-width:900px){
+
+    .filters{
+        grid-template-columns:1fr;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="wrapper">
+
+    <h1 class="title">Email List</h1>
+
+    <div class="card">
+
+        <!-- FILTERS -->
+        <form method="GET">
+
+            <div class="filters">
+
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search subject, message, email..."
+                    value="{{ request.GET.search }}"
+                >
+
+                <input
+                    type="date"
+                    name="from_date"
+                    value="{{ request.GET.from_date }}"
+                >
+
+                <input
+                    type="date"
+                    name="to_date"
+                    value="{{ request.GET.to_date }}"
+                >
+
+                <button class="filter-btn">
+
+                    <i class="ti ti-search"></i>
+
+                    Filter
+
+                </button>
+
+            </div>
+
+        </form>
+
+        <!-- TABLE -->
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Subject</th>
+
+                        <th>To</th>
+
+                        <th>CC</th>
+
+                        <th>BCC</th>
+
+                        <th>Message</th>
+
+                        <th>Attachments</th>
+
+                        <th>Date</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for email in emails %}
+
+                    <tr>
+
+                        <td>
+
+                            #{{ email.id }}
+
+                        </td>
+
+                        <td>
+
+                            <div class="subject">
+
+                                {{ email.subject }}
+
+                            </div>
+
+                        </td>
+
+                        <td>
+
+                            {{ email.to_email }}
+
+                        </td>
+
+                        <td>
+
+                            {{ email.cc_email|default:"-" }}
+
+                        </td>
+
+                        <td>
+
+                            {{ email.bcc_email|default:"-" }}
+
+                        </td>
+
+                        <td>
+
+                            <div class="message">
+
+                                {{ email.body }}
+
+                            </div>
+
+                        </td>
+
+                        <td>
+
+                            {% if email.attachments.all %}
+
+                                {% for file in email.attachments.all %}
+
+                                    <div class="badge">
+
+                                        {{ file.file.name|cut:"email_attachments/" }}
+
+                                    </div>
+
+                                    <br><br>
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {{ email.created_at }}
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="8">
+
+                            <div class="empty">
+
+                                No Emails Found
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

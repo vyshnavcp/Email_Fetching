@@ -1,6 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Send Email</title>
 
@@ -12,29 +16,30 @@
 
 <style>
 
-*,*::before,*::after{
+*,
+*::before,
+*::after{
     box-sizing:border-box;
     margin:0;
     padding:0;
 }
 
 :root{
-    --ink:#0f0e0b;
-    --paper:#f7f5f0;
-    --cream:#edeae2;
-    --gold:#c9a84c;
-    --gold-light:#f0dfa0;
-    --muted:#7a7669;
-    --card:#fffefb;
-    --border:#dedad0;
+    --ink:#111111;
+    --paper:#f5f3ee;
+    --card:#ffffff;
+    --gold:#caa64d;
+    --gold-light:#e8d9a8;
+    --border:#ddd8cd;
+    --muted:#6f6b61;
 }
 
 body{
     font-family:'DM Sans',sans-serif;
     background:var(--paper);
+    color:var(--ink);
     min-height:100vh;
     padding:40px 20px;
-    color:var(--ink);
 }
 
 .shell{
@@ -45,7 +50,7 @@ body{
 .title{
     font-family:'Playfair Display',serif;
     font-size:42px;
-    margin-bottom:30px;
+    margin-bottom:25px;
 }
 
 .form-box{
@@ -53,10 +58,11 @@ body{
     border:1px solid var(--border);
     border-radius:24px;
     padding:30px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.04);
 }
 
 .field{
-    margin-bottom:20px;
+    margin-bottom:22px;
 }
 
 label{
@@ -69,12 +75,19 @@ label{
 input,
 textarea{
     width:100%;
-    border:1px solid var(--border);
-    background:white;
-    border-radius:12px;
     padding:14px;
+    border:1px solid var(--border);
+    border-radius:14px;
     font-size:14px;
     outline:none;
+    transition:0.3s;
+    background:#fff;
+}
+
+input:focus,
+textarea:focus{
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(202,166,77,0.15);
 }
 
 textarea{
@@ -82,64 +95,103 @@ textarea{
     resize:vertical;
 }
 
-input:focus,
-textarea:focus{
-    border-color:var(--gold);
-}
-
 .drop-zone{
     border:2px dashed var(--gold);
-    border-radius:16px;
-    padding:40px;
+    background:#faf7ef;
+    border-radius:18px;
+    padding:45px 25px;
     text-align:center;
-    background:var(--cream);
     cursor:pointer;
-    transition:.3s;
+    transition:0.3s;
+}
+
+.drop-zone:hover{
+    background:#fdf8e9;
 }
 
 .drop-zone.dragover{
-    background:#f9f1d7;
+    background:#f8edc8;
 }
 
 .drop-zone i{
-    font-size:42px;
-    margin-bottom:10px;
+    font-size:48px;
     color:var(--gold);
+    margin-bottom:12px;
 }
 
-.file-list{
-    margin-top:15px;
-}
-
-.file-item{
-    padding:10px;
-    border:1px solid var(--border);
-    border-radius:10px;
-    margin-bottom:10px;
-    background:white;
-}
-
-.send-btn{
-    background:var(--ink);
-    color:var(--gold-light);
-    border:none;
-    padding:14px 24px;
-    border-radius:12px;
-    cursor:pointer;
-    font-size:15px;
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-}
-
-.send-btn:hover{
-    background:#24211c;
+.drop-zone p{
+    margin-bottom:8px;
 }
 
 .note{
-    margin-top:12px;
     color:var(--muted);
     font-size:13px;
+}
+
+.file-list{
+    margin-top:18px;
+}
+
+.file-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 14px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:white;
+    margin-bottom:10px;
+}
+
+.file-item-left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.file-item i{
+    font-size:20px;
+    color:var(--gold);
+}
+
+.send-btn{
+    border:none;
+    background:var(--ink);
+    color:var(--gold-light);
+    padding:14px 24px;
+    border-radius:14px;
+    font-size:15px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition:0.3s;
+}
+
+.send-btn:hover{
+    background:#232323;
+    transform:translateY(-1px);
+}
+
+.success{
+    background:#e7f8eb;
+    color:#1c7a36;
+    border:1px solid #b8ebc4;
+    padding:14px;
+    border-radius:12px;
+    margin-bottom:20px;
+}
+
+@media(max-width:768px){
+
+    .title{
+        font-size:32px;
+    }
+
+    .form-box{
+        padding:20px;
+    }
+
 }
 
 </style>
@@ -152,25 +204,41 @@ textarea:focus{
 
     <h1 class="title">Send Email</h1>
 
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div class="success">
+
+                {{ message }}
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
     <form method="POST" enctype="multipart/form-data">
 
         {% csrf_token %}
 
         <div class="form-box">
 
+            <!-- TO -->
             <div class="field">
 
                 <label>To</label>
 
                 <input
-                    type="text"
+                    type="email"
                     name="to_email"
-                    placeholder="example@gmail.com"
+                    placeholder="client@gmail.com"
                     required
                 >
 
             </div>
 
+            <!-- CC -->
             <div class="field">
 
                 <label>CC</label>
@@ -178,11 +246,12 @@ textarea:focus{
                 <input
                     type="text"
                     name="cc_email"
-                    placeholder="cc@gmail.com"
+                    placeholder="manager@gmail.com, team@gmail.com"
                 >
 
             </div>
 
+            <!-- BCC -->
             <div class="field">
 
                 <label>BCC</label>
@@ -190,11 +259,12 @@ textarea:focus{
                 <input
                     type="text"
                     name="bcc_email"
-                    placeholder="bcc@gmail.com"
+                    placeholder="admin@gmail.com"
                 >
 
             </div>
 
+            <!-- SUBJECT -->
             <div class="field">
 
                 <label>Subject</label>
@@ -202,23 +272,26 @@ textarea:focus{
                 <input
                     type="text"
                     name="subject"
+                    placeholder="Enter email subject"
                     required
                 >
 
             </div>
 
+            <!-- BODY -->
             <div class="field">
 
                 <label>Message</label>
 
                 <textarea
                     name="body"
+                    placeholder="Write your message..."
                     required
                 ></textarea>
 
             </div>
 
-            <!-- DRAG DROP -->
+            <!-- ATTACHMENTS -->
             <div class="field">
 
                 <label>Attachments</label>
@@ -227,12 +300,10 @@ textarea:focus{
 
                     <i class="ti ti-upload"></i>
 
-                    <p>
-                        Drag & Drop files here
-                    </p>
+                    <p><strong>Drag & Drop files here</strong></p>
 
                     <p class="note">
-                        Supports ZIP, PNG, JPG, PDF, DOCX
+                        ZIP, PDF, DOCX, JPG, PNG supported
                     </p>
 
                     <input
@@ -245,12 +316,11 @@ textarea:focus{
 
                 </div>
 
-                <div class="file-list" id="file-list">
-
-                </div>
+                <div class="file-list" id="file-list"></div>
 
             </div>
 
+            <!-- BUTTON -->
             <button type="submit" class="send-btn">
 
                 <i class="ti ti-send"></i>
@@ -274,6 +344,7 @@ const fileInput = document.getElementById("file-input");
 const fileList = document.getElementById("file-list");
 
 
+// CLICK OPEN
 dropZone.addEventListener("click", () => {
 
     fileInput.click();
@@ -281,6 +352,7 @@ dropZone.addEventListener("click", () => {
 });
 
 
+// DRAG OVER
 dropZone.addEventListener("dragover", (e) => {
 
     e.preventDefault();
@@ -290,6 +362,7 @@ dropZone.addEventListener("dragover", (e) => {
 });
 
 
+// DRAG LEAVE
 dropZone.addEventListener("dragleave", () => {
 
     dropZone.classList.remove("dragover");
@@ -297,6 +370,7 @@ dropZone.addEventListener("dragleave", () => {
 });
 
 
+// DROP FILE
 dropZone.addEventListener("drop", (e) => {
 
     e.preventDefault();
@@ -310,24 +384,38 @@ dropZone.addEventListener("drop", (e) => {
 });
 
 
+// INPUT CHANGE
 fileInput.addEventListener("change", showFiles);
 
 
+// SHOW FILES
 function showFiles(){
 
     fileList.innerHTML = "";
 
     Array.from(fileInput.files).forEach(file => {
 
-        fileList.innerHTML += `
+        const div = document.createElement("div");
 
-            <div class="file-item">
+        div.classList.add("file-item");
 
-                ${file.name}
+        div.innerHTML = `
+
+            <div class="file-item-left">
+
+                <i class="ti ti-paperclip"></i>
+
+                <span>${file.name}</span>
 
             </div>
 
+            <small>
+                ${(file.size / 1024).toFixed(1)} KB
+            </small>
+
         `;
+
+        fileList.appendChild(div);
 
     });
 

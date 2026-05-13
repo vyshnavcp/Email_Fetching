@@ -661,20 +661,14 @@ def filter_tickets(request):
             Q(assigned_to__name__icontains=search)
 
         )
-
-    # STATUS FILTER
     status = request.GET.get("status")
 
     if status:
         tickets = tickets.filter(status=status)
-
-    # STAFF FILTER
     staff = request.GET.get("staff")
 
     if staff:
         tickets = tickets.filter(assigned_to_id=staff)
-
-    # DATE FILTER
     from_date = request.GET.get("from_date")
     to_date = request.GET.get("to_date")
 
@@ -707,75 +701,88 @@ def filter_tickets(request):
     return JsonResponse({
         "tickets": data
     })
-    
+  
 def send_email(request):
 
     if request.method == "POST":
 
         to_email = request.POST.get("to_email")
-
         cc_email = request.POST.get("cc_email")
-
         bcc_email = request.POST.get("bcc_email")
-
         subject = request.POST.get("subject")
-
         body = request.POST.get("body")
 
         # SAVE EMAIL
         sent_email = SentEmail.objects.create(
-
             to_email=to_email,
-
             cc_email=cc_email,
-
             bcc_email=bcc_email,
-
             subject=subject,
-
             body=body,
-
         )
 
-        # EMAIL MESSAGE
+        # CREATE EMAIL
         email = EmailMessage(
-
             subject=subject,
-
             body=body,
-
             from_email=settings.EMAIL_HOST_USER,
-
             to=[x.strip() for x in to_email.split(",") if x.strip()],
-
             cc=[x.strip() for x in cc_email.split(",") if x.strip()] if cc_email else [],
-
             bcc=[x.strip() for x in bcc_email.split(",") if x.strip()] if bcc_email else [],
-
         )
 
-        # MULTIPLE FILES
+        # FILES
         files = request.FILES.getlist("attachments")
 
-        for file in files:
+        for uploaded_file in files:
 
-            # SAVE FILE
-            EmailAttachment.objects.create(
+            # SAVE TO DATABASE
+            attachment = EmailAttachment.objects.create(
                 email=sent_email,
-                file=file
+                file=uploaded_file
             )
 
-            # ATTACH FILE TO MAIL
+            # IMPORTANT
+            uploaded_file.seek(0)
+
+            # ATTACH FILE
             email.attach(
-                file.name,
-                file.read(),
-                file.content_type
+                uploaded_file.name,
+                uploaded_file.read(),
+                uploaded_file.content_type
             )
 
-        # SEND MAIL
-        email.send()
+        # SEND EMAIL
+        email.send(fail_silently=False)
 
         return redirect("send_email")
 
     return render(request, "send_email.html")
 
+def email_list(request):
+
+    emails = SentEmail.objects.all().order_by("-id")
+
+    search = request.GET.get("search")
+    from_date = request.GET.get("from_date")
+    to_date = request.GET.get("to_date")
+    if search:
+
+        emails = emails.filter(
+
+            Q(subject__icontains=search) |
+            Q(body__icontains=search) |
+            Q(to_email__icontains=search) |
+            Q(cc_email__icontains=search) |
+            Q(bcc_email__icontains=search)
+
+        )
+    if from_date:
+
+        emails = emails.filter(created_at__date__gte=from_date)
+    if to_date:
+        emails = emails.filter(created_at__date__lte=to_date)
+    context = {
+        "emails": emails
+    }
+    return render(request, "email_list.html", context)
