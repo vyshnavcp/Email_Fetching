@@ -1,428 +1,288 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Email List</title>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
-
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
 }
 
-:root{
-    --bg:#f5f3ee;
-    --card:#ffffff;
-    --border:#ddd8cd;
-    --gold:#caa64d;
-    --text:#111111;
-    --muted:#6d6d6d;
+body {
+    font-family: 'DM Sans', sans-serif;
+    background:#f5f3ee;
+    padding:40px;
 }
 
-body{
-    font-family:'DM Sans',sans-serif;
-    background:var(--bg);
-    padding:40px 20px;
-    color:var(--text);
-}
-
-.wrapper{
-    max-width:1500px;
+.wrapper {
+    max-width:1400px;
     margin:auto;
 }
 
-.title{
-    font-family:'Playfair Display',serif;
-    font-size:42px;
-    margin-bottom:25px;
-}
-
-.card{
-    background:var(--card);
-    border-radius:24px;
-    padding:25px;
-    border:1px solid var(--border);
-}
-
-.filters{
-    display:grid;
-    grid-template-columns:2fr 1fr 1fr;
-    gap:15px;
-    margin-bottom:25px;
-}
-
-input{
-    width:100%;
-    padding:14px;
-    border-radius:12px;
-    border:1px solid var(--border);
-    outline:none;
-    font-size:14px;
-}
-
-input:focus{
-    border-color:var(--gold);
-}
-
-.table-wrap{
-    overflow:auto;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    min-width:1300px;
-}
-
-thead{
-    background:#faf7ef;
-}
-
-th{
-    text-align:left;
-    padding:16px;
-    font-size:14px;
-    color:#555;
-    border-bottom:1px solid var(--border);
-}
-
-td{
-    padding:16px;
-    border-bottom:1px solid #eee;
-    vertical-align:top;
-    font-size:14px;
-}
-
-.subject{
-    font-weight:600;
-}
-
-.message{
-    max-width:250px;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-    color:#666;
-}
-
-.badge{
-    display:inline-block;
-    background:#f3ecd4;
-    color:#8b6a17;
-    padding:5px 10px;
-    border-radius:999px;
-    font-size:12px;
-    margin-bottom:6px;
-}
-
-.loader{
-    display:none;
-    text-align:center;
+h1{
     margin-bottom:20px;
 }
 
-.loader i{
-    font-size:28px;
-    color:var(--gold);
-    animation:spin 1s linear infinite;
+/* CARD */
+.card {
+    background:white;
+    padding:20px;
+    border-radius:16px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.05);
 }
 
-@keyframes spin{
-
-    from{
-        transform:rotate(0deg);
-    }
-
-    to{
-        transform:rotate(360deg);
-    }
-
+/* FILTERS */
+.filters {
+    display:grid;
+    grid-template-columns:2fr 1fr 1fr;
+    gap:12px;
+    margin-bottom:20px;
 }
 
-.empty{
+input {
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    outline:none;
+}
+
+input:focus{
+    border-color:#caa64d;
+}
+
+/* LOADER */
+.loader {
+    display:none;
     text-align:center;
-    padding:40px;
-    color:#888;
+    margin-bottom:10px;
+    font-weight:500;
+    color:#caa64d;
+}
+
+/* TABLE WRAP */
+.table-wrap{
+    overflow-x:auto;
+}
+
+/* TABLE */
+table {
+    width:100%;
+    border-collapse:collapse;
+    min-width:1100px;
+}
+
+thead {
+    background:#faf7ef;
+}
+
+th {
+    text-align:left;
+    padding:14px;
+    font-size:13px;
+    color:#555;
+    border-bottom:1px solid #ddd;
+    white-space:nowrap;
+}
+
+td {
+    padding:14px;
+    border-bottom:1px solid #eee;
+    font-size:13px;
+    vertical-align:top;
+}
+
+/* SUBJECT */
+.subject {
+    font-weight:600;
+}
+
+/* MESSAGE */
+.message {
+    max-width:220px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    color:#666;
+}
+
+/* BADGE */
+.badge {
+    display:inline-block;
+    padding:4px 8px;
+    background:#f3ecd4;
+    margin:2px;
+    border-radius:8px;
+    font-size:11px;
+}
+
+/* PAGINATION FIXED */
+.pagination {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    margin-top:20px;
+}
+
+.pagination button {
+    padding:8px 14px;
+    border:none;
+    background:#111;
+    color:white;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13px;
+}
+
+.pagination button:disabled {
+    opacity:0.5;
+    cursor:not-allowed;
+}
+
+#page-number {
+    font-weight:600;
 }
 
 @media(max-width:900px){
-
     .filters{
         grid-template-columns:1fr;
     }
-
 }
-
 </style>
-
 </head>
 
 <body>
 
 <div class="wrapper">
 
-    <h1 class="title">
-
-        Email List
-
-    </h1>
-
-    <div class="card">
-
-        <!-- FILTERS -->
-        <div class="filters">
-
-            <input
-                type="text"
-                id="search"
-                placeholder="Search subject, message, email..."
-            >
-
-            <input
-                type="date"
-                id="from_date"
-            >
-
-            <input
-                type="date"
-                id="to_date"
-            >
-
-        </div>
-
-        <!-- LOADER -->
-        <div class="loader" id="loader">
-
-            <i class="ti ti-loader-2"></i>
-
-        </div>
-
-        <!-- TABLE -->
-        <div class="table-wrap">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        <th>ID</th>
-
-                        <th>Sender</th>
-
-                        <th>Subject</th>
-
-                        <th>To</th>
-
-                        <th>CC</th>
-
-                        <th>BCC</th>
-
-                        <th>Message</th>
-
-                        <th>Attachments</th>
-
-                        <th>Date</th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody id="email-table-body">
-
-                    {% for email in emails %}
-
-                    <tr>
-
-                        <td>
-
-                            #{{ email.id }}
-
-                        </td>
-
-                        <td>
-
-                            {{ email.sender_email }}
-
-                        </td>
-
-                        <td>
-
-                            <div class="subject">
-
-                                {{ email.subject }}
-
-                            </div>
-
-                        </td>
-
-                        <td>
-
-                            {{ email.to_email }}
-
-                        </td>
-
-                        <td>
-
-                            {{ email.cc_email|default:"-" }}
-
-                        </td>
-
-                        <td>
-
-                            {{ email.bcc_email|default:"-" }}
-
-                        </td>
-
-                        <td>
-
-                            <div class="message">
-
-                                {{ email.body }}
-
-                            </div>
-
-                        </td>
-
-                        <td>
-
-                            {% for file in email.attachments.all %}
-
-                                <div class="badge">
-
-                                    {{ file.file.name|cut:"email_attachments/" }}
-
-                                </div>
-
-                            {% empty %}
-
-                                -
-
-                            {% endfor %}
-
-                        </td>
-
-                        <td>
-
-                            {{ email.created_at }}
-
-                        </td>
-
-                    </tr>
-
-                    {% empty %}
-
-                    <tr>
-
-                        <td colspan="9">
-
-                            <div class="empty">
-
-                                No Emails Found
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
-
+<h1>Email List</h1>
+
+<div class="card">
+
+<!-- FILTERS -->
+<div class="filters">
+    <input type="text" id="search" placeholder="Search emails...">
+    <input type="date" id="from_date">
+    <input type="date" id="to_date">
+</div>
+
+<!-- LOADER -->
+<div class="loader" id="loader">Loading...</div>
+
+<!-- TABLE -->
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+    <th>ID</th>
+    <th>Sender</th>
+    <th>Subject</th>
+    <th>To</th>
+    <th>CC</th>
+    <th>BCC</th>
+    <th>Message</th>
+    <th>Attachments</th>
+    <th>Date</th>
+</tr>
+</thead>
+
+<tbody id="email-table-body">
+
+{% for email in emails %}
+<tr>
+    <td>#{{ email.id }}</td>
+    <td>{{ email.sender_email }}</td>
+    <td class="subject">{{ email.subject }}</td>
+    <td>{{ email.to_email }}</td>
+    <td>{{ email.cc_email|default:"-" }}</td>
+    <td>{{ email.bcc_email|default:"-" }}</td>
+    <td><div class="message">{{ email.body }}</div></td>
+    <td>
+        {% for file in email.attachments.all %}
+            <div class="badge">{{ file.file.name|cut:"email_attachments/" }}</div>
+        {% empty %}
+            -
+        {% endfor %}
+    </td>
+    <td>{{ email.created_at }}</td>
+</tr>
+{% endfor %}
+
+</tbody>
+</table>
+</div>
+
+<!-- PAGINATION -->
+<div class="pagination">
+    <button onclick="prevPage()">Prev</button>
+    <span id="page-number">1</span>
+    <button onclick="nextPage()">Next</button>
+</div>
+
+</div>
 </div>
 
 <script>
 
 const searchInput = document.getElementById("search");
-
 const fromDateInput = document.getElementById("from_date");
-
 const toDateInput = document.getElementById("to_date");
-
 const tableBody = document.getElementById("email-table-body");
-
 const loader = document.getElementById("loader");
 
+let currentPage = 1;
 
-// LOAD EMAILS
-function loadEmails(){
+/* LOAD DATA */
+function loadEmails(page = 1){
 
     let search = searchInput.value;
-
     let from_date = fromDateInput.value;
-
     let to_date = toDateInput.value;
 
     loader.style.display = "block";
 
-    fetch(
-
-        `?search=${search}&from_date=${from_date}&to_date=${to_date}`,
-
-        {
-
-            headers:{
-
-                "X-Requested-With":"XMLHttpRequest"
-
-            }
-
+    fetch(`?search=${search}&from_date=${from_date}&to_date=${to_date}&page=${page}`, {
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"
         }
-
-    )
-
-    .then(response => response.json())
-
+    })
+    .then(res => res.json())
     .then(data => {
 
         tableBody.innerHTML = data.table;
-
         loader.style.display = "none";
 
-    });
+        currentPage = data.current_page;
+        document.getElementById("page-number").innerText = currentPage;
 
+    });
 }
 
+/* NEXT */
+function nextPage(){
+    loadEmails(currentPage + 1);
+}
 
-// LIVE SEARCH
-searchInput.addEventListener("keyup", function(){
+/* PREV */
+function prevPage(){
+    if(currentPage > 1){
+        loadEmails(currentPage - 1);
+    }
+}
 
-    loadEmails();
+/* FILTERS RESET PAGE */
+searchInput.addEventListener("keyup", () => loadEmails(1));
+fromDateInput.addEventListener("change", () => loadEmails(1));
+toDateInput.addEventListener("change", () => loadEmails(1));
 
-});
-
-
-// DATE FILTER
-fromDateInput.addEventListener("change", function(){
-
-    loadEmails();
-
-});
-
-toDateInput.addEventListener("change", function(){
-
-    loadEmails();
-
-});
+/* INIT */
+window.onload = () => loadEmails(1);
 
 </script>
 

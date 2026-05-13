@@ -682,41 +682,32 @@ def send_email(request):
         return redirect("send_email")
 
     return render(request, "send_email.html")
+
 def email_list(request):
-    emails = SentEmail.objects.all().prefetch_related(
-        "attachments"
-    ).order_by("-id")
-
+    emails = SentEmail.objects.all().prefetch_related("attachments").order_by("id")
     search = request.GET.get("search")
-
     from_date = request.GET.get("from_date")
-
     to_date = request.GET.get("to_date")
-
     if search:
-
         emails = emails.filter(
-
             Q(sender_email__icontains=search) |
             Q(subject__icontains=search) |
             Q(body__icontains=search) |
             Q(to_email__icontains=search) |
             Q(cc_email__icontains=search) |
             Q(bcc_email__icontains=search)
-
         )
 
     if from_date:
+        emails = emails.filter(created_at__date__gte=from_date)
 
-        emails = emails.filter(
-            created_at__date__gte=from_date
-        )
     if to_date:
+        emails = emails.filter(created_at__date__lte=to_date)
+    page_number = request.GET.get("page", 1)
+    paginator = Paginator(emails, 10)
+    page_obj = paginator.get_page(page_number)
 
-        emails = emails.filter(
-            created_at__date__lte=to_date
-        )
-
+    emails = page_obj.object_list
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
 
         table_html = ""
@@ -724,100 +715,47 @@ def email_list(request):
         for email in emails:
 
             attachments = ""
-
             for file in email.attachments.all():
-
                 attachments += f"""
-
                     <div class="badge">
-
                         {file.file.name.replace('email_attachments/', '')}
-
                     </div>
-
                 """
 
             if not attachments:
-
                 attachments = "-"
 
             table_html += f"""
-
             <tr>
-
                 <td>#{email.id}</td>
-
                 <td>{email.sender_email}</td>
-
-                <td>
-
-                    <div class="subject">
-
-                        {email.subject}
-
-                    </div>
-
-                </td>
-
+                <td><div class="subject">{email.subject}</div></td>
                 <td>{email.to_email}</td>
-
                 <td>{email.cc_email or '-'}</td>
-
                 <td>{email.bcc_email or '-'}</td>
-
-                <td>
-
-                    <div class="message">
-
-                        {email.body}
-
-                    </div>
-
-                </td>
-
-                <td>
-
-                    {attachments}
-
-                </td>
-
-                <td>
-
-                    {email.created_at.strftime('%d %b %Y %I:%M %p')}
-
-                </td>
-
+                <td><div class="message">{email.body}</div></td>
+                <td>{attachments}</td>
+                <td>{email.created_at.strftime('%d %b %Y %I:%M %p')}</td>
             </tr>
-
             """
 
         if not table_html:
-
             table_html = """
-
             <tr>
-
                 <td colspan="9">
-
-                    <div class="empty">
-
-                        No Emails Found
-
-                    </div>
-
+                    <div class="empty">No Emails Found</div>
                 </td>
-
             </tr>
-
             """
 
         return JsonResponse({
-            "table": table_html
+            "table": table_html,
+            "current_page": page_obj.number,
+            "has_next": page_obj.has_next(),
+            "has_previous": page_obj.has_previous()
         })
 
-    context = {
+    return render(request, "email_list.html", {
         "emails": emails,
         "sender_email": settings.EMAIL_HOST_USER
-    }
-
-    return render(request, "email_list.html", context)
+    })
