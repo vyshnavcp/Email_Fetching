@@ -1,3 +1,4 @@
+from urllib.request import Request
 from django.http import HttpResponse
 import imaplib
 import secrets
@@ -168,56 +169,55 @@ def inbox(request):
         "fetched": False,
     })
  
- 
 def email_detail(request, mail_id):
- 
+
     if not request.session.get("token"):
         return redirect("login")
- 
+
     try:
         mail_conn = imaplib.IMAP4_SSL("imap.gmail.com")
         mail_conn.login(MY_EMAIL, MY_PASSWORD)
         mail_conn.select("inbox")
- 
+
         status, msg_data = mail_conn.fetch(mail_id, "(RFC822)")
- 
+
         subject = ""
         from_email = ""
         date = ""
         text_body = ""
         html_body = ""
         attachments = []
- 
+
         for response_part in msg_data:
             if not isinstance(response_part, tuple):
                 continue
- 
+
             msg = email.message_from_bytes(response_part[1])
- 
+
             subject, encoding = decode_header(msg.get("Subject"))[0]
             if isinstance(subject, bytes):
                 subject = subject.decode(encoding or "utf-8", errors="ignore")
- 
+
             from_email = msg.get("From")
             date = msg.get("Date")
- 
+
             if msg.is_multipart():
                 for part in msg.walk():
                     content_type = part.get_content_type()
                     content_disposition = str(part.get("Content-Disposition", ""))
- 
+
                     if content_type == "text/plain" and "attachment" not in content_disposition:
                         try:
                             text_body = part.get_payload(decode=True).decode(errors="ignore")
                         except:
                             pass
- 
+
                     elif content_type == "text/html" and "attachment" not in content_disposition:
                         try:
                             html_body = part.get_payload(decode=True).decode(errors="ignore")
                         except:
                             pass
- 
+
                     elif "attachment" in content_disposition or part.get_filename():
                         filename = part.get_filename()
                         if filename:
@@ -232,8 +232,9 @@ def email_detail(request, mail_id):
                     text_body = msg.get_payload(decode=True).decode(errors="ignore")
                 except:
                     pass
- 
+
         mail_conn.logout()
+
         ticket, created = Ticket.objects.get_or_create(
             mail_id=mail_id,
             defaults={
@@ -243,6 +244,7 @@ def email_detail(request, mail_id):
                 "body": text_body or html_body,
             }
         )
+
         for att in attachments:
             if not ticket.attachments.filter(filename=att["filename"]).exists():
                 TicketAttachment.objects.create(
@@ -251,21 +253,27 @@ def email_detail(request, mail_id):
                     content_type=att["content_type"],
                     file=ContentFile(att["data"], name=att["filename"]),
                 )
- 
+
         all_staff = Staff.objects.all()
+
+        # ✅ FIX: Sanitize HTML — remove <img> tags only, keep all other HTML intact
         import re as _re
-        safe_html = _re.sub(r'<img[^>]*>', '', html_body, flags=_re.IGNORECASE) if html_body else ""
- 
+        safe_html = ""
+        if html_body:
+            safe_html = _re.sub(r'<img[^>]*>', '', html_body, flags=_re.IGNORECASE)
+
         return render(request, "email_detail.html", {
             "subject":    subject,
             "from_email": from_email,
             "date":       date,
-            "body":       text_body,  
-            "html_body":  safe_html,   
+            "body":       text_body,
+            "html_body":  safe_html,
+            # ✅ FIX: Tell template whether HTML exists so it can prefer it
+            "has_html":   bool(safe_html.strip()),
             "ticket":     ticket,
             "all_staff":  all_staff,
         })
- 
+
     except Exception as e:
         return HttpResponse(f"Error: {str(e)}")
  
@@ -414,14 +422,11 @@ def ticket_history(request, ticket_id):
     admin_logged = request.session.get("token")
     staff_email = request.session.get("staff_email")
 
-    # ❌ if neither admin nor staff
     if not admin_logged and not staff_email:
         return redirect("login")
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
-    # 🔒 Restrict staff: only see their own tickets
-    # ✅ KEY FIX: only apply this restriction if they're a staff (not admin)
     if staff_email and not admin_logged:
         staff = get_object_or_404(Staff, email=staff_email)
         if ticket.assigned_to != staff:
@@ -447,3 +452,22 @@ def ticket_history(request, ticket_id):
         "ticket": ticket,
         "grouped_history": grouped_history
     })
+
+def create_staff(request):
+    if request.method == 'POST':
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        staff = Staff.objects.create(
+            name=name,
+            email=email,
+        )
+        staff.set_password(password)
+        staff.save()
+        return redirect('staff_list')
+    return render(request,'create_staff.html')
+
+def staff_list(request):
+    staffs=Staff.objects.all()
+    return render(request,'staff_list.html',{'staffs':staffs})
+        

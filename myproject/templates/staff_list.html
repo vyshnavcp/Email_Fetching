@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Staff List</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+
+*,*::before,*::after{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root {
+  --ink: #0f0e0b;
+  --paper: #f7f5f0;
+  --cream: #edeae2;
+  --gold: #c9a84c;
+  --gold-light: #f0dfa0;
+  --muted: #7a7669;
+  --card: #fffefb;
+  --border: #dedad0;
+  --red: #c0392b;
+}
+
+body{
+    font-family:'DM Sans',sans-serif;
+    background:var(--paper);
+    min-height:100vh;
+    color:var(--ink);
+    overflow-x:hidden;
+}
+
+body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;
+    opacity:.6;
+}
+
+.shell{
+    max-width:900px;
+    margin:auto;
+    padding:50px 24px;
+    position:relative;
+    z-index:1;
+}
+
+.top-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-bottom:40px;
+    padding-bottom:20px;
+    border-bottom:1px solid var(--border);
+}
+
+.eyebrow{
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.18em;
+    color:var(--gold);
+}
+
+.title{
+    font-family:'Playfair Display',serif;
+    font-size:38px;
+    font-weight:700;
+}
+
+.add-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--ink);
+    color:var(--gold-light);
+    padding:10px 18px;
+    border-radius:8px;
+    text-decoration:none;
+    font-size:13px;
+    transition:.3s;
+}
+
+.add-btn:hover{
+    background:#2a2820;
+}
+
+.staff-list{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+.staff-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    transition:.3s;
+}
+
+.staff-card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 5px 20px rgba(0,0,0,0.05);
+}
+
+.staff-left{
+    display:flex;
+    align-items:center;
+    gap:16px;
+}
+
+.avatar{
+    width:50px;
+    height:50px;
+    border-radius:14px;
+    background:var(--cream);
+    border:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    color:var(--gold);
+    font-size:16px;
+}
+
+.staff-info h3{
+    font-size:16px;
+    margin-bottom:4px;
+}
+
+.staff-info p{
+    font-size:13px;
+    color:var(--muted);
+}
+
+.staff-id{
+    font-size:12px;
+    color:var(--muted);
+    background:var(--cream);
+    padding:6px 10px;
+    border-radius:20px;
+    border:1px solid var(--border);
+}
+
+.empty{
+    text-align:center;
+    padding:80px 20px;
+    color:var(--muted);
+}
+
+.empty i{
+    font-size:42px;
+    margin-bottom:12px;
+    display:block;
+    opacity:.3;
+}
+
+.empty p{
+    font-family:'Playfair Display',serif;
+    font-size:20px;
+    opacity:.5;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="shell">
+
+    <div class="top-bar">
+
+        <div>
+            <div class="eyebrow">Management</div>
+            <h1 class="title">Staff List</h1>
+        </div>
+
+        <a href="{% url 'create_staff' %}" class="add-btn">
+            <i class="ti ti-user-plus"></i>
+            Create Staff
+        </a>
+
+    </div>
+
+    {% if staffs %}
+
+    <div class="staff-list">
+
+        {% for staff in staffs %}
+
+        <div class="staff-card">
+
+            <div class="staff-left">
+
+                <div class="avatar">
+                    {{ staff.name|slice:":2"|upper }}
+                </div>
+
+                <div class="staff-info">
+                    <h3>{{ staff.name }}</h3>
+                    <p>{{ staff.email }}</p>
+                </div>
+
+            </div>
+
+            <div class="staff-id">
+                ID : {{ staff.id }}
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="empty">
+        <i class="ti ti-users"></i>
+        <p>No Staff Found</p>
+    </div>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>

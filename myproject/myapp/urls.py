@@ -14,6 +14,8 @@ urlpatterns = [
     path("staff/ticket/<int:ticket_id>/", views.staff_ticket_detail, name="staff_ticket_detail"),
     path("tickets/",views.ticket_list,name="ticket_list"),
     path("ticket/<int:ticket_id>/history/", views.ticket_history, name="ticket_history"),
+    path("create-staff/", views.create_staff, name="create_staff"),
+    path("staff-list/", views.staff_list, name="staff_list"),
 
   
 

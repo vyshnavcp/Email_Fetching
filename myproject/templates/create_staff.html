@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Staff</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root {
+  --ink: #0f0e0b;
+  --paper: #f7f5f0;
+  --cream: #edeae2;
+  --gold: #c9a84c;
+  --gold-light: #f0dfa0;
+  --muted: #7a7669;
+  --card: #fffefb;
+  --border: #dedad0;
+}
+
+body{
+    background:var(--paper);
+    font-family:'DM Sans',sans-serif;
+    min-height:100vh;
+    color:var(--ink);
+    overflow-x:hidden;
+}
+
+body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;
+    z-index:0;
+    opacity:.6;
+}
+
+.shell{
+    max-width:700px;
+    margin:auto;
+    padding:50px 24px;
+    position:relative;
+    z-index:1;
+}
+
+.top-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-bottom:40px;
+    border-bottom:1px solid var(--border);
+    padding-bottom:20px;
+}
+
+.eyebrow{
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.18em;
+    color:var(--gold);
+}
+
+.title{
+    font-family:'Playfair Display',serif;
+    font-size:38px;
+    font-weight:700;
+}
+
+.list-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--ink);
+    color:var(--gold-light);
+    padding:10px 18px;
+    border-radius:8px;
+    text-decoration:none;
+    font-size:13px;
+    transition:.3s;
+}
+
+.list-btn:hover{
+    background:#2a2820;
+}
+
+.card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:35px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.05);
+}
+
+.form-group{
+    margin-bottom:22px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:8px;
+    font-size:13px;
+    color:var(--muted);
+}
+
+.form-group input{
+    width:100%;
+    padding:14px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:white;
+    font-size:14px;
+    outline:none;
+    transition:.3s;
+}
+
+.form-group input:focus{
+    border-color:var(--gold);
+}
+
+.submit-btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:var(--ink);
+    color:var(--gold-light);
+    font-size:14px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.submit-btn:hover{
+    background:#2a2820;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="shell">
+
+    <div class="top-bar">
+
+        <div>
+            <div class="eyebrow">Management</div>
+            <h1 class="title">Create Staff</h1>
+        </div>
+
+        <a href="{% url 'staff_list' %}" class="list-btn">
+            <i class="ti ti-users"></i>
+            Staff List
+        </a>
+
+    </div>
+
+    <div class="card">
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Staff Name</label>
+                <input type="text" name="name" placeholder="Enter staff name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="Enter email address" required>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter password" required>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                Create Staff
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

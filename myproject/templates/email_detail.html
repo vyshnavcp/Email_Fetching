@@ -6,7 +6,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
  
-  <!-- Block external images inside rendered html_body — only allow /media/ (your attachments) -->
   <meta http-equiv="Content-Security-Policy" content="img-src 'self' data: blob: /media/">
  
   <style>
@@ -159,7 +158,7 @@
       gap: 4px;
     }
  
-    /* ── Body ── */
+    /* ── Plain text body ── */
     .email-body-text {
       padding: 28px 32px;
       line-height: 1.8;
@@ -169,21 +168,65 @@
       color: #2a2820;
     }
  
-    /* html body — scoped so email styles don't bleed out */
-    .email-html-body {
-      padding: 28px 32px;
-      font-size: 13.5px;
-      line-height: 1.8;
-      color: #2a2820;
-      overflow-x: auto;
+    /* ── iframe for HTML email ── */
+    .email-iframe-wrapper {
+      padding: 20px 24px;
     }
  
-    /* hide any broken <img> that slipped through (fallback) */
-    .email-html-body img[src=""],
-    .email-html-body img:not([src]) {
-      display: none !important;
+    .email-iframe {
+      width: 100%;
+      min-height: 120px;
+      border: none;
+      display: block;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: height 0.25s ease;
     }
  
+    /* ── Toggle bar ── */
+    .view-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--paper);
+    }
+ 
+    .toggle-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-right: 4px;
+    }
+ 
+    .toggle-btn {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+ 
+    .toggle-btn.active {
+      background: var(--ink);
+      color: var(--gold-light);
+      border-color: var(--ink);
+    }
+ 
+    .toggle-btn:hover:not(.active) {
+      border-color: var(--gold);
+      color: var(--ink);
+    }
+ 
+    /* ── Footer ── */
     .email-footer {
       padding: 14px 32px;
       border-top: 1px solid var(--border);
@@ -231,10 +274,7 @@
       gap: 6px;
     }
  
-    .attachment-item {
-      margin-bottom: 16px;
-    }
- 
+    .attachment-item { margin-bottom: 16px; }
     .attachment-item:last-child { margin-bottom: 0; }
  
     .att-filename {
@@ -244,7 +284,6 @@
       font-weight: 400;
     }
  
-    /* image preview */
     .att-image {
       max-width: 100%;
       max-height: 320px;
@@ -258,7 +297,6 @@
  
     .att-image:hover { opacity: 0.9; }
  
-    /* pdf */
     .att-pdf {
       width: 100%;
       height: 420px;
@@ -267,7 +305,6 @@
       display: block;
     }
  
-    /* download button */
     .att-download {
       display: inline-flex;
       align-items: center;
@@ -481,35 +518,45 @@
       padding: 8px 0;
     }
  
+    .history-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px;
+      margin-top: 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      background: var(--blue-light);
+      color: var(--blue);
+      border: 1px solid var(--blue-border);
+      transition: all 0.2s ease;
+    }
+ 
+    .history-btn:hover {
+      background: var(--blue);
+      color: white;
+      border-color: var(--blue);
+      transform: translateY(-1px);
+    }
+ 
+    .no-content {
+      padding: 40px 32px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      font-style: italic;
+    }
+ 
     @media (max-width: 640px) {
       .layout { grid-template-columns: 1fr; }
+      .email-header { padding: 20px; }
+      .email-body-text,
+      .email-iframe-wrapper { padding: 20px; }
     }
-    .history-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  padding: 10px;
-  margin-top: 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 500;
-  text-decoration: none;
-
-  background: var(--blue-light);
-  color: var(--blue);
-  border: 1px solid var(--blue-border);
-
-  transition: all 0.2s ease;
-}
-
-.history-btn:hover {
-  background: var(--blue);
-  color: white;
-  border-color: var(--blue);
-  transform: translateY(-1px);
-}
   </style>
 </head>
  
@@ -522,15 +569,14 @@
  
   <div class="layout">
  
-    <!-- ── Left: Email ── -->
+    <!-- ── Left: Email Card ── -->
     <div class="email-card">
  
+      <!-- Header -->
       <div class="email-header">
         <span class="eyebrow">Message</span>
         <div class="subject">{{ subject }}</div>
- 
         <div class="meta">
-          <!-- FIXED: from_email instead of from -->
           <div class="avatar">{{ from_email|slice:":2"|upper }}</div>
           <div>
             <div class="meta-from">{{ from_email }}</div>
@@ -542,13 +588,51 @@
         </div>
       </div>
  
-      <!-- Email body: prefer plain text; fall back to sanitised html (no <img>) -->
-      {% if body %}
-        <div class="email-body-text">{{ body }}</div>
-      {% elif html_body %}
-        <div class="email-html-body">{{ html_body|safe }}</div>
+      <!-- ✅ Toggle bar: only show if BOTH html and plain text exist -->
+      {% if has_html and body %}
+      <div class="view-toggle">
+        <span class="toggle-label">View as</span>
+        <button class="toggle-btn active" id="btn-html" onclick="showHTML()">
+          <i class="ti ti-code"></i> HTML
+        </button>
+        <button class="toggle-btn" id="btn-text" onclick="showText()">
+          <i class="ti ti-align-left"></i> Plain Text
+        </button>
+      </div>
       {% endif %}
  
+      <!-- ✅ HTML email rendered in sandboxed iframe -->
+      {% if has_html %}
+      <div class="email-iframe-wrapper" id="html-view">
+        <iframe
+          id="email-iframe"
+          class="email-iframe"
+          sandbox="allow-same-origin"
+          scrolling="no"
+          frameborder="0"
+          title="Email Content"
+        ></iframe>
+      </div>
+      {% endif %}
+ 
+      <!-- Plain text fallback (hidden if HTML view is active) -->
+      {% if body %}
+      <div
+        class="email-body-text"
+        id="text-view"
+        {% if has_html %}style="display:none;"{% endif %}
+      >{{ body }}</div>
+      {% endif %}
+ 
+      <!-- No content at all -->
+      {% if not has_html and not body %}
+      <div class="no-content">
+        <i class="ti ti-mail-off" style="font-size:24px; display:block; margin-bottom:8px;"></i>
+        No message content available.
+      </div>
+      {% endif %}
+ 
+      <!-- Footer -->
       <div class="email-footer">
         <span class="footer-label">Via</span>
         <span class="tag"><i class="ti ti-mail"></i> Gmail IMAP</span>
@@ -567,7 +651,6 @@
           <div class="att-filename">{{ att.filename }}</div>
  
           {% if "image" in att.content_type %}
-            <!-- Image: inline preview + click to zoom -->
             <img
               src="{{ att.file.url }}"
               class="att-image"
@@ -579,7 +662,6 @@
             </a>
  
           {% elif "pdf" in att.content_type %}
-            <!-- PDF: embedded viewer + download -->
             <iframe
               src="{{ att.file.url }}"
               class="att-pdf"
@@ -590,7 +672,6 @@
             </a>
  
           {% else %}
-            <!-- Generic file: download link -->
             <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download">
               <i class="ti ti-download"></i> {{ att.filename }}
             </a>
@@ -604,7 +685,7 @@
     </div>
     <!-- end email card -->
  
-    <!-- ── Lightbox overlay ── -->
+    <!-- ── Lightbox ── -->
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
       <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
       <img id="lightbox-img" src="" alt="Preview">
@@ -618,21 +699,20 @@
         <div class="sidebar-card-header">
           <span class="sidebar-card-title">Ticket Info</span>
         </div>
-
         <div class="sidebar-card-body">
-
+ 
           <div class="info-row">
             <span class="info-label">Number</span>
             <span class="ticket-chip">{{ ticket.ticket_number }}</span>
           </div>
-
+ 
           <div class="info-row">
             <span class="info-label">Status</span>
             <span class="status-pill status-{{ ticket.status }}">
               {{ ticket.get_status_display }}
             </span>
           </div>
-
+ 
           <div class="info-row">
             <span class="info-label">Assigned to</span>
             {% if ticket.assigned_to %}
@@ -648,19 +728,16 @@
               </span>
             {% endif %}
           </div>
-
-          <!-- 🔥 PERFECT HISTORY BUTTON -->
+ 
           <a href="{% url 'ticket_history' ticket.id %}" class="history-btn">
             <i class="ti ti-history"></i> View Full History
           </a>
-
+ 
         </div>
       </div>
  
       <!-- Assign Form -->
       <div class="sidebar-card">
-        <div style="margin-top:14px;">
-      
         <div class="sidebar-card-header">
           <span class="sidebar-card-title">Assign to Staff</span>
         </div>
@@ -714,6 +791,7 @@
 </div>
  
 <script>
+  // ── Lightbox ──
   function openLightbox(url) {
     document.getElementById('lightbox-img').src = url;
     document.getElementById('lightbox').classList.add('open');
@@ -727,6 +805,53 @@
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeLightbox();
   });
+ 
+  // ── Toggle HTML / Plain text ──
+  function showHTML() {
+    document.getElementById('html-view').style.display = 'block';
+    document.getElementById('text-view').style.display = 'none';
+    document.getElementById('btn-html').classList.add('active');
+    document.getElementById('btn-text').classList.remove('active');
+  }
+ 
+  function showText() {
+    document.getElementById('html-view').style.display = 'none';
+    document.getElementById('text-view').style.display = 'block';
+    document.getElementById('btn-text').classList.add('active');
+    document.getElementById('btn-html').classList.remove('active');
+  }
+ 
+  // ── ✅ Inject HTML email into sandboxed iframe & auto-resize ──
+  {% if has_html %}
+  (function () {
+    var iframe = document.getElementById('email-iframe');
+    if (!iframe) return;
+ 
+    // Django's escapejs makes the HTML string safe to embed in JS
+    var htmlContent = "{{ html_body|escapejs }}";
+ 
+    var doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(htmlContent);
+    doc.close();
+ 
+    function resizeIframe() {
+      try {
+        var body = doc.body;
+        var html = doc.documentElement;
+        var height = Math.max(
+          body.scrollHeight, body.offsetHeight,
+          html.clientHeight, html.scrollHeight, html.offsetHeight
+        );
+        iframe.style.height = (height + 24) + 'px';
+      } catch (e) {}
+    }
+ 
+    iframe.addEventListener('load', resizeIframe);
+    setTimeout(resizeIframe, 300);
+    setTimeout(resizeIframe, 900);  // second pass for slow-loading fonts/images
+  })();
+  {% endif %}
 </script>
  
 </body>
