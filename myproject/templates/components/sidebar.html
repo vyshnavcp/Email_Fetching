@@ -1,0 +1,116 @@
+<style>
+    
+    /* Tooltip for collapsed sidebar icons */
+    .nav-item[data-tip],
+    .nav-group-toggle[data-tip] {
+      position: relative;
+    }
+ 
+    .sidebar.collapsed .nav-item[data-tip]:hover::after,
+    .sidebar.collapsed .nav-group-toggle[data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: 60px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #1e1c18;
+      color: rgba(255,255,255,0.9);
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      pointer-events: none;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+ 
+    .nav-item-label { transition: opacity 0.2s; }
+    .sidebar.collapsed .nav-item-label { opacity: 0; width: 0; overflow: hidden; }
+</style>
+<aside class="sidebar" id="sidebar">
+ 
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class="ti ti-mail"></i></div>
+      <span class="logo-text">TicketDesk</span>
+    </div>
+ 
+    <div class="sidebar-toggle" onclick="toggleSidebar()">
+      <i class="ti ti-chevron-left"></i>
+    </div>
+ 
+    <nav class="sidebar-nav">
+ 
+      <!-- Main -->
+      <div class="nav-section-label">Main</div>
+ 
+      <a href="{% url 'inbox' %}" class="nav-item active" data-tip="Inbox">
+        <i class="ti ti-inbox"></i>
+        <span class="nav-item-label">Assign Ticket</span>
+      </a>
+ 
+      <!-- Staff dropdown -->
+      <div class="nav-section-label">Management</div>
+ 
+      <div class="nav-group" id="group-staff">
+        <div class="nav-group-toggle" onclick="toggleGroup('group-staff')" data-tip="Staff">
+          <i class="ti ti-users group-icon"></i>
+          <span class="nav-group-label">Staff</span>
+          <i class="ti ti-chevron-right nav-group-arrow"></i>
+        </div>
+        <div class="nav-group-children">
+          <a href="{% url 'create_staff' %}" class="nav-child">
+            <i class="ti ti-user-plus"></i> Create Staff
+          </a>
+          <a href="{% url 'staff_list' %}" class="nav-child">
+            <i class="ti ti-list"></i> Staff List
+          </a>
+        </div>
+      </div>
+ 
+      <!-- Tickets dropdown -->
+      <div class="nav-group" id="group-tickets">
+        <div class="nav-group-toggle" onclick="toggleGroup('group-tickets')" data-tip="Tickets">
+          <i class="ti ti-ticket group-icon"></i>
+          <span class="nav-group-label">Tickets</span>
+          <i class="ti ti-chevron-right nav-group-arrow"></i>
+        </div>
+        <div class="nav-group-children">
+          <a href="{% url 'ticket_list' %}" class="nav-child">
+            <i class="ti ti-ticket"></i> Ticket Assign
+        </a>
+          <a href="{% url 'tickets_list' %}" class="nav-child">
+            <i class="ti ti-list-details"></i> Ticket List 
+          </a>
+          <a href="{% url 'create_ticket' %}" class="nav-child">
+            <i class="ti ti-plus"></i> Create Ticket
+          </a>
+        </div>
+      </div>
+      <div class="nav-group" id="group-mail">
+
+        <div class="nav-group-toggle" onclick="toggleGroup('group-mail')"data-tip="Mail">
+              <i class="ti ti-mail group-icon"></i>
+              <span class="nav-group-label">Mail</span>
+              <i class="ti ti-chevron-right nav-group-arrow"></i>
+          </div>
+
+          <div class="nav-group-children">
+              <a href="{% url 'send_email' %}" class="nav-child">
+                  <i class="ti ti-send"></i>Send Mail
+              </a>
+              <a href="{% url 'email_list' %}" class="nav-child">
+                  <i class="ti ti-list-details"></i>Email List
+              </a>
+          </div>
+
+      </div>
+ 
+    </nav>
+ 
+    <div class="sidebar-bottom">
+      <a href="{% url 'logout' %}" class="logout-side">
+        <i class="ti ti-logout"></i>
+        <span>Sign out</span>
+      </a>
+    </div>
+ 
+  </aside>
