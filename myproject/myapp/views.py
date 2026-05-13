@@ -26,8 +26,8 @@ from django.core.mail import EmailMessage
 
 
 
-MY_EMAIL = settings.EMAIL_ACCOUNT
-MY_PASSWORD = settings.EMAIL_APP_PASSWORD
+MY_EMAIL = settings.EMAIL_HOST_USER
+MY_PASSWORD = settings.EMAIL_HOST_PASSWORD
  
  
 
