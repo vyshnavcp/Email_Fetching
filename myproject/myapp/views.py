@@ -72,7 +72,6 @@ def login_page(request):
             "error": "Invalid Email or Password"
         })
     return render(request, "login.html")
-
 def inbox(request):
     if not request.session.get("token"):
         return redirect("login")
@@ -89,58 +88,73 @@ def inbox(request):
             status, messages = mail_conn.search(None, "ALL")
             email_ids = messages[0].split()
             emails = []
+
             for mail_id in reversed(email_ids[-20:]):
                 status, msg_data = mail_conn.fetch(mail_id, "(RFC822)")
                 for response_part in msg_data:
                     if not isinstance(response_part, tuple):
                         continue
+
                     msg = email.message_from_bytes(response_part[1])
+
                     subject, encoding = decode_header(msg["Subject"])[0]
                     if isinstance(subject, bytes):
                         subject = subject.decode(encoding or "utf-8")
+
                     from_email = msg.get("From")
-                    date = msg.get("Date")
-                    text_body = ""
-                    html_body = ""
-                    attachments = []
-                    mail_id_str = mail_id.decode()
+                    date       = msg.get("Date")
+                    cc         = msg.get("CC", "")
+                    bcc        = msg.get("BCC", "")
+
+                    text_body    = ""
+                    html_body    = ""
+                    attachments  = []
+                    mail_id_str  = mail_id.decode()
+
                     if msg.is_multipart():
                         for part in msg.walk():
-                            content_type = part.get_content_type()
+                            content_type        = part.get_content_type()
                             content_disposition = str(part.get("Content-Disposition", ""))
+
                             if content_type == "text/plain" and "attachment" not in content_disposition:
                                 try:
                                     text_body = part.get_payload(decode=True).decode(errors="ignore")
                                 except:
                                     pass
+
                             elif content_type == "text/html" and "attachment" not in content_disposition:
                                 try:
                                     html_body = part.get_payload(decode=True).decode(errors="ignore")
                                 except:
                                     pass
+
                             elif "attachment" in content_disposition or part.get_filename():
                                 filename = part.get_filename()
                                 if filename:
                                     file_data = part.get_payload(decode=True)
                                     attachments.append({
-                                        "filename": filename,
+                                        "filename":     filename,
                                         "content_type": content_type,
-                                        "data": file_data,
+                                        "data":         file_data,
                                     })
                     else:
                         try:
                             text_body = msg.get_payload(decode=True).decode(errors="ignore")
                         except:
                             pass
+
                     ticket, created = Ticket.objects.get_or_create(
                         mail_id=mail_id_str,
                         defaults={
                             "subject": subject,
-                            "sender": from_email,
-                            "date": date,
-                            "body": text_body or html_body,
+                            "sender":  from_email,
+                            "date":    date,
+                            "body":    text_body or html_body,
+                            "cc":      cc,
+                            "bcc":     bcc,
                         }
                     )
+
                     for att in attachments:
                         if not ticket.attachments.filter(filename=att["filename"]).exists():
                             TicketAttachment.objects.create(
@@ -149,11 +163,14 @@ def inbox(request):
                                 content_type=att["content_type"],
                                 file=ContentFile(att["data"], name=att["filename"]),
                             )
+
                     emails.append({
                         "id":          mail_id_str,
                         "subject":     subject,
                         "sender":      from_email,
                         "date":        date,
+                        "cc":          cc,
+                        "bcc":         bcc,
                         "body":        (text_body or html_body)[:300],
                         "ticket":      ticket.ticket_number,
                         "status":      ticket.status,
@@ -168,6 +185,7 @@ def inbox(request):
                 "assigned_count":   assigned_count,
                 "closed_count":     closed_count,
             })
+
         except Exception as e:
             return render(request, "inbox.html", {
                 "error":            str(e),
@@ -184,25 +202,31 @@ def inbox(request):
         "assigned_count":   assigned_count,
         "closed_count":     closed_count,
     })
-    
+
+
 def email_detail(request, mail_id):
     if not request.session.get("token"):
         return redirect("login")
+
     is_manual = not mail_id.isdigit()
+
     if is_manual:
-        ticket = get_object_or_404(Ticket, mail_id=mail_id)
+        ticket   = get_object_or_404(Ticket, mail_id=mail_id)
         all_staff = Staff.objects.all()
 
         return render(request, "email_detail.html", {
             "subject":    ticket.subject,
             "from_email": ticket.sender,
             "date":       ticket.date,
+            "cc":         ticket.cc,
+            "bcc":        ticket.bcc,
             "body":       ticket.body,
             "html_body":  "",
             "has_html":   False,
             "ticket":     ticket,
             "all_staff":  all_staff,
         })
+
     try:
         mail_conn = imaplib.IMAP4_SSL("imap.gmail.com")
         mail_conn.login(MY_EMAIL, MY_PASSWORD)
@@ -210,11 +234,13 @@ def email_detail(request, mail_id):
 
         status, msg_data = mail_conn.fetch(mail_id, "(RFC822)")
 
-        subject = ""
+        subject    = ""
         from_email = ""
-        date = ""
-        text_body = ""
-        html_body = ""
+        date       = ""
+        cc         = ""
+        bcc        = ""
+        text_body  = ""
+        html_body  = ""
         attachments = []
 
         for response_part in msg_data:
@@ -228,11 +254,13 @@ def email_detail(request, mail_id):
                 subject = subject.decode(encoding or "utf-8", errors="ignore")
 
             from_email = msg.get("From")
-            date = msg.get("Date")
+            date       = msg.get("Date")
+            cc         = msg.get("CC", "")
+            bcc        = msg.get("BCC", "")
 
             if msg.is_multipart():
                 for part in msg.walk():
-                    content_type = part.get_content_type()
+                    content_type        = part.get_content_type()
                     content_disposition = str(part.get("Content-Disposition", ""))
 
                     if content_type == "text/plain" and "attachment" not in content_disposition:
@@ -252,9 +280,9 @@ def email_detail(request, mail_id):
                         if filename:
                             file_data = part.get_payload(decode=True)
                             attachments.append({
-                                "filename": filename,
+                                "filename":     filename,
                                 "content_type": content_type,
-                                "data": file_data,
+                                "data":         file_data,
                             })
             else:
                 try:
@@ -268,9 +296,11 @@ def email_detail(request, mail_id):
             mail_id=mail_id,
             defaults={
                 "subject": subject,
-                "sender": from_email,
-                "date": date,
-                "body": text_body or html_body,
+                "sender":  from_email,
+                "date":    date,
+                "body":    text_body or html_body,
+                "cc":      cc,
+                "bcc":     bcc,
             }
         )
 
@@ -293,6 +323,8 @@ def email_detail(request, mail_id):
             "subject":    subject,
             "from_email": from_email,
             "date":       date,
+            "cc":         cc,
+            "bcc":        bcc,
             "body":       text_body,
             "html_body":  safe_html,
             "has_html":   bool(safe_html.strip()),

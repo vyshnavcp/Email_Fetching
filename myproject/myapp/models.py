@@ -38,29 +38,31 @@ class Ticket(models.Model):
         ("assigned",   "Assigned"),
         ("closed",     "Closed"),
     ]
- 
+
     ticket_number = models.CharField(max_length=20, unique=True, editable=False)
     mail_id  = models.CharField(max_length=50, unique=True)
-    subject  = models.TextField(blank=True)
-    sender  = models.CharField(max_length=255, blank=True)
-    date   = models.CharField(max_length=100, blank=True)
+    subject = models.TextField(blank=True)
+    sender = models.CharField(max_length=255, blank=True)
+    date  = models.CharField(max_length=100, blank=True)
     body  = models.TextField(blank=True)
- 
-    assigned_to = models.ForeignKey( Staff, null=True, blank=True, on_delete=models.SET_NULL, related_name="tickets" )
-    created_by = models.ForeignKey( Staff, null=True, blank=True, on_delete=models.SET_NULL, related_name="created_tickets")
-    status  = models.CharField(max_length=20, choices=STATUS_CHOICES, default="unassigned")
-    created_at = models.DateTimeField(auto_now_add=True)
- 
+    cc    = models.TextField(blank=True, default="")
+    bcc   = models.TextField(blank=True, default="")
+
+    assigned_to = models.ForeignKey(Staff, null=True, blank=True, on_delete=models.SET_NULL, related_name="tickets")
+    created_by  = models.ForeignKey(Staff, null=True, blank=True, on_delete=models.SET_NULL, related_name="created_tickets")
+    status      = models.CharField(max_length=20, choices=STATUS_CHOICES, default="unassigned")
+    created_at  = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         ordering = ["-created_at"]
- 
+
     def save(self, *args, **kwargs):
         if not self.ticket_number:
             last    = Ticket.objects.order_by("id").last()
             next_id = (last.id + 1) if last else 1
             self.ticket_number = f"TKT-{next_id:04d}"
         super().save(*args, **kwargs)
- 
+
     def __str__(self):
         return f"{self.ticket_number} — {self.subject[:50]}"
  
