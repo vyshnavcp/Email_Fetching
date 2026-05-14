@@ -1,51 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Ticket List</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
- 
+{% extends "main.html" %}
+{% block title %}Home{% endblock  %}
+{% load static %}
+
+{% block css %}
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
- 
-    :root {
-      --ink:          #0f0e0b;
-      --paper:        #f7f5f0;
-      --cream:        #edeae2;
-      --gold:         #c9a84c;
-      --gold-light:   #f0dfa0;
-      --muted:        #7a7669;
-      --card:         #fffefb;
-      --border:       #dedad0;
-      --red:          #c0392b;
-      --red-light:    #fde8e8;
-      --green:        #15803d;
-      --green-light:  #dcfce7;
-      --green-border: #86efac;
-      --blue:         #1d4ed8;
-      --blue-light:   #dbeafe;
-      --blue-border:  #93c5fd;
-    }
- 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--paper);
-      min-height: 100vh;
-      color: var(--ink);
-      overflow-x: hidden;
-    }
- 
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.6;
-    }
- 
     .shell {
       max-width: 1000px;
       margin: 0 auto;
@@ -318,9 +276,8 @@
       thead th:nth-child(3), tbody td:nth-child(3) { display: none; }
     }
   </style>
-</head>
- 
-<body>
+  {% endblock %}
+{% block content %}
 <div class="shell">
  
   <!-- TOP BAR -->
@@ -575,5 +532,6 @@
   </div>
  
 </div><!-- /shell -->
-</body>
-</html>
+{% endblock %}
+{% block js %}
+{% endblock %}

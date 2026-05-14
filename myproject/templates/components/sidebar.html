@@ -80,9 +80,11 @@
           <a href="{% url 'tickets_list' %}" class="nav-child">
             <i class="ti ti-list-details"></i> Ticket List 
           </a>
-          <a href="{% url 'create_ticket' %}" class="nav-child">
-            <i class="ti ti-plus"></i> Create Ticket
-          </a>
+          {% if request.session.role == "staff" %}
+            <a href="{% url 'create_ticket' %}" class="nav-child">
+                <i class="ti ti-plus"></i> Create Ticket
+            </a>
+            {% endif %}
         </div>
       </div>
       <div class="nav-group" id="group-mail">

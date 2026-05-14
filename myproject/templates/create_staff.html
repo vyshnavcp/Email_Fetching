@@ -1,13 +1,14 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Create Staff</title>
+{% extends "main.html" %} 
+{% block tittel %}Home{% endblock  %}
+{% load static %}
 
+{% block css %}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
-
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+
+ 
 
 <style>
 
@@ -144,11 +145,9 @@ body::before{
 }
 
 </style>
+{% endblock %}
 
-</head>
-
-<body>
-
+{% block content %}
 <div class="shell">
 
     <div class="top-bar">
@@ -196,5 +195,5 @@ body::before{
 
 </div>
 
-</body>
-</html>
+{% endblock %}
+{% block js  %}{% endblock %}

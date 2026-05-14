@@ -1,24 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
+{% extends "main.html" %}
+{% block title %}Home{% endblock  %}
+{% load static %}
 
-    <title>All Tickets</title>
+{% block css %}
+  
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+ 
 
 <style>
 
-*,*::before,*::after{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-}
+
 
 :root {
   --ink: #0f0e0b;
@@ -34,22 +26,6 @@
   --orange:#ef6c00;
 }
 
-body{
-    font-family:'DM Sans',sans-serif;
-    background:var(--paper);
-    min-height:100vh;
-    color:var(--ink);
-    overflow-x:hidden;
-}
-
-body::before{
-    content:'';
-    position:fixed;
-    inset:0;
-    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events:none;
-    opacity:.6;
-}
 
 .shell{
     max-width:1400px;
@@ -243,11 +219,9 @@ tbody tr:hover{
 }
 
 </style>
+{% endblock %}
 
-</head>
-
-<body>
-
+{% block content %}
 <div class="shell">
 
     <div class="top-header">
@@ -358,7 +332,8 @@ tbody tr:hover{
     </table>
 
 </div>
-
+{% endblock %}
+{% block js %}
 <script>
 
 function loadTickets(){
@@ -478,6 +453,4 @@ $("#to_date").change(function(){
 });
 
 </script>
-
-</body>
-</html>
+{% endblock %}

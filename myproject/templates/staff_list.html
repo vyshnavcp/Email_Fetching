@@ -1,16 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
+{% extends "main.html" %}
+{% load static %}
 
-<title>Staff List</title>
+{% block title %}Staff List{% endblock %}
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+{% block css %}
 
 <style>
 
@@ -244,11 +237,8 @@ tbody tr:hover{
 }
 
 </style>
-
-</head>
-
-<body>
-
+{% endblock %}
+{% block content %}
 <div class="shell">
 
     <div class="top-bar">
@@ -332,7 +322,8 @@ tbody tr:hover{
     </div>
 
 </div>
-
+{% endblock %}
+{% block js %}
 <script>
 
 function loadStaffs(){
@@ -480,5 +471,4 @@ $("#status").change(function(){
 
 </script>
 
-</body>
-</html>
+{% endblock %}
