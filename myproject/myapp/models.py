@@ -92,13 +92,20 @@ class TicketHistory(models.Model):
         ("reassigned", "Reassigned"),
         ("closed",     "Closed"),
         ("note",       "Note Added"),
-        ("replied",    "Reply Sent"),       # ← new
+        ("replied",    "Reply Sent"),
     ]
-    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="history")
-    staff  = models.ForeignKey(Staff, null=True, blank=True, on_delete=models.SET_NULL)
-    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    ticket      = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="history")
+    staff       = models.ForeignKey(Staff, null=True, blank=True, on_delete=models.SET_NULL)
+    action      = models.CharField(max_length=20, choices=ACTION_CHOICES)
     description = models.TextField(blank=True)
     created_at  = models.DateTimeField(auto_now_add=True)
+
+    # ── Add these two lines ──────────────────────────────────────────
+    note  = models.ForeignKey('TicketNote',  null=True, blank=True, on_delete=models.SET_NULL, related_name="history_entries")
+    reply = models.ForeignKey('TicketReply', null=True, blank=True, on_delete=models.SET_NULL, related_name="history_entries")
+
+    def __str__(self):
+        return f"{self.ticket.ticket_number} - {self.action}"
  
     def __str__(self):
         return f"{self.ticket.ticket_number} - {self.action}" 

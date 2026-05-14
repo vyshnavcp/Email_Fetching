@@ -1,7 +1,7 @@
 {% extends "main.html" %}
 {% block title %}Home{% endblock  %}
 {% load static %}
-
+ 
 {% block css %}
   <style>
     .shell {
@@ -145,13 +145,50 @@
       color: var(--muted);
     }
  
+    /* ── Clickable rows ── */
     tbody tr {
       border-bottom: 1px solid var(--border);
-      transition: background 0.15s;
       cursor: pointer;
+      transition: background 0.15s, box-shadow 0.15s;
+      position: relative;
     }
     tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: var(--paper); }
+ 
+    tbody tr::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--gold);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+ 
+    tbody tr:hover {
+      background: var(--paper);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+    }
+ 
+    tbody tr:hover::before {
+      opacity: 1;
+    }
+ 
+    tbody tr:hover .td-subject {
+      color: var(--gold);
+    }
+ 
+    tbody tr:hover .td-ticket {
+      background: var(--gold-light);
+      border-color: #e0c97a;
+      color: #7a5c10;
+    }
+ 
+    tbody tr:active {
+      background: var(--cream);
+    }
+    /* ─────────────────────── */
  
     tbody td { padding: 13px 16px; vertical-align: middle; color: var(--ink); }
  
@@ -166,6 +203,7 @@
       border: 1px solid var(--border);
       white-space: nowrap;
       display: inline-block;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
     }
  
     .td-subject {
@@ -177,6 +215,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       display: block;
+      transition: color 0.15s;
     }
  
     .td-sender {
@@ -195,6 +234,18 @@
       color: var(--muted);
       font-weight: 300;
       white-space: nowrap;
+    }
+ 
+    /* little arrow hint on hover */
+    .td-arrow {
+      color: var(--muted);
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    tbody tr:hover .td-arrow {
+      opacity: 1;
+      transform: translateX(3px);
     }
  
     .assigned-chip {
@@ -277,6 +328,7 @@
     }
   </style>
   {% endblock %}
+ 
 {% block content %}
 <div class="shell">
  
@@ -300,7 +352,7 @@
   <!-- ══════════════════════════════════
        TABLE 1 — UNASSIGNED
   ══════════════════════════════════════ -->
-  <div class="section"  id="unassigned" style="animation-delay:0ms;">
+  <div class="section" id="unassigned" style="animation-delay:0ms;">
     <div class="section-header">
       <div class="section-icon unassigned"><i class="ti ti-mail-opened"></i></div>
       <span class="section-title">Unassigned</span>
@@ -315,6 +367,7 @@
               <th>Ticket</th>
               <th>Subject / Sender</th>
               <th>Date</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -326,6 +379,7 @@
                 <span class="td-sender">{{ ticket.sender }}</span>
               </td>
               <td class="td-date">{{ ticket.date|truncatechars:22 }}</td>
+              <td><i class="ti ti-arrow-right td-arrow"></i></td>
             </tr>
             {% endfor %}
           </tbody>
@@ -336,12 +390,10 @@
           <span class="page-info">
             Page {{ unassigned_tickets.number }} of {{ unassigned_tickets.paginator.num_pages }}
           </span>
-          <!-- Prev -->
           <a class="page-btn {% if not unassigned_tickets.has_previous %}disabled{% endif %}"
              href="?unassigned_page={% if unassigned_tickets.has_previous %}{{ unassigned_tickets.previous_page_number }}{% else %}1{% endif %}&assigned_page={{ assigned_tickets.number }}&closed_page={{ closed_tickets.number }}">
             <i class="ti ti-chevron-left"></i>
           </a>
-          <!-- Pages -->
           {% for num in unassigned_tickets.paginator.page_range %}
             {% if num == unassigned_tickets.number %}
               <span class="page-btn current">{{ num }}</span>
@@ -352,7 +404,6 @@
               </a>
             {% endif %}
           {% endfor %}
-          <!-- Next -->
           <a class="page-btn {% if not unassigned_tickets.has_next %}disabled{% endif %}"
              href="?unassigned_page={% if unassigned_tickets.has_next %}{{ unassigned_tickets.next_page_number }}{% else %}{{ unassigned_tickets.paginator.num_pages }}{% endif %}&assigned_page={{ assigned_tickets.number }}&closed_page={{ closed_tickets.number }}">
             <i class="ti ti-chevron-right"></i>
@@ -373,7 +424,7 @@
   <!-- ══════════════════════════════════
        TABLE 2 — ASSIGNED
   ══════════════════════════════════════ -->
-  <div class="section" id="assigned"  style="animation-delay:80ms;">
+  <div class="section" id="assigned" style="animation-delay:80ms;">
     <div class="section-header">
       <div class="section-icon assigned"><i class="ti ti-user-check"></i></div>
       <span class="section-title">Assigned</span>
@@ -389,6 +440,7 @@
               <th>Subject / Sender</th>
               <th>Date</th>
               <th>Assigned To</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -410,6 +462,7 @@
                   <span class="unassigned-chip">—</span>
                 {% endif %}
               </td>
+              <td><i class="ti ti-arrow-right td-arrow"></i></td>
             </tr>
             {% endfor %}
           </tbody>
@@ -470,6 +523,7 @@
               <th>Subject / Sender</th>
               <th>Date</th>
               <th>Resolved By</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -491,6 +545,7 @@
                   <span class="unassigned-chip">—</span>
                 {% endif %}
               </td>
+              <td><i class="ti ti-arrow-right td-arrow"></i></td>
             </tr>
             {% endfor %}
           </tbody>
@@ -533,5 +588,6 @@
  
 </div><!-- /shell -->
 {% endblock %}
+ 
 {% block js %}
 {% endblock %}

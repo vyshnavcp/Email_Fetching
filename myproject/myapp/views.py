@@ -385,10 +385,11 @@ def staff_ticket_detail(request, ticket_id):
         if action == "add_note":
             note_text = request.POST.get("note", "").strip()
             if note_text:
-                TicketNote.objects.create(ticket=ticket, staff=staff, note=note_text)
+                note_obj = TicketNote.objects.create(ticket=ticket, staff=staff, note=note_text)
                 TicketHistory.objects.create(
                     ticket=ticket, staff=staff,
                     action="note", description=note_text,
+                    note=note_obj,          # precise FK link
                 )
             return redirect("staff_ticket_detail", ticket_id=ticket.id)
  
@@ -433,8 +434,6 @@ def staff_ticket_detail(request, ticket_id):
  
             msg.attach(MIMEText(full_body, "plain"))
  
-            # attach files
-            attachment_objects = []
             for f in files:
                 mime_type, _ = mimetypes.guess_type(f.name)
                 mime_type = mime_type or "application/octet-stream"
@@ -443,7 +442,6 @@ def staff_ticket_detail(request, ticket_id):
                 encoders.encode_base64(part)
                 part.add_header("Content-Disposition", "attachment", filename=f.name)
                 msg.attach(part)
-                attachment_objects.append((f, mime_type))
  
             # ── SMTP send ───────────────────────────────────────────────────
             try:
@@ -467,7 +465,7 @@ def staff_ticket_detail(request, ticket_id):
                 signature = sig_txt,
             )
  
-            # re-open files from request for saving (they were already read for SMTP)
+            # Save attachments (files already read for SMTP, re-read from request)
             for uploaded_file in request.FILES.getlist("reply_attachments"):
                 mime_type, _ = mimetypes.guess_type(uploaded_file.name)
                 TicketReplyAttachment.objects.create(
@@ -477,12 +475,13 @@ def staff_ticket_detail(request, ticket_id):
                     content_type = mime_type or "application/octet-stream",
                 )
  
-            # ── Record in ticket history ────────────────────────────────────
+            # ── Record in ticket history with precise FK link ───────────────
             TicketHistory.objects.create(
                 ticket      = ticket,
                 staff       = staff,
                 action      = "replied",
                 description = f"Reply sent to {to_raw}. Subject: {subj}",
+                reply       = reply_obj,        # precise FK link
             )
  
             return redirect("staff_ticket_detail", ticket_id=ticket.id)
@@ -530,15 +529,15 @@ def staff_ticket_detail(request, ticket_id):
     if html_body:
         safe_html = _re.sub(r'<img[^>]*>', '', html_body, flags=_re.IGNORECASE)
  
-    # default reply subject
     default_subject = f"Re: [{ticket.ticket_number}] {ticket.subject}"
-    default_to      = ticket.sender  # reply to original sender
+    default_to      = ticket.sender
  
     return render(request, "staff_ticket_detail.html", {
         "ticket":          ticket,
         "attachments":     ticket.attachments.all(),
         "notes":           ticket.notes.all().order_by("-created_at"),
         "replies":         ticket.replies.all().order_by("-sent_at"),
+        "history":         ticket.history.select_related("staff", "note", "reply").prefetch_related("reply__attachments").order_by("created_at"),
         "body":            text_body,
         "html_body":       safe_html,
         "has_html":        bool(safe_html.strip()),
@@ -764,6 +763,7 @@ def filter_tickets(request):
 
         data.append({
 
+            "mail_id":       ticket.mail_id, 
             "ticket_number": ticket.ticket_number,
 
             "subject": ticket.subject,
