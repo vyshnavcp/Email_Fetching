@@ -23,7 +23,15 @@ import re as _re
 from email.header import decode_header
 from django.db.models import Q
 from django.core.mail import EmailMessage
-
+import imaplib
+import email as _email
+import re as _re
+import smtplib, mimetypes
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+from django.core.files.storage import default_storage
 # Create your views here.
 
 MY_EMAIL = settings.EMAIL_HOST_USER
@@ -350,6 +358,7 @@ def staff_asigned_ticket(request):
     })
 
 
+
 def staff_ticket_detail(request, ticket_id):
     staff_email = request.session.get("staff_email")
     if not staff_email:
@@ -358,14 +367,22 @@ def staff_ticket_detail(request, ticket_id):
     staff  = get_object_or_404(Staff, email=staff_email)
     ticket = get_object_or_404(Ticket, id=ticket_id, assigned_to=staff)
  
+    # ── POST handlers ────────────────────────────────────────────────────────
     if request.method == "POST":
+        action = request.POST.get("action")
  
-        if request.POST.get("action") == "close":
+        # ── Close ticket ────────────────────────────────────────────────────
+        if action == "close":
             ticket.status = "closed"
             ticket.save()
+            TicketHistory.objects.create(
+                ticket=ticket, staff=staff,
+                action="closed", description="Ticket marked as closed.",
+            )
             return redirect("staff_asigned_ticket")
  
-        if request.POST.get("action") == "add_note":
+        # ── Add note ────────────────────────────────────────────────────────
+        if action == "add_note":
             note_text = request.POST.get("note", "").strip()
             if note_text:
                 TicketNote.objects.create(ticket=ticket, staff=staff, note=note_text)
@@ -375,15 +392,104 @@ def staff_ticket_detail(request, ticket_id):
                 )
             return redirect("staff_ticket_detail", ticket_id=ticket.id)
  
-        if request.POST.get("action") == "edit_note":
+        # ── Edit note ───────────────────────────────────────────────────────
+        if action == "edit_note":
             note_id  = request.POST.get("note_id")
             new_text = request.POST.get("note", "").strip()
             note = get_object_or_404(TicketNote, id=note_id, staff=staff)
             note.note = new_text
             note.save()
             return redirect("staff_ticket_detail", ticket_id=ticket.id)
-    html_body  = ""
-    text_body  = ticket.body or ""  
+ 
+        # ── Save signature ──────────────────────────────────────────────────
+        if action == "save_signature":
+            staff.signature = request.POST.get("signature", "").strip()
+            staff.save()
+            return redirect("staff_ticket_detail", ticket_id=ticket.id)
+ 
+        # ── Send reply ──────────────────────────────────────────────────────
+        if action == "send_reply":
+            to_raw   = request.POST.get("reply_to", "").strip()
+            cc_raw   = request.POST.get("reply_cc", "").strip()
+            bcc_raw  = request.POST.get("reply_bcc", "").strip()
+            subj     = request.POST.get("reply_subject", "").strip()
+            body_txt = request.POST.get("reply_body", "").strip()
+            sig_txt  = request.POST.get("reply_signature", "").strip()
+            files    = request.FILES.getlist("reply_attachments")
+ 
+            full_body = body_txt
+            if sig_txt:
+                full_body += f"\n\n--\n{sig_txt}"
+ 
+            # ── Build MIME message ──────────────────────────────────────────
+            msg = MIMEMultipart()
+            msg["From"]    = MY_EMAIL
+            msg["To"]      = to_raw
+            msg["Subject"] = subj
+            if cc_raw:
+                msg["Cc"]  = cc_raw
+            if bcc_raw:
+                msg["Bcc"] = bcc_raw
+ 
+            msg.attach(MIMEText(full_body, "plain"))
+ 
+            # attach files
+            attachment_objects = []
+            for f in files:
+                mime_type, _ = mimetypes.guess_type(f.name)
+                mime_type = mime_type or "application/octet-stream"
+                part = MIMEBase(*mime_type.split("/", 1))
+                part.set_payload(f.read())
+                encoders.encode_base64(part)
+                part.add_header("Content-Disposition", "attachment", filename=f.name)
+                msg.attach(part)
+                attachment_objects.append((f, mime_type))
+ 
+            # ── SMTP send ───────────────────────────────────────────────────
+            try:
+                with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                    server.login(MY_EMAIL, MY_PASSWORD)
+                    recipients = [a.strip() for a in (to_raw + "," + cc_raw + "," + bcc_raw).split(",") if a.strip()]
+                    server.sendmail(MY_EMAIL, recipients, msg.as_string())
+                send_ok = True
+            except Exception as e:
+                send_ok = False
+ 
+            # ── Persist reply in DB ─────────────────────────────────────────
+            reply_obj = TicketReply.objects.create(
+                ticket    = ticket,
+                sent_by   = staff,
+                to_email  = to_raw,
+                cc_email  = cc_raw,
+                bcc_email = bcc_raw,
+                subject   = subj,
+                body      = body_txt,
+                signature = sig_txt,
+            )
+ 
+            # re-open files from request for saving (they were already read for SMTP)
+            for uploaded_file in request.FILES.getlist("reply_attachments"):
+                mime_type, _ = mimetypes.guess_type(uploaded_file.name)
+                TicketReplyAttachment.objects.create(
+                    reply        = reply_obj,
+                    file         = uploaded_file,
+                    filename     = uploaded_file.name,
+                    content_type = mime_type or "application/octet-stream",
+                )
+ 
+            # ── Record in ticket history ────────────────────────────────────
+            TicketHistory.objects.create(
+                ticket      = ticket,
+                staff       = staff,
+                action      = "replied",
+                description = f"Reply sent to {to_raw}. Subject: {subj}",
+            )
+ 
+            return redirect("staff_ticket_detail", ticket_id=ticket.id)
+ 
+    # ── GET: fetch HTML body from IMAP ───────────────────────────────────────
+    html_body = ""
+    text_body = ticket.body or ""
  
     try:
         mail_conn = imaplib.IMAP4_SSL("imap.gmail.com")
@@ -394,9 +500,7 @@ def staff_ticket_detail(request, ticket_id):
         for part in msg_data:
             if not isinstance(part, tuple):
                 continue
- 
             msg = _email.message_from_bytes(part[1])
- 
             if msg.is_multipart():
                 for mp in msg.walk():
                     ct   = mp.get_content_type()
@@ -418,24 +522,31 @@ def staff_ticket_detail(request, ticket_id):
                         html_body = msg.get_payload(decode=True).decode(errors="ignore")
                     except Exception:
                         pass
- 
         mail_conn.logout()
- 
     except Exception:
         pass
+ 
     safe_html = ""
     if html_body:
         safe_html = _re.sub(r'<img[^>]*>', '', html_body, flags=_re.IGNORECASE)
  
+    # default reply subject
+    default_subject = f"Re: [{ticket.ticket_number}] {ticket.subject}"
+    default_to      = ticket.sender  # reply to original sender
+ 
     return render(request, "staff_ticket_detail.html", {
-        "ticket":      ticket,
-        "attachments": ticket.attachments.all(),
-        "notes":       ticket.notes.all().order_by("-created_at"),
-        "body":        text_body,
-        "html_body":   safe_html,
-        "has_html":    bool(safe_html.strip()),
+        "ticket":          ticket,
+        "attachments":     ticket.attachments.all(),
+        "notes":           ticket.notes.all().order_by("-created_at"),
+        "replies":         ticket.replies.all().order_by("-sent_at"),
+        "body":            text_body,
+        "html_body":       safe_html,
+        "has_html":        bool(safe_html.strip()),
+        "staff":           staff,
+        "default_subject": default_subject,
+        "default_to":      default_to,
     })
-
+    
 def ticket_list(request):
     if not request.session.get("token"):
         return redirect("login")
