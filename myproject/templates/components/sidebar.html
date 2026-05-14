@@ -40,15 +40,19 @@
     <nav class="sidebar-nav">
  
       <!-- Main -->
+        {% if request.session.role == "admin" %}
       <div class="nav-section-label">Main</div>
  
       <a href="{% url 'inbox' %}" class="nav-item active" data-tip="Inbox">
         <i class="ti ti-inbox"></i>
         <span class="nav-item-label">Assign Ticket</span>
       </a>
+      {% endif %}
  
       <!-- Staff dropdown -->
+       
       <div class="nav-section-label">Management</div>
+       {% if request.session.role == "admin" %}
  
       <div class="nav-group" id="group-staff">
         <div class="nav-group-toggle" onclick="toggleGroup('group-staff')" data-tip="Staff">
@@ -57,6 +61,7 @@
           <i class="ti ti-chevron-right nav-group-arrow"></i>
         </div>
         <div class="nav-group-children">
+          
           <a href="{% url 'create_staff' %}" class="nav-child">
             <i class="ti ti-user-plus"></i> Create Staff
           </a>
@@ -65,6 +70,7 @@
           </a>
         </div>
       </div>
+      {% endif %}
  
       <!-- Tickets dropdown -->
       <div class="nav-group" id="group-tickets">
@@ -74,12 +80,20 @@
           <i class="ti ti-chevron-right nav-group-arrow"></i>
         </div>
         <div class="nav-group-children">
+          {% if request.session.role == "admin" %}
           <a href="{% url 'ticket_list' %}" class="nav-child">
             <i class="ti ti-ticket"></i> Ticket Assign
         </a>
+        
           <a href="{% url 'tickets_list' %}" class="nav-child">
             <i class="ti ti-list-details"></i> Ticket List 
           </a>
+          {% endif %}
+          {% if request.session.role == "staff" %}
+            <a href="{% url 'staff_asigned_ticket' %}" class="nav-child">
+                <i class="ti ti-plus"></i> Staff Asigned Ticket
+            </a>
+            {% endif %}
           {% if request.session.role == "staff" %}
             <a href="{% url 'create_ticket' %}" class="nav-child">
                 <i class="ti ti-plus"></i> Create Ticket
@@ -96,12 +110,15 @@
           </div>
 
           <div class="nav-group-children">
+            
               <a href="{% url 'send_email' %}" class="nav-child">
                   <i class="ti ti-send"></i>Send Mail
               </a>
+               {% if request.session.role == "admin" %}
               <a href="{% url 'email_list' %}" class="nav-child">
                   <i class="ti ti-list-details"></i>Email List
               </a>
+              {% endif %}
           </div>
 
       </div>

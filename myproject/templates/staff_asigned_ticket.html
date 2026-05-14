@@ -1,14 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>My Tickets</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
- 
+{% extends "main.html" %}
+{% block title %}Home{% endblock  %}
+{% load static %}
+
+{% block css %}
+  
+
+
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
- 
+
     :root {
       --ink: #0f0e0b;
       --paper: #f7f5f0;
@@ -28,24 +27,6 @@
       --amber-light: #fef3dc;
     }
  
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--paper);
-      min-height: 100vh;
-      color: var(--ink);
-      padding: 0;
-      overflow-x: hidden;
-    }
- 
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.6;
-    }
  
     .shell {
       max-width: 860px;
@@ -340,11 +321,12 @@
       text-decoration: none;
     }
  
-    #s1:hover { background: #2a2820; }
-  </style>
-</head>
+     </style>
+
+    {% endblock %}
  
-<body>
+  
+{% block content %}
 <div class="shell">
  
   <div class="top-bar">
@@ -359,13 +341,7 @@
       <p class="welcome-note">Welcome back, <strong>{{ staff.name }}</strong></p>
     </div>
  
-    <div class="header-right">
-      <a id="s1" href='{% url "create_ticket" %}'>Create Token</a>
-       <a id="s1" href='{% url "send_email" %}'>Send mail</a>
-      <a href="{% url 'logout' %}" class="logout-btn">
-        <i class="ti ti-logout"></i> Sign out
-      </a>
-    </div>
+  
   </div>
  
   <div class="table-wrapper">
@@ -417,5 +393,6 @@
   </div>
  
 </div>
-</body>
-</html>
+{% endblock %}
+{% block js %}
+{% endblock %}

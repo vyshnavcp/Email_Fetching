@@ -28,14 +28,26 @@ from django.core.mail import EmailMessage
 MY_EMAIL = settings.EMAIL_HOST_USER
 MY_PASSWORD = settings.EMAIL_HOST_PASSWORD
 
+
 def login_page(request):
     if request.method == "POST":
         entered_email = request.POST.get("entered_email")
         entered_password = request.POST.get("password")
-        if entered_email == MY_EMAIL and entered_password == MY_PASSWORD:
+
+        # Superuser login - find user by email first
+        from django.contrib.auth.models import User
+        try:
+            django_user = User.objects.get(email=entered_email)
+            user = authenticate(username=django_user.username, password=entered_password)
+        except User.DoesNotExist:
+            user = None
+
+        if user and user.is_superuser:
             request.session["token"] = secrets.token_hex(16)
             request.session["role"] = "admin"
             return redirect("inbox")
+
+        # Staff login
         staff = Staff.objects.filter(email=entered_email).first()
         if staff:
             if staff.status == "inactive":
@@ -46,11 +58,11 @@ def login_page(request):
                 request.session["staff_email"] = staff.email
                 request.session["role"] = "staff"
                 return redirect("staff_asigned_ticket")
+
         return render(request, "login.html", {
             "error": "Invalid Email or Password"
         })
     return render(request, "login.html")
-
 def inbox(request):
     if not request.session.get("token"):
         return redirect("login")
