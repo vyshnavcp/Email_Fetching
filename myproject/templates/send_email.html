@@ -1,28 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+{% extends "main.html" %}
+{% block title %}Home{% endblock  %}
+{% load static %}
 
-<meta charset="UTF-8">
+{% block css %}
+  
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Send Email</title>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
 
-*,
-*::before,
-*::after{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-}
 
 :root{
     --ink:#111111;
@@ -34,13 +20,7 @@
     --muted:#6f6b61;
 }
 
-body{
-    font-family:'DM Sans',sans-serif;
-    background:var(--paper);
-    color:var(--ink);
-    min-height:100vh;
-    padding:40px 20px;
-}
+
 
 .shell{
     max-width:900px;
@@ -195,11 +175,9 @@ textarea{
 }
 
 </style>
+{% endblock %}
 
-</head>
-
-<body>
-
+{% block content %}
 <div class="shell">
 
     <h1 class="title">Send Email</h1>
@@ -334,7 +312,8 @@ textarea{
     </form>
 
 </div>
-
+{% endblock %}
+{% block js %}
 <script>
 
 const dropZone = document.getElementById("drop-zone");
@@ -423,5 +402,4 @@ function showFiles(){
 
 </script>
 
-</body>
-</html>
+{% endblock %}
