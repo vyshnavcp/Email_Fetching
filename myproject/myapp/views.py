@@ -72,6 +72,7 @@ def login_page(request):
             "error": "Invalid Email or Password"
         })
     return render(request, "login.html")
+
 def inbox(request):
     if not request.session.get("token"):
         return redirect("login")
@@ -738,77 +739,63 @@ def create_ticket(request):
     })
 
 def tickets_list(request):
-
-    staffs = Staff.objects.all()
-
+    staffs = Staff.objects.filter(status='active').order_by('name')
     return render(request, 'tickets_list.html', {
         'staffs': staffs
     })
-
-
+ 
+ 
 def filter_tickets(request):
-
-    tickets = Ticket.objects.select_related(
-        "assigned_to"
-    ).all().order_by("-created_at")
-
+    tickets = Ticket.objects.select_related("assigned_to").all().order_by("-created_at")
+ 
     # SEARCH
-    search = request.GET.get("search")
-
+    search = request.GET.get("search", "").strip()
     if search:
-
         tickets = tickets.filter(
-
             Q(subject__icontains=search) |
-
             Q(ticket_number__icontains=search) |
-
             Q(sender__icontains=search) |
-
-            Q(assigned_to__name__icontains=search)
-
+            Q(assigned_to__name__icontains=search) |
+            Q(cc__icontains=search)
         )
-    status = request.GET.get("status")
-
+ 
+    # STATUS
+    status = request.GET.get("status", "").strip()
     if status:
         tickets = tickets.filter(status=status)
-    staff = request.GET.get("staff")
-
+ 
+    # STAFF
+    staff = request.GET.get("staff", "").strip()
     if staff:
         tickets = tickets.filter(assigned_to_id=staff)
-    from_date = request.GET.get("from_date")
-    to_date = request.GET.get("to_date")
-
+ 
+    # DATE RANGE
+    from_date = request.GET.get("from_date", "").strip()
+    to_date   = request.GET.get("to_date", "").strip()
     if from_date:
         tickets = tickets.filter(created_at__date__gte=from_date)
-
     if to_date:
         tickets = tickets.filter(created_at__date__lte=to_date)
-
+ 
     data = []
-
     for ticket in tickets:
-
+        # Parse CC into a clean list
+        cc_raw  = ticket.cc or ""
+        cc_list = [e.strip() for e in cc_raw.split(",") if e.strip()]
+ 
         data.append({
-
-            "mail_id":       ticket.mail_id, 
+            "mail_id":       ticket.mail_id,
             "ticket_number": ticket.ticket_number,
-
-            "subject": ticket.subject,
-
-            "sender": ticket.sender,
-
-            "status": ticket.status,
-
-            "staff": ticket.assigned_to.name if ticket.assigned_to else "Not Assigned",
-
-            "date": ticket.created_at.strftime("%d-%m-%Y"),
-
+            "subject":       ticket.subject,
+            "sender":        ticket.sender,
+            "status":        ticket.status,
+            "staff":         ticket.assigned_to.name if ticket.assigned_to else "Not Assigned",
+            "date":          ticket.created_at.strftime("%d-%m-%Y"),
+            "cc":            cc_list,          # list of addresses
+            "cc_raw":        cc_raw,           # plain string for display/copy
         })
-
-    return JsonResponse({
-        "tickets": data
-    })
+ 
+    return JsonResponse({"tickets": data})
   
 def send_email(request):
     if request.method == "POST":

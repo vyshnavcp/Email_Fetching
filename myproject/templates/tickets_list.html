@@ -1,10 +1,10 @@
 {% extends "main.html" %}
 {% block title %}Tickets List{% endblock %}
 {% load static %}
- 
+
 {% block css %}
 <style>
- 
+
 :root {
   --ink: #0f0e0b;
   --paper: #f7f5f0;
@@ -18,7 +18,7 @@
   --green: #2e7d32;
   --orange: #ef6c00;
 }
- 
+
 .shell {
   max-width: 1400px;
   margin: auto;
@@ -26,7 +26,7 @@
   position: relative;
   z-index: 1;
 }
- 
+
 .top-header {
   display: flex;
   justify-content: space-between;
@@ -35,31 +35,31 @@
   padding-bottom: 20px;
   border-bottom: 1px solid var(--border);
 }
- 
+
 .eyebrow {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: .18em;
   color: var(--gold);
 }
- 
+
 .title {
   font-family: 'Playfair Display', serif;
   font-size: 38px;
   font-weight: 700;
 }
- 
+
 .top-bar {
   display: flex;
   gap: 14px;
   flex-wrap: wrap;
   margin-bottom: 28px;
 }
- 
+
 .search-box {
   position: relative;
 }
- 
+
 .search-box i {
   position: absolute;
   left: 14px;
@@ -67,7 +67,7 @@
   transform: translateY(-50%);
   color: var(--muted);
 }
- 
+
 input,
 select {
   background: var(--card);
@@ -80,17 +80,17 @@ select {
   min-width: 180px;
   color: var(--ink);
 }
- 
+
 input {
   padding-left: 42px;
 }
- 
+
 input:focus,
 select:focus {
   border-color: var(--gold);
   box-shadow: 0 0 0 3px rgba(201,168,76,.12);
 }
- 
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -99,7 +99,7 @@ table {
   overflow: hidden;
   border: 1px solid var(--border);
 }
- 
+
 table th {
   background: var(--cream);
   padding: 18px;
@@ -109,52 +109,50 @@ table th {
   text-transform: uppercase;
   letter-spacing: .08em;
 }
- 
+
 table td {
   padding: 18px;
   border-bottom: 1px solid var(--border);
   font-size: 14px;
 }
- 
-/* ── Clickable rows ──────────────────────────── */
+
 tbody tr {
   transition: background .2s, box-shadow .2s;
   cursor: pointer;
 }
- 
+
 tbody tr:hover {
   background: #faf8f3;
   box-shadow: inset 3px 0 0 var(--gold);
 }
- 
+
 tbody tr:hover .ticket-no {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
- 
+
 tbody tr:active {
   background: var(--cream);
 }
-/* ───────────────────────────────────────────── */
- 
+
 .ticket-no {
   font-weight: 700;
   color: var(--gold);
 }
- 
+
 .subject {
   font-weight: 500;
 }
- 
+
 .staff {
   color: var(--muted);
 }
- 
+
 .date {
   color: var(--muted);
   font-size: 13px;
 }
- 
+
 .badge {
   padding: 6px 12px;
   border-radius: 20px;
@@ -162,95 +160,115 @@ tbody tr:active {
   font-size: 12px;
   font-weight: 500;
 }
- 
+
 .assigned   { background: var(--green);  }
 .unassigned { background: var(--orange); }
 .closed     { background: var(--red);    }
- 
+
+.cc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cc-addr {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.cc-empty {
+  color: var(--border);
+  font-size: 13px;
+}
+
 .no-data {
   text-align: center;
   padding: 80px 20px;
   color: var(--muted);
 }
- 
+
 .no-data i {
   font-size: 42px;
   margin-bottom: 12px;
   display: block;
   opacity: .3;
 }
- 
+
 @media (max-width: 900px) {
- 
+
   .top-header {
     flex-direction: column;
     gap: 18px;
     align-items: flex-start;
   }
- 
+
   .top-bar {
     flex-direction: column;
   }
- 
+
   input, select {
     width: 100%;
   }
- 
+
   table {
     display: block;
     overflow-x: auto;
   }
- 
+
 }
 </style>
 {% endblock %}
- 
- 
+
+
 {% block content %}
 <div class="shell">
- 
+
   <div class="top-header">
     <div>
       <div class="eyebrow">Management</div>
       <h1 class="title">All Tickets</h1>
     </div>
   </div>
- 
+
   <!-- FILTERS -->
   <div class="top-bar">
- 
+
     <div class="search-box">
       <i class="ti ti-search"></i>
       <input type="text" id="search"
              placeholder="Search Ticket No, Subject, Sender, Staff">
     </div>
- 
+
     <select id="status">
       <option value="">All Status</option>
       <option value="assigned">Assigned</option>
       <option value="unassigned">Unassigned</option>
       <option value="closed">Closed</option>
     </select>
- 
+
     <select id="staff">
       <option value="">All Staff</option>
       {% for s in staffs %}
         <option value="{{ s.id }}">{{ s.name }}</option>
       {% endfor %}
     </select>
- 
+
     <div class="search-box">
       <i class="ti ti-calendar"></i>
       <input type="date" id="from_date">
     </div>
- 
+
     <div class="search-box">
       <i class="ti ti-calendar"></i>
       <input type="date" id="to_date">
     </div>
- 
+
   </div>
- 
+
   <!-- TABLE -->
   <table>
     <thead>
@@ -258,6 +276,7 @@ tbody tr:active {
         <th>Ticket No</th>
         <th>Subject</th>
         <th>Sender</th>
+        <th>CC</th>
         <th>Status</th>
         <th>Assigned Staff</th>
         <th>Date</th>
@@ -265,20 +284,20 @@ tbody tr:active {
     </thead>
     <tbody id="ticket-body"></tbody>
   </table>
- 
+
 </div>
 {% endblock %}
- 
- 
+
+
 {% block js %}
 <script>
- 
+
   function loadTickets() {
- 
+
     $.ajax({
- 
+
       url: "{% url 'filter_tickets' %}",
- 
+
       data: {
         search:    $("#search").val(),
         status:    $("#status").val(),
@@ -286,80 +305,63 @@ tbody tr:active {
         from_date: $("#from_date").val(),
         to_date:   $("#to_date").val(),
       },
- 
+
       success: function(response) {
- 
+
         let rows = "";
- 
+
         if (response.tickets.length > 0) {
- 
+
           response.tickets.forEach(function(ticket) {
- 
-            {# Build the detail URL using mail_id — matches: path("email/<mail_id>/", ...) #}
+
             var detailUrl = "/email/" + ticket.mail_id + "/";
- 
+
+            var ccHtml = ticket.cc && ticket.cc.length
+              ? `<div class="cc-list">${ticket.cc.map(addr => `<span class="cc-addr" title="${addr}">${addr}</span>`).join('')}</div>`
+              : `<span class="cc-empty">—</span>`;
+
             rows += `
               <tr onclick="window.location='${detailUrl}'" title="View ticket ${ticket.ticket_number}">
- 
-                <td class="ticket-no">
-                  ${ticket.ticket_number}
-                </td>
- 
-                <td class="subject">
-                  ${ticket.subject}
-                </td>
- 
-                <td>
-                  ${ticket.sender}
-                </td>
- 
-                <td>
-                  <span class="badge ${ticket.status}">
-                    ${ticket.status}
-                  </span>
-                </td>
- 
-                <td class="staff">
-                  ${ticket.staff}
-                </td>
- 
-                <td class="date">
-                  ${ticket.date}
-                </td>
- 
+                <td class="ticket-no">${ticket.ticket_number}</td>
+                <td class="subject">${ticket.subject}</td>
+                <td>${ticket.sender}</td>
+                <td>${ccHtml}</td>
+                <td><span class="badge ${ticket.status}">${ticket.status}</span></td>
+                <td class="staff">${ticket.staff}</td>
+                <td class="date">${ticket.date}</td>
               </tr>
             `;
- 
+
           });
- 
+
         } else {
- 
+
           rows = `
             <tr>
-              <td colspan="6" class="no-data">
+              <td colspan="7" class="no-data">
                 <i class="ti ti-ticket-off"></i>
                 No Tickets Found
               </td>
             </tr>
           `;
- 
+
         }
- 
+
         $("#ticket-body").html(rows);
- 
+
       }
- 
+
     });
- 
+
   }
- 
+
   loadTickets();
- 
+
   $("#search").keyup(function()     { loadTickets(); });
   $("#status").change(function()    { loadTickets(); });
   $("#staff").change(function()     { loadTickets(); });
   $("#from_date").change(function() { loadTickets(); });
   $("#to_date").change(function()   { loadTickets(); });
- 
+
 </script>
 {% endblock %}

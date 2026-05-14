@@ -49,13 +49,40 @@
     font-weight: 400;
     letter-spacing: 0.03em;
   }
+
+  /* ── CC row in inbox card ── */
+  .email-cc {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .email-cc-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .email-cc-value {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 340px;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="shell">
 
-  <!-- ── Stat Cards (above everything) ── -->
+  <!-- ── Stat Cards ── -->
   <div class="stat-cards">
     <a href="{% url 'ticket_list' %}#unassigned" class="stat-card unassigned">
       <div class="stat-icon"><i class="ti ti-clock"></i></div>
@@ -143,6 +170,13 @@
 
             <div class="email-subject">{{ email.subject }}</div>
             <div class="email-preview">{{ email.body }}</div>
+
+            {% if email.cc %}
+            <div class="email-cc">
+              <span class="email-cc-label">CC</span>
+              <span class="email-cc-value">{{ email.cc }}</span>
+            </div>
+            {% endif %}
 
             <div class="assigned-row">
               {% if email.assigned_to %}
