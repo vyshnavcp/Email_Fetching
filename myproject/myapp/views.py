@@ -1,3 +1,4 @@
+from myapp.models import Ticket
 from django.template.loader import render_to_string
 from myapp.models import SentEmail
 from django.http import JsonResponse
@@ -63,17 +64,23 @@ def login_page(request):
             "error": "Invalid Email or Password"
         })
     return render(request, "login.html")
+
 def inbox(request):
     if not request.session.get("token"):
         return redirect("login")
+
+    unassigned_count = Ticket.objects.filter(status="unassigned").count()
+    assigned_count   = Ticket.objects.filter(status="assigned").count()
+    closed_count     = Ticket.objects.filter(status="closed").count()
+
     if request.method == "POST" and request.POST.get("fetch") == "1":
         try:
             mail_conn = imaplib.IMAP4_SSL("imap.gmail.com")
             mail_conn.login(MY_EMAIL, MY_PASSWORD)
             mail_conn.select("inbox")
             status, messages = mail_conn.search(None, "ALL")
-            email_ids = messages[0].split() 
-            emails = [] 
+            email_ids = messages[0].split()
+            emails = []
             for mail_id in reversed(email_ids[-20:]):
                 status, msg_data = mail_conn.fetch(mail_id, "(RFC822)")
                 for response_part in msg_data:
@@ -144,21 +151,32 @@ def inbox(request):
                         "status":      ticket.status,
                         "assigned_to": ticket.assigned_to.name if ticket.assigned_to else None,
                     })
- 
+
             mail_conn.logout()
             return render(request, "inbox.html", {
-                "emails":  emails,
-                "fetched": True,
+                "emails":           emails,
+                "fetched":          True,
+                "unassigned_count": unassigned_count,
+                "assigned_count":   assigned_count,
+                "closed_count":     closed_count,
             })
         except Exception as e:
             return render(request, "inbox.html", {
-                "error":   str(e),
-                "fetched": True,
+                "error":            str(e),
+                "fetched":          True,
+                "unassigned_count": unassigned_count,
+                "assigned_count":   assigned_count,
+                "closed_count":     closed_count,
             })
+
     return render(request, "inbox.html", {
-        "emails":  [],
-        "fetched": False,
+        "emails":           [],
+        "fetched":          False,
+        "unassigned_count": unassigned_count,
+        "assigned_count":   assigned_count,
+        "closed_count":     closed_count,
     })
+    
 def email_detail(request, mail_id):
     if not request.session.get("token"):
         return redirect("login")

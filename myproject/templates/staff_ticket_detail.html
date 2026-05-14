@@ -5,7 +5,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
- 
   <meta http-equiv="Content-Security-Policy" content="img-src 'self' data: blob: /media/">
  
   <style>
@@ -36,7 +35,7 @@
       background: var(--paper);
       min-height: 100vh;
       color: var(--ink);
-      padding: 48px 24px 80px;
+      padding: 36px 28px 80px;
     }
  
     body::before {
@@ -50,7 +49,7 @@
     }
  
     .shell {
-      max-width: 760px;
+      max-width: 1280px;
       margin: 0 auto;
       position: relative;
       z-index: 1;
@@ -62,6 +61,14 @@
       to   { opacity: 1; transform: translateY(0); }
     }
  
+    /* ── Top bar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+ 
     .back {
       display: inline-flex;
       align-items: center;
@@ -69,8 +76,7 @@
       text-decoration: none;
       color: var(--muted);
       font-size: 13px;
-      margin-bottom: 28px;
-      padding: 8px 14px;
+      padding: 8px 16px;
       border: 1px solid var(--border);
       border-radius: 8px;
       background: var(--card);
@@ -78,22 +84,60 @@
     }
     .back:hover { color: var(--ink); border-color: #ccc9be; }
  
+    .ticket-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+ 
+    .ticket-num-tag {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 5px 14px;
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+    }
+ 
+    /* ── Main layout: 3-col ── */
     .layout {
       display: grid;
-      grid-template-columns: 1fr 260px;
-      gap: 16px;
+      grid-template-columns: 1fr 320px;
+      gap: 20px;
       align-items: start;
     }
  
-    /* ── Email card ── */
-    .email-card {
+    /* ── Cards ── */
+    .card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 20px;
       overflow: hidden;
       box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+      margin-bottom: 16px;
+    }
+    .card:last-child { margin-bottom: 0; }
+ 
+    .card-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--paper);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
  
+    .card-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+ 
+    /* ── Email card header ── */
     .email-header {
       padding: 28px 32px 24px;
       border-bottom: 1px solid var(--border);
@@ -134,7 +178,7 @@
     .meta-from { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
     .meta-date { font-size: 11px; font-weight: 300; color: var(--muted); display: flex; align-items: center; gap: 4px; }
  
-    /* ── HTML/plain toggle bar ── */
+    /* ── Toggle bar ── */
     .view-toggle {
       display: flex;
       align-items: center;
@@ -143,200 +187,312 @@
       border-bottom: 1px solid var(--border);
       background: var(--paper);
     }
- 
-    .toggle-label {
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-right: 4px;
-    }
- 
+    .toggle-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
     .toggle-btn {
-      font-size: 11px;
-      font-weight: 500;
-      padding: 4px 12px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: 'DM Sans', sans-serif;
+      font-size: 11px; font-weight: 500; padding: 4px 12px;
+      border-radius: 20px; border: 1px solid var(--border);
+      background: var(--card); color: var(--muted); cursor: pointer;
+      transition: all 0.2s; font-family: 'DM Sans', sans-serif;
     }
+    .toggle-btn.active { background: var(--ink); color: var(--gold-light); border-color: var(--ink); }
+    .toggle-btn:hover:not(.active) { border-color: var(--gold); color: var(--ink); }
  
-    .toggle-btn.active {
-      background: var(--ink);
-      color: var(--gold-light);
-      border-color: var(--ink);
-    }
- 
-    .toggle-btn:hover:not(.active) {
-      border-color: var(--gold);
-      color: var(--ink);
-    }
- 
-    /* ── iframe wrapper ── */
+    /* ── iframe ── */
     .email-iframe-wrapper { padding: 20px 24px; }
- 
     .email-iframe {
-      width: 100%;
-      min-height: 120px;
-      border: none;
-      display: block;
-      border-radius: 8px;
-      overflow: hidden;
+      width: 100%; min-height: 120px; border: none;
+      display: block; border-radius: 8px; overflow: hidden;
       transition: height 0.25s ease;
     }
  
-    /* ── Plain text body ── */
+    /* ── Plain body ── */
     .email-body-text {
-      padding: 28px 32px;
-      line-height: 1.8;
-      white-space: pre-wrap;
-      font-size: 13.5px;
-      font-weight: 300;
-      color: #2a2820;
+      padding: 28px 32px; line-height: 1.8;
+      white-space: pre-wrap; font-size: 13.5px; font-weight: 300; color: #2a2820;
     }
+    .no-content { padding: 40px 32px; text-align: center; color: var(--muted); font-size: 13px; font-style: italic; }
  
-    .no-content {
-      padding: 40px 32px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 13px;
-      font-style: italic;
-    }
- 
-    /* ── Footer ── */
-    .email-footer {
-      padding: 14px 32px;
-      border-top: 1px solid var(--border);
-      background: var(--paper);
-      display: flex; align-items: center; gap: 8px;
-    }
- 
+    /* ── Footer tag ── */
+    .email-footer { padding: 14px 32px; border-top: 1px solid var(--border); background: var(--paper); display: flex; align-items: center; gap: 8px; }
     .footer-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
- 
-    .tag {
-      display: inline-flex; align-items: center; gap: 4px;
-      font-size: 11px; padding: 2px 9px; border-radius: 20px;
-      background: var(--gold-light); color: #7a5c10; border: 1px solid #e0c97a;
-    }
+    .tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 9px; border-radius: 20px; background: var(--gold-light); color: #7a5c10; border: 1px solid #e0c97a; }
  
     /* ── Attachments ── */
     .attachments-section { padding: 20px 32px 28px; border-top: 1px solid var(--border); }
- 
-    .attachments-title {
-      font-size: 10px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
-    }
- 
+    .attachments-title { font-size: 10px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
     .attachment-item { margin-bottom: 16px; }
     .attachment-item:last-child { margin-bottom: 0; }
     .att-filename { font-size: 11px; color: var(--muted); margin-bottom: 7px; font-weight: 400; }
- 
-    .att-image {
-      max-width: 100%; max-height: 320px; object-fit: contain;
-      border-radius: 10px; border: 1px solid var(--border);
-      display: block; cursor: zoom-in; transition: opacity 0.2s;
-    }
+    .att-image { max-width: 100%; max-height: 320px; object-fit: contain; border-radius: 10px; border: 1px solid var(--border); display: block; cursor: zoom-in; transition: opacity 0.2s; }
     .att-image:hover { opacity: 0.9; }
- 
     .att-pdf { width: 100%; height: 420px; border: 1px solid var(--border); border-radius: 10px; display: block; }
- 
-    .att-download {
-      display: inline-flex; align-items: center; gap: 7px;
-      font-size: 13px; font-weight: 500; color: var(--ink);
-      background: var(--cream); border: 1px solid var(--border);
-      border-radius: 8px; padding: 8px 14px; text-decoration: none;
-      transition: border-color 0.2s, background 0.2s; margin-top: 8px;
-    }
+    .att-download { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; color: var(--ink); background: var(--cream); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; text-decoration: none; transition: border-color 0.2s, background 0.2s; margin-top: 8px; }
     .att-download:hover { border-color: var(--gold); background: var(--gold-light); }
  
     /* ── Lightbox ── */
-    .lightbox {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.88); z-index: 9999;
-      align-items: center; justify-content: center; cursor: zoom-out;
-    }
+    .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 9999; align-items: center; justify-content: center; cursor: zoom-out; }
     .lightbox.open { display: flex; }
     .lightbox img { max-width: 92vw; max-height: 92vh; border-radius: 10px; box-shadow: 0 24px 80px rgba(0,0,0,0.6); }
     .lightbox-close { position: absolute; top: 18px; right: 24px; color: #fff; font-size: 30px; cursor: pointer; opacity: 0.7; line-height: 1; transition: opacity 0.2s; }
     .lightbox-close:hover { opacity: 1; }
  
+    /* ────────────────────────────────────────────────────────────────────────
+       REPLY COMPOSER
+    ──────────────────────────────────────────────────────────────────────── */
+    .reply-composer {
+      padding: 0;
+    }
+ 
+    .reply-composer-header {
+      padding: 18px 28px;
+      border-bottom: 1px solid var(--border);
+      background: var(--paper);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .reply-composer-header:hover { background: var(--cream); }
+ 
+    .reply-composer-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+ 
+    .reply-composer-body {
+      padding: 24px 28px;
+      display: none;
+    }
+    .reply-composer-body.open { display: block; }
+ 
+    .form-row {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+ 
+    .form-row-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: right;
+      letter-spacing: 0.05em;
+    }
+ 
+    .form-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      background: var(--paper);
+      color: var(--ink);
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--gold); }
+ 
+    .reply-body-wrap {
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+ 
+    .reply-body-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--paper);
+      border-bottom: 1px solid var(--border);
+    }
+ 
+    .toolbar-btn {
+      width: 28px; height: 28px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--card);
+      color: var(--muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+    .toolbar-btn:hover { background: var(--gold-light); border-color: var(--gold); color: var(--ink); }
+ 
+    .reply-textarea {
+      width: 100%;
+      min-height: 160px;
+      padding: 14px 16px;
+      border: none;
+      resize: vertical;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--ink);
+      background: var(--card);
+      outline: none;
+    }
+ 
+    /* ── Signature section inside composer ── */
+    .sig-divider {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-top: 1px dashed var(--border);
+      background: var(--paper);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+ 
+    .sig-preview {
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #555;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      background: #faf9f6;
+      min-height: 60px;
+    }
+ 
+    /* ── File drop zone ── */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      margin-top: 14px;
+      transition: border-color 0.2s, background 0.2s;
+      background: var(--paper);
+    }
+    .drop-zone.dragover { border-color: var(--gold); background: var(--gold-light); }
+    .drop-zone-icon { font-size: 22px; color: var(--muted); margin-bottom: 6px; }
+    .drop-zone-label { font-size: 12px; color: var(--muted); }
+    .drop-zone-label span { color: var(--blue); text-decoration: underline; cursor: pointer; }
+ 
+    .file-list { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .file-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; padding: 4px 10px;
+      background: var(--blue-light); color: var(--blue);
+      border: 1px solid var(--blue-border); border-radius: 20px;
+    }
+    .file-chip-remove {
+      cursor: pointer; font-size: 13px; line-height: 1;
+      color: var(--blue); opacity: 0.6; transition: opacity 0.15s;
+    }
+    .file-chip-remove:hover { opacity: 1; }
+ 
+    /* ── Send button ── */
+    .send-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 14px;
+      padding: 11px 22px;
+      background: var(--blue); color: white;
+      border: none; border-radius: 10px;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: background 0.2s, transform 0.1s;
+    }
+    .send-btn:hover  { background: #1a3fc4; }
+    .send-btn:active { transform: scale(0.97); }
+ 
+    /* ── Replies history ── */
+    .reply-thread-item {
+      padding: 16px 20px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      background: var(--paper);
+    }
+    .reply-thread-meta { font-size: 11px; color: var(--muted); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .reply-thread-to   { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+    .reply-thread-body { font-size: 12px; color: var(--ink); white-space: pre-wrap; line-height: 1.65; }
+ 
     /* ── Sidebar ── */
-    .sidebar { display: flex; flex-direction: column; gap: 12px; }
+    .sidebar { display: flex; flex-direction: column; gap: 14px; }
  
     .sidebar-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
- 
-    .sidebar-card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); background: var(--paper); }
- 
-    .sidebar-card-title { font-size: 10px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
- 
-    .sidebar-card-body { padding: 16px 18px; }
+    .sidebar-card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--paper); }
+    .sidebar-card-title { font-size: 10px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+    .sidebar-card-body { padding: 18px 20px; }
  
     .info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .info-row:last-child { margin-bottom: 0; }
     .info-label { font-size: 11px; font-weight: 500; color: var(--muted); }
  
-    .ticket-chip {
-      font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
-      padding: 3px 10px; border-radius: 6px;
-      background: var(--cream); color: var(--muted); border: 1px solid var(--border);
-    }
+    .ticket-chip { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; padding: 3px 10px; border-radius: 6px; background: var(--cream); color: var(--muted); border: 1px solid var(--border); }
  
     .status-pill { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; }
     .status-unassigned { background: var(--blue-light);  color: var(--blue);  border: 1px solid var(--blue-border); }
     .status-assigned   { background: var(--gold-light);  color: #7a5c10;      border: 1px solid #e0c97a; }
     .status-closed     { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
  
-    .close-btn {
-      width: 100%; padding: 10px;
-      background: var(--ink); color: var(--gold-light);
-      border: none; border-radius: 8px;
-      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
-      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
-      transition: background 0.2s, transform 0.1s;
-    }
-    .close-btn:hover  { background: #2a2820; }
-    .close-btn:active { transform: scale(0.97); }
- 
-    .history-btn {
-      width: 100%; padding: 10px; margin-bottom: 10px;
-      background: var(--cream); color: var(--ink);
+    .action-btn {
+      width: 100%; padding: 10px 14px; margin-bottom: 10px;
       border: 1px solid var(--border); border-radius: 8px;
       font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
       cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
       text-decoration: none; transition: background 0.2s, border-color 0.2s;
     }
-    .history-btn:hover { background: var(--gold-light); border-color: var(--gold); color: var(--ink); }
+    .action-btn:last-child { margin-bottom: 0; }
  
-    .closed-notice {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 12px; font-weight: 500;
-      color: var(--green); background: var(--green-light);
-      border: 1px solid var(--green-border);
-      border-radius: 8px; padding: 10px 14px;
-    }
+    .btn-ghost { background: var(--cream); color: var(--ink); }
+    .btn-ghost:hover { background: var(--gold-light); border-color: var(--gold); color: var(--ink); }
  
-    .notes-toggle-btn {
-      width: 100%; padding: 7px; font-size: 12px; font-weight: 500;
-      border: 1px solid var(--border); border-radius: 8px;
-      background: var(--cream); color: var(--ink); cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 5px;
-      transition: background 0.2s, border-color 0.2s;
+    .btn-dark  { background: var(--ink); color: var(--gold-light); border-color: var(--ink); }
+    .btn-dark:hover { background: #2a2820; }
+ 
+    .btn-blue  { background: var(--blue); color: white; border-color: var(--blue); }
+    .btn-blue:hover { background: #1a3fc4; }
+ 
+    .closed-notice { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; color: var(--green); background: var(--green-light); border: 1px solid var(--green-border); border-radius: 8px; padding: 10px 14px; }
+ 
+    /* ── Notes ── */
+    .note-item { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; background: var(--paper); }
+    .note-item:last-child { margin-bottom: 0; }
+    .note-meta  { font-size: 10px; color: var(--muted); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+    .note-body  { font-size: 12px; color: var(--ink); }
+    .note-edit-btn { font-size: 10px; border: none; background: none; color: var(--blue); cursor: pointer; display: flex; align-items: center; gap: 3px; }
+ 
+    /* ── Signature editor in sidebar ── */
+    .sig-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
       font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      line-height: 1.7;
+      resize: vertical;
+      background: var(--paper);
+      color: var(--ink);
+      outline: none;
     }
+    .sig-textarea:focus { border-color: var(--gold); }
+ 
+    .notes-toggle-btn { width: 100%; padding: 7px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); border-radius: 8px; background: var(--cream); color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: background 0.2s, border-color 0.2s; font-family: 'DM Sans', sans-serif; margin-top: 8px; }
     .notes-toggle-btn:hover { background: var(--gold-light); border-color: var(--gold); }
  
-    .note-item.note-hidden { display: none; }
+    /* ── CC / BCC toggle ── */
+    .cc-toggle { font-size: 11px; color: var(--blue); cursor: pointer; text-decoration: underline; margin-left: 4px; }
  
-    @media (max-width: 640px) {
+    @media (max-width: 900px) {
       .layout { grid-template-columns: 1fr; }
-      .email-header { padding: 20px; }
-      .email-body-text,
-      .email-iframe-wrapper { padding: 20px; }
+      .email-header, .email-body-text, .email-iframe-wrapper { padding: 20px; }
     }
   </style>
 </head>
@@ -344,107 +500,230 @@
 <body>
 <div class="shell">
  
-  <a href="{% url 'staff_asigned_ticket' %}" class="back">
-    <i class="ti ti-arrow-left"></i> Back
-  </a>
+  <!-- ── Top bar ── -->
+  <div class="topbar">
+    <a href="{% url 'staff_asigned_ticket' %}" class="back">
+      <i class="ti ti-arrow-left"></i> Back to My Tickets
+    </a>
+    <div class="ticket-badge">
+      <span class="ticket-num-tag">{{ ticket.ticket_number }}</span>
+      <span class="status-pill status-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+    </div>
+  </div>
  
   <div class="layout">
  
-    <!-- ── Left: Email Card ── -->
-    <div class="email-card">
+    <!-- ══════════════════════════════════════════════════════════════
+         LEFT COLUMN: Email + Reply Composer + Reply History
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="left-col">
  
-      <!-- Header -->
-      <div class="email-header">
-        <span class="eyebrow">Ticket Detail</span>
-        <div class="subject">{{ ticket.subject }}</div>
-        <div class="meta">
-          <div class="avatar">{{ ticket.sender|slice:":2"|upper }}</div>
-          <div>
-            <div class="meta-from">{{ ticket.sender }}</div>
-            <div class="meta-date">
-              <i class="ti ti-clock" style="font-size:11px;"></i>
-              {{ ticket.date }}
+      <!-- ── Original Email Card ── -->
+      <div class="card">
+ 
+        <div class="email-header">
+          <span class="eyebrow">Original Email</span>
+          <div class="subject">{{ ticket.subject }}</div>
+          <div class="meta">
+            <div class="avatar">{{ ticket.sender|slice:":2"|upper }}</div>
+            <div>
+              <div class="meta-from">{{ ticket.sender }}</div>
+              <div class="meta-date">
+                <i class="ti ti-clock" style="font-size:11px;"></i>
+                {{ ticket.date }}
+              </div>
             </div>
           </div>
         </div>
-      </div>
  
-      <!-- Toggle bar: only show when BOTH html and plain text exist -->
-      {% if has_html and body %}
-      <div class="view-toggle">
-        <span class="toggle-label">View as</span>
-        <button class="toggle-btn active" id="btn-html" onclick="showHTML()">
-          <i class="ti ti-code"></i> HTML
-        </button>
-        <button class="toggle-btn" id="btn-text" onclick="showText()">
-          <i class="ti ti-align-left"></i> Plain Text
-        </button>
-      </div>
-      {% endif %}
- 
-      <!-- HTML email rendered in sandboxed iframe -->
-      {% if has_html %}
-      <div class="email-iframe-wrapper" id="html-view">
-        <iframe
-          id="email-iframe"
-          class="email-iframe"
-          sandbox="allow-same-origin"
-          scrolling="no"
-          frameborder="0"
-          title="Email Content"
-        ></iframe>
-      </div>
-      {% endif %}
- 
-      <!-- Plain text fallback (hidden when HTML view is active) -->
-      {% if body %}
-      <div
-        class="email-body-text"
-        id="text-view"
-        {% if has_html %}style="display:none;"{% endif %}
-      >{{ body }}</div>
-      {% endif %}
- 
-      <!-- No content at all -->
-      {% if not has_html and not body %}
-      <div class="no-content">
-        <i class="ti ti-mail-off" style="font-size:24px; display:block; margin-bottom:8px;"></i>
-        No message content available.
-      </div>
-      {% endif %}
- 
-      <!-- Footer -->
-      <div class="email-footer">
-        <span class="footer-label">Via</span>
-        <span class="tag"><i class="ti ti-mail"></i> Gmail IMAP</span>
-      </div>
- 
-      <!-- Attachments -->
-      {% if attachments %}
-      <div class="attachments-section">
-        <div class="attachments-title">
-          <i class="ti ti-paperclip" style="font-size:11px;"></i>
-          Attachments ({{ attachments|length }})
+        {% if has_html and body %}
+        <div class="view-toggle">
+          <span class="toggle-label">View as</span>
+          <button class="toggle-btn active" id="btn-html" onclick="showHTML()">
+            <i class="ti ti-code"></i> HTML
+          </button>
+          <button class="toggle-btn" id="btn-text" onclick="showText()">
+            <i class="ti ti-align-left"></i> Plain Text
+          </button>
         </div>
-        {% for att in attachments %}
-        <div class="attachment-item">
-          <div class="att-filename">{{ att.filename }}</div>
-          {% if "image" in att.content_type %}
-            <img src="{{ att.file.url }}" class="att-image" alt="{{ att.filename }}" onclick="openLightbox('{{ att.file.url }}')">
-            <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download"><i class="ti ti-download"></i> Download image</a>
-          {% elif "pdf" in att.content_type %}
-            <iframe src="{{ att.file.url }}" class="att-pdf" title="{{ att.filename }}"></iframe>
-            <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download"><i class="ti ti-download"></i> Download PDF</a>
-          {% else %}
-            <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download"><i class="ti ti-download"></i> {{ att.filename }}</a>
-          {% endif %}
+        {% endif %}
+ 
+        {% if has_html %}
+        <div class="email-iframe-wrapper" id="html-view">
+          <iframe id="email-iframe" class="email-iframe" sandbox="allow-same-origin" scrolling="no" frameborder="0" title="Email Content"></iframe>
         </div>
-        {% endfor %}
+        {% endif %}
+ 
+        {% if body %}
+        <div class="email-body-text" id="text-view" {% if has_html %}style="display:none;"{% endif %}>{{ body }}</div>
+        {% endif %}
+ 
+        {% if not has_html and not body %}
+        <div class="no-content">
+          <i class="ti ti-mail-off" style="font-size:24px; display:block; margin-bottom:8px;"></i>
+          No message content available.
+        </div>
+        {% endif %}
+ 
+        <div class="email-footer">
+          <span class="footer-label">Via</span>
+          <span class="tag"><i class="ti ti-mail"></i> Gmail IMAP</span>
+        </div>
+ 
+        {% if attachments %}
+        <div class="attachments-section">
+          <div class="attachments-title">
+            <i class="ti ti-paperclip" style="font-size:11px;"></i>
+            Attachments ({{ attachments|length }})
+          </div>
+          {% for att in attachments %}
+          <div class="attachment-item">
+            <div class="att-filename">{{ att.filename }}</div>
+            {% if "image" in att.content_type %}
+              <img src="{{ att.file.url }}" class="att-image" alt="{{ att.filename }}" onclick="openLightbox('{{ att.file.url }}')">
+              <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download"><i class="ti ti-download"></i> Download image</a>
+            {% elif "pdf" in att.content_type %}
+              <iframe src="{{ att.file.url }}" class="att-pdf" title="{{ att.filename }}"></iframe>
+              <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download"><i class="ti ti-download"></i> Download PDF</a>
+            {% else %}
+              <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download"><i class="ti ti-download"></i> {{ att.filename }}</a>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+ 
+      </div>
+      <!-- end original email card -->
+ 
+      <!-- ═══════════════════════════════════════════════════════════
+           REPLY COMPOSER
+      ═══════════════════════════════════════════════════════════ -->
+      <div class="card reply-composer" id="reply-card">
+ 
+        <div class="reply-composer-header" onclick="toggleComposer()">
+          <div class="reply-composer-title">
+            <i class="ti ti-send" style="color:var(--blue);font-size:15px;"></i>
+            Reply to this ticket
+          </div>
+          <i class="ti ti-chevron-down" id="composer-chevron" style="color:var(--muted);font-size:15px;transition:transform 0.2s;"></i>
+        </div>
+ 
+        <div class="reply-composer-body" id="composer-body">
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="send_reply">
+ 
+            <!-- To -->
+            <div class="form-row">
+              <span class="form-row-label">To</span>
+              <input type="text" name="reply_to" class="form-input" value="{{ default_to }}" placeholder="recipient@example.com" required>
+            </div>
+ 
+            <!-- CC toggle -->
+            <div class="form-row" id="cc-row" style="display:none;">
+              <span class="form-row-label">CC</span>
+              <input type="text" name="reply_cc" class="form-input" placeholder="cc@example.com (comma-separated)">
+            </div>
+ 
+            <!-- BCC toggle -->
+            <div class="form-row" id="bcc-row" style="display:none;">
+              <span class="form-row-label">BCC</span>
+              <input type="text" name="reply_bcc" class="form-input" placeholder="bcc@example.com (comma-separated)">
+            </div>
+ 
+            <!-- CC / BCC links -->
+            <div style="margin-left:80px; margin-bottom:10px;">
+              <span class="cc-toggle" onclick="toggleRow('cc-row', this, 'CC')">+ CC</span>
+              &nbsp;
+              <span class="cc-toggle" onclick="toggleRow('bcc-row', this, 'BCC')">+ BCC</span>
+            </div>
+ 
+            <!-- Subject -->
+            <div class="form-row">
+              <span class="form-row-label">Subject</span>
+              <input type="text" name="reply_subject" class="form-input" value="{{ default_subject }}" required>
+            </div>
+ 
+            <!-- Body -->
+            <div class="reply-body-wrap">
+              <div class="reply-body-toolbar">
+                <button type="button" class="toolbar-btn" title="Bold" onclick="wrapText('**','**')"><i class="ti ti-bold"></i></button>
+                <button type="button" class="toolbar-btn" title="Italic" onclick="wrapText('_','_')"><i class="ti ti-italic"></i></button>
+                <button type="button" class="toolbar-btn" title="Quote" onclick="wrapText('> ','')"><i class="ti ti-blockquote"></i></button>
+                <button type="button" class="toolbar-btn" title="Clear" onclick="clearBody()"><i class="ti ti-eraser"></i></button>
+              </div>
+              <textarea
+                id="reply-body-ta"
+                name="reply_body"
+                class="reply-textarea"
+                placeholder="Write your reply here…"
+              ></textarea>
+ 
+              <!-- Signature divider -->
+              <div class="sig-divider">
+                <i class="ti ti-pencil" style="font-size:10px;"></i> Signature
+              </div>
+              <div class="sig-preview" id="sig-preview-composer">{{ staff.signature|default:"(No signature set — add one in the panel →)" }}</div>
+              <input type="hidden" name="reply_signature" id="hidden-sig" value="{{ staff.signature }}">
+            </div>
+ 
+            <!-- File dropzone -->
+            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+              <div class="drop-zone-icon"><i class="ti ti-cloud-upload"></i></div>
+              <div class="drop-zone-label">Drag & drop files here, or <span>browse</span></div>
+            </div>
+            <input type="file" id="file-input" name="reply_attachments" multiple style="display:none;" onchange="handleFiles(this.files)">
+            <div class="file-list" id="file-list"></div>
+ 
+            <button type="submit" class="send-btn">
+              <i class="ti ti-send"></i> Send Reply
+            </button>
+          </form>
+        </div>
+      </div>
+      <!-- end reply composer -->
+ 
+      <!-- ═══════════════════════════════════════════════════════════
+           REPLY HISTORY
+      ═══════════════════════════════════════════════════════════ -->
+      {% if replies %}
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i class="ti ti-clock-history" style="font-size:11px;"></i> &nbsp;Sent Replies ({{ replies|length }})</span>
+        </div>
+        <div style="padding:18px 24px;">
+          {% for rep in replies %}
+          <div class="reply-thread-item">
+            <div class="reply-thread-meta">
+              <i class="ti ti-send" style="font-size:10px;"></i>
+              Sent by <strong>{{ rep.sent_by.name }}</strong>
+              &middot; {{ rep.sent_at|date:"M d, Y H:i" }}
+            </div>
+            <div class="reply-thread-to">
+              <strong>To:</strong> {{ rep.to_email }}
+              {% if rep.cc_email %} &nbsp;·&nbsp; <strong>CC:</strong> {{ rep.cc_email }}{% endif %}
+              {% if rep.bcc_email %} &nbsp;·&nbsp; <strong>BCC:</strong> {{ rep.bcc_email }}{% endif %}
+            </div>
+            <div style="font-size:11px; color:var(--muted); margin-bottom:8px;"><strong>Subject:</strong> {{ rep.subject }}</div>
+            <div class="reply-thread-body">{{ rep.body }}</div>
+            {% if rep.attachments.exists %}
+            <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">
+              {% for ra in rep.attachments.all %}
+              <a href="{{ ra.file.url }}" download="{{ ra.filename }}" class="att-download" style="font-size:11px; padding:4px 10px;">
+                <i class="ti ti-paperclip"></i> {{ ra.filename }}
+              </a>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
       </div>
       {% endif %}
  
     </div>
-    <!-- end email card -->
+    <!-- end left col -->
  
     <!-- Lightbox -->
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
@@ -452,14 +731,14 @@
       <img id="lightbox-img" src="" alt="Preview">
     </div>
  
-    <!-- ── Right: Sidebar (unchanged) ── -->
+    <!-- ══════════════════════════════════════════════════════════════
+         RIGHT COLUMN: Sidebar
+    ══════════════════════════════════════════════════════════════ -->
     <div class="sidebar">
  
       <!-- Ticket Info -->
       <div class="sidebar-card">
-        <div class="sidebar-card-header">
-          <span class="sidebar-card-title">Ticket Info</span>
-        </div>
+        <div class="sidebar-card-header"><span class="sidebar-card-title">Ticket Info</span></div>
         <div class="sidebar-card-body">
           <div class="info-row">
             <span class="info-label">Number</span>
@@ -469,17 +748,23 @@
             <span class="info-label">Status</span>
             <span class="status-pill status-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
           </div>
+          <div class="info-row">
+            <span class="info-label">Assigned to</span>
+            <span style="font-size:12px; font-weight:500;">{{ ticket.assigned_to.name|default:"—" }}</span>
+          </div>
+          <div class="info-row" style="align-items:flex-start;">
+            <span class="info-label">Created</span>
+            <span style="font-size:11px; color:var(--muted);">{{ ticket.created_at|date:"M d, Y H:i" }}</span>
+          </div>
         </div>
       </div>
  
       <!-- Actions -->
       <div class="sidebar-card">
-        <div class="sidebar-card-header">
-          <span class="sidebar-card-title">Actions</span>
-        </div>
+        <div class="sidebar-card-header"><span class="sidebar-card-title">Actions</span></div>
         <div class="sidebar-card-body">
  
-          <a href="{% url 'ticket_history' ticket_id=ticket.id %}" class="history-btn">
+          <a href="{% url 'ticket_history' ticket_id=ticket.id %}" class="action-btn btn-ghost">
             <i class="ti ti-history"></i> View History
           </a>
  
@@ -488,10 +773,10 @@
             {% csrf_token %}
             <input type="hidden" name="action" value="add_note">
             <textarea name="note"
-              placeholder="Add note about this ticket..."
-              style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; margin-bottom:8px; resize:vertical;"
+              placeholder="Add internal note…"
+              style="width:100%; padding:9px 10px; border-radius:8px; border:1px solid var(--border); font-family:'DM Sans',sans-serif; font-size:12px; margin-bottom:8px; resize:vertical; background:var(--paper); outline:none; line-height:1.5;"
             ></textarea>
-            <button type="submit" class="close-btn" style="background:var(--blue); color:white;">
+            <button type="submit" class="action-btn btn-blue" style="margin-bottom:0;">
               <i class="ti ti-plus"></i> Add Note
             </button>
           </form>
@@ -500,36 +785,25 @@
           {% if notes %}
           <div style="margin-bottom:14px;">
             {% for note in notes %}
-            <div class="note-item {% if forloop.counter > 5 %}note-hidden{% endif %}"
-                 style="border:1px solid var(--border); border-radius:8px; padding:8px; margin-bottom:8px; background:var(--paper);">
- 
-              <div style="font-size:10px; color:var(--muted); margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
-                <span>{{ note.staff.name }} • {{ note.created_at }}</span>
+            <div class="note-item {% if forloop.counter > 5 %}note-hidden{% endif %}">
+              <div class="note-meta">
+                <span>{{ note.staff.name }} · {{ note.created_at|date:"M d, Y H:i" }}</span>
                 {% if note.staff.email == request.session.staff_email %}
-                <button type="button"
-                  onclick="toggleEdit({{ note.id }})"
-                  style="font-size:10px; border:none; background:none; color:var(--blue); cursor:pointer; display:flex; align-items:center; gap:3px;">
+                <button type="button" class="note-edit-btn" onclick="toggleEdit({{ note.id }})">
                   <i class="ti ti-pencil" style="font-size:10px;"></i> Edit
                 </button>
                 {% endif %}
               </div>
- 
-              <div id="note-text-{{ note.id }}" style="font-size:12px; color:var(--ink);">{{ note.note }}</div>
- 
+              <div id="note-text-{{ note.id }}" class="note-body">{{ note.note }}</div>
               {% if note.staff.email == request.session.staff_email %}
               <form method="POST" id="edit-form-{{ note.id }}" style="display:none; margin-top:6px;">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="edit_note">
                 <input type="hidden" name="note_id" value="{{ note.id }}">
-                <textarea name="note"
-                  style="width:100%; padding:6px; border-radius:6px; border:1px solid #ccc; font-size:12px;">{{ note.note }}</textarea>
-                <button type="submit"
-                  style="margin-top:6px; font-size:11px; padding:4px 8px; border:none; background:var(--blue); color:white; border-radius:6px;">
-                  Save
-                </button>
+                <textarea name="note" style="width:100%; padding:6px; border-radius:6px; border:1px solid #ccc; font-size:12px; font-family:'DM Sans',sans-serif;">{{ note.note }}</textarea>
+                <button type="submit" style="margin-top:6px; font-size:11px; padding:4px 10px; border:none; background:var(--blue); color:white; border-radius:6px; cursor:pointer;">Save</button>
               </form>
               {% endif %}
- 
             </div>
             {% endfor %}
  
@@ -542,113 +816,209 @@
           </div>
           {% endif %}
  
-          <!-- Close ticket -->
+          <!-- Close / Closed -->
           {% if ticket.status != "closed" %}
           <form method="POST">
             {% csrf_token %}
             <input type="hidden" name="action" value="close">
-            <button type="submit" class="close-btn">
+            <button type="submit" class="action-btn btn-dark" style="margin-bottom:0;">
               <i class="ti ti-circle-check"></i> Mark as Closed
             </button>
           </form>
           {% else %}
-          <div class="closed-notice">
-            <i class="ti ti-circle-check-filled"></i>
-            This ticket is closed
-          </div>
+          <div class="closed-notice"><i class="ti ti-circle-check-filled"></i> This ticket is closed</div>
           {% endif %}
  
         </div>
       </div>
  
-    </div><!-- end sidebar -->
+      <!-- ── Email Signature ── -->
+      <div class="sidebar-card">
+        <div class="sidebar-card-header">
+          <span class="sidebar-card-title"><i class="ti ti-signature" style="font-size:10px;"></i> &nbsp;Email Signature</span>
+        </div>
+        <div class="sidebar-card-body">
+          <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save_signature">
+            <textarea
+              id="sig-editor"
+              name="signature"
+              class="sig-textarea"
+              placeholder="Thanking you,&#10;Your Name&#10;Phone: 9876543210&#10;&#10;Company Name&#10;Designation&#10;&#10;Office Address..."
+              oninput="syncSignature(this.value)"
+            >{{ staff.signature }}</textarea>
+            <button type="submit" class="action-btn btn-ghost" style="margin-top:10px; margin-bottom:0;">
+              <i class="ti ti-device-floppy"></i> Save Signature
+            </button>
+          </form>
+          <div style="font-size:10px; color:var(--muted); margin-top:8px; line-height:1.5;">
+            This signature will automatically appear in your reply composer.
+          </div>
+        </div>
+      </div>
+ 
+    </div>
+    <!-- end sidebar -->
  
   </div>
 </div>
  
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════════════════════════════════════════ -->
 <script>
-  /* ── Lightbox ── */
-  function openLightbox(url) {
-    document.getElementById('lightbox-img').src = url;
-    document.getElementById('lightbox').classList.add('open');
+/* ── Lightbox ── */
+function openLightbox(url) {
+  document.getElementById('lightbox-img').src = url;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightbox-img').src = '';
+}
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
+ 
+/* ── HTML / Plain toggle ── */
+function showHTML() {
+  document.getElementById('html-view').style.display = 'block';
+  document.getElementById('text-view').style.display = 'none';
+  document.getElementById('btn-html').classList.add('active');
+  document.getElementById('btn-text').classList.remove('active');
+}
+function showText() {
+  document.getElementById('html-view').style.display = 'none';
+  document.getElementById('text-view').style.display = 'block';
+  document.getElementById('btn-text').classList.add('active');
+  document.getElementById('btn-html').classList.remove('active');
+}
+ 
+/* ── iframe inject ── */
+{% if has_html %}
+(function () {
+  var iframe = document.getElementById('email-iframe');
+  if (!iframe) return;
+  var htmlContent = "{{ html_body|escapejs }}";
+  var doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open(); doc.write(htmlContent); doc.close();
+  function resizeIframe() {
+    try {
+      var b = doc.body, h = doc.documentElement;
+      var ht = Math.max(b.scrollHeight, b.offsetHeight, h.clientHeight, h.scrollHeight, h.offsetHeight);
+      iframe.style.height = (ht + 24) + 'px';
+    } catch (e) {}
   }
-  function closeLightbox() {
-    document.getElementById('lightbox').classList.remove('open');
-    document.getElementById('lightbox-img').src = '';
+  iframe.addEventListener('load', resizeIframe);
+  setTimeout(resizeIframe, 300);
+  setTimeout(resizeIframe, 900);
+})();
+{% endif %}
+ 
+/* ── Reply composer toggle ── */
+function toggleComposer() {
+  var body = document.getElementById('composer-body');
+  var icon = document.getElementById('composer-chevron');
+  var open = body.classList.toggle('open');
+  icon.style.transform = open ? 'rotate(180deg)' : '';
+}
+ 
+/* ── CC / BCC toggle ── */
+function toggleRow(id, el, label) {
+  var row = document.getElementById(id);
+  var vis = row.style.display !== 'none';
+  row.style.display = vis ? 'none' : 'grid';
+  el.textContent = vis ? '+ ' + label : '− ' + label;
+}
+ 
+/* ── Toolbar helpers ── */
+function wrapText(before, after) {
+  var ta = document.getElementById('reply-body-ta');
+  var s = ta.selectionStart, e = ta.selectionEnd;
+  var sel = ta.value.substring(s, e);
+  ta.value = ta.value.substring(0, s) + before + sel + after + ta.value.substring(e);
+  ta.focus();
+}
+function clearBody() {
+  if (confirm('Clear the reply body?')) document.getElementById('reply-body-ta').value = '';
+}
+ 
+/* ── Signature sync: editor → composer preview + hidden field ── */
+function syncSignature(val) {
+  document.getElementById('sig-preview-composer').textContent = val || '(No signature set)';
+  document.getElementById('hidden-sig').value = val;
+}
+ 
+/* ── File drop zone ── */
+var selectedFiles = [];
+ 
+function handleFiles(files) {
+  for (var i = 0; i < files.length; i++) {
+    selectedFiles.push(files[i]);
   }
-  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
+  renderFileChips();
+  syncFileInput();
+}
  
-  /* ── HTML / Plain-text toggle ── */
-  function showHTML() {
-    document.getElementById('html-view').style.display = 'block';
-    document.getElementById('text-view').style.display = 'none';
-    document.getElementById('btn-html').classList.add('active');
-    document.getElementById('btn-text').classList.remove('active');
+function removeFile(idx) {
+  selectedFiles.splice(idx, 1);
+  renderFileChips();
+  syncFileInput();
+}
+ 
+function renderFileChips() {
+  var list = document.getElementById('file-list');
+  list.innerHTML = '';
+  selectedFiles.forEach(function(f, idx) {
+    var chip = document.createElement('div');
+    chip.className = 'file-chip';
+    chip.innerHTML = '<i class="ti ti-file" style="font-size:11px;"></i>' + f.name +
+      '<span class="file-chip-remove" onclick="removeFile(' + idx + ')">×</span>';
+    list.appendChild(chip);
+  });
+}
+ 
+function syncFileInput() {
+  // rebuild DataTransfer to keep file input in sync
+  var dt = new DataTransfer();
+  selectedFiles.forEach(function(f) { dt.items.add(f); });
+  document.getElementById('file-input').files = dt.files;
+}
+ 
+var dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', function(e) { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', function() { dz.classList.remove('dragover'); });
+dz.addEventListener('drop', function(e) {
+  e.preventDefault();
+  dz.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
+ 
+/* ── Note edit toggle ── */
+function toggleEdit(id) {
+  var form = document.getElementById('edit-form-' + id);
+  var text = document.getElementById('note-text-' + id);
+  if (form.style.display === 'none') {
+    form.style.display = 'block';
+    text.style.display = 'none';
+  } else {
+    form.style.display = 'none';
+    text.style.display = 'block';
   }
-  function showText() {
-    document.getElementById('html-view').style.display = 'none';
-    document.getElementById('text-view').style.display = 'block';
-    document.getElementById('btn-text').classList.add('active');
-    document.getElementById('btn-html').classList.remove('active');
-  }
+}
  
-  /* ── Inject HTML into sandboxed iframe & auto-resize ── */
-  {% if has_html %}
-  (function () {
-    var iframe = document.getElementById('email-iframe');
-    if (!iframe) return;
- 
-    var htmlContent = "{{ html_body|escapejs }}";
- 
-    var doc = iframe.contentDocument || iframe.contentWindow.document;
-    doc.open();
-    doc.write(htmlContent);
-    doc.close();
- 
-    function resizeIframe() {
-      try {
-        var body = doc.body;
-        var html = doc.documentElement;
-        var height = Math.max(
-          body.scrollHeight, body.offsetHeight,
-          html.clientHeight, html.scrollHeight, html.offsetHeight
-        );
-        iframe.style.height = (height + 24) + 'px';
-      } catch (e) {}
-    }
- 
-    iframe.addEventListener('load', resizeIframe);
-    setTimeout(resizeIframe, 300);
-    setTimeout(resizeIframe, 900);
-  })();
-  {% endif %}
- 
-  /* ── Note edit toggle ── */
-  function toggleEdit(id) {
-    var form = document.getElementById("edit-form-" + id);
-    var text = document.getElementById("note-text-" + id);
-    if (form.style.display === "none") {
-      form.style.display = "block";
-      text.style.display = "none";
-    } else {
-      form.style.display = "none";
-      text.style.display = "block";
-    }
-  }
- 
-  /* ── Notes expand/collapse ── */
-  var notesExpanded = false;
-  function toggleNotes(total) {
-    var allNotes = document.querySelectorAll('.note-item');
-    var icon     = document.getElementById('notes-toggle-icon');
-    var label    = document.getElementById('notes-toggle-label');
-    notesExpanded = !notesExpanded;
-    allNotes.forEach(function(note, index) {
-      if (index >= 5) note.style.display = notesExpanded ? 'block' : 'none';
-    });
-    icon.className    = notesExpanded ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
-    label.textContent = notesExpanded ? 'Show less' : 'Show all ' + total + ' notes';
-  }
+/* ── Notes expand/collapse ── */
+var notesExpanded = false;
+function toggleNotes(total) {
+  var allNotes = document.querySelectorAll('.note-item');
+  var icon  = document.getElementById('notes-toggle-icon');
+  var label = document.getElementById('notes-toggle-label');
+  notesExpanded = !notesExpanded;
+  allNotes.forEach(function(note, index) {
+    if (index >= 5) note.style.display = notesExpanded ? 'block' : 'none';
+  });
+  icon.className    = notesExpanded ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
+  label.textContent = notesExpanded ? 'Show less' : 'Show all ' + total + ' notes';
+}
 </script>
  
 </body>

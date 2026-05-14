@@ -1,113 +1,186 @@
 {% extends "main.html" %}
-{% block title %}Home{% endblock  %}
+{% block title %}Home{% endblock %}
 {% load static %}
 
 {% block css %}
-  
+<style>
+  .stat-cards {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
 
+  .stat-card {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    border-radius: 14px;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    background: var(--card);
+    transition: box-shadow 0.2s, transform 0.15s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  }
+
+  .stat-icon { font-size: 28px; }
+  .stat-card.unassigned .stat-icon { color: var(--blue); }
+  .stat-card.assigned   .stat-icon { color: #7a5c10; }
+  .stat-card.closed     .stat-icon { color: var(--green); }
+
+  .stat-info { display: flex; flex-direction: column; gap: 2px; }
+
+  .stat-count {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 400;
+    letter-spacing: 0.03em;
+  }
+</style>
 {% endblock %}
- 
 
- 
-  <!-- ── Sidebar ── -->
+{% block content %}
+<div class="shell">
 
- 
-  <!-- ── Main ── -->
-  {% block content %}
-    <div class="shell">
- 
-      <div class="top-bar">
-        <div class="header-left">
-          <span class="eyebrow">Mail</span>
-          <h1 class="title">
-            Tickets
-            {% if fetched %}
-              <span class="badge">{{ emails|length }}</span>
-            {% endif %}
-          </h1>
-        </div>
- 
-        <div>
-          <button class="fetch-btn" onclick="submitFetch(this)">
-            <i class="ti ti-refresh"></i> Fetch Mail
-          </button>
-        </div>
+  <!-- ── Stat Cards (above everything) ── -->
+  <div class="stat-cards">
+    <a href="{% url 'ticket_list' %}#unassigned" class="stat-card unassigned">
+      <div class="stat-icon"><i class="ti ti-clock"></i></div>
+      <div class="stat-info">
+        <span class="stat-count">{{ unassigned_count }}</span>
+        <span class="stat-label">Unassigned</span>
       </div>
- 
-      <form id="fetch-form" method="POST" style="display:none;">
-        {% csrf_token %}
-        <input type="hidden" name="fetch" value="1">
-      </form>
- 
-      {% if error %}
-        <div class="error-msg">
-          <i class="ti ti-alert-circle"></i>
-          {{ error }}
-        </div>
-      {% endif %}
- 
-      {% if not fetched %}
- 
-        <div class="idle-state">
-          <i class="ti ti-inbox"></i>
-          <p>Press "Fetch Mail" to load your inbox.</p>
-        </div>
- 
-      {% elif emails %}
- 
-        <div class="email-list">
-          {% for email in emails %}
-          <a href="{% url 'email_detail' email.id %}" class="email-link"
-             style="animation-delay: {{ forloop.counter0 }}00ms;">
-            <div class="email-card">
- 
-              <div class="avatar">{{ email.sender|slice:":2"|upper }}</div>
- 
-              <div class="email-body">
-                <div class="email-row">
-                  <div class="sender-group">
-                    <span class="email-from">{{ email.sender }}</span>
-                    <span class="ticket-badge">{{ email.ticket }}</span>
-                    <span class="status-pill status-{{ email.status }}">{{ email.status }}</span>
-                  </div>
-                  <span class="email-date">{{ email.date }}</span>
-                </div>
- 
-                <div class="email-subject">{{ email.subject }}</div>
-                <div class="email-preview">{{ email.body }}</div>
- 
-                <div class="assigned-row">
-                  {% if email.assigned_to %}
-                    <span class="assigned-chip">
-                      <span class="assigned-chip-avatar">{{ email.assigned_to|slice:":2"|upper }}</span>
-                      {{ email.assigned_to }}
-                    </span>
-                  {% else %}
-                    <span class="unassigned-chip">
-                      <i class="ti ti-user-off" style="font-size:11px; vertical-align:middle;"></i>
-                      Unassigned
-                    </span>
-                  {% endif %}
-                </div>
- 
-              </div>
-            </div>
-          </a>
-          {% endfor %}
-        </div>
- 
-      {% else %}
- 
-        <div class="empty">
-          <i class="ti ti-mail-off"></i>
-          <p>Your inbox is empty.</p>
-        </div>
- 
-      {% endif %}
- 
-    </div>
-  {% endblock %}
+    </a>
 
- {% block js %}
-  
- {% endblock js %}
+    <a href="{% url 'ticket_list' %}#assigned" class="stat-card assigned">
+      <div class="stat-icon"><i class="ti ti-user-check"></i></div>
+      <div class="stat-info">
+        <span class="stat-count">{{ assigned_count }}</span>
+        <span class="stat-label">Assigned</span>
+      </div>
+    </a>
+
+    <a href="{% url 'ticket_list' %}#closed" class="stat-card closed">
+      <div class="stat-icon"><i class="ti ti-circle-check"></i></div>
+      <div class="stat-info">
+        <span class="stat-count">{{ closed_count }}</span>
+        <span class="stat-label">Closed</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- ── Top Bar ── -->
+  <div class="top-bar">
+    <div class="header-left">
+      <span class="eyebrow">Mail</span>
+      <h1 class="title">
+        Tickets
+        {% if fetched %}
+          <span class="badge">{{ emails|length }}</span>
+        {% endif %}
+      </h1>
+    </div>
+
+    <div>
+      <button class="fetch-btn" onclick="submitFetch(this)">
+        <i class="ti ti-refresh"></i> Fetch Mail
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Hidden Fetch Form ── -->
+  <form id="fetch-form" method="POST" style="display:none;">
+    {% csrf_token %}
+    <input type="hidden" name="fetch" value="1">
+  </form>
+
+  <!-- ── Error ── -->
+  {% if error %}
+    <div class="error-msg">
+      <i class="ti ti-alert-circle"></i>
+      {{ error }}
+    </div>
+  {% endif %}
+
+  <!-- ── States ── -->
+  {% if not fetched %}
+    <div class="idle-state">
+      <i class="ti ti-inbox"></i>
+      <p>Press "Fetch Mail" to load your inbox.</p>
+    </div>
+
+  {% elif emails %}
+    <div class="email-list">
+      {% for email in emails %}
+      <a href="{% url 'email_detail' email.id %}" class="email-link"
+         style="animation-delay: {{ forloop.counter0 }}00ms;">
+        <div class="email-card">
+
+          <div class="avatar">{{ email.sender|slice:":2"|upper }}</div>
+
+          <div class="email-body">
+            <div class="email-row">
+              <div class="sender-group">
+                <span class="email-from">{{ email.sender }}</span>
+                <span class="ticket-badge">{{ email.ticket }}</span>
+                <span class="status-pill status-{{ email.status }}">{{ email.status }}</span>
+              </div>
+              <span class="email-date">{{ email.date }}</span>
+            </div>
+
+            <div class="email-subject">{{ email.subject }}</div>
+            <div class="email-preview">{{ email.body }}</div>
+
+            <div class="assigned-row">
+              {% if email.assigned_to %}
+                <span class="assigned-chip">
+                  <span class="assigned-chip-avatar">{{ email.assigned_to|slice:":2"|upper }}</span>
+                  {{ email.assigned_to }}
+                </span>
+              {% else %}
+                <span class="unassigned-chip">
+                  <i class="ti ti-user-off" style="font-size:11px; vertical-align:middle;"></i>
+                  Unassigned
+                </span>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div class="empty">
+      <i class="ti ti-mail-off"></i>
+      <p>Your inbox is empty.</p>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+  function submitFetch(btn) {
+    btn.classList.add('loading');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ti ti-refresh"></i> Fetching...';
+    document.getElementById('fetch-form').submit();
+  }
+</script>
+{% endblock %}
