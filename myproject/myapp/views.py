@@ -203,7 +203,6 @@ def inbox(request):
         "closed_count":     closed_count,
     })
 
-
 def email_detail(request, mail_id):
     if not request.session.get("token"):
         return redirect("login")
@@ -211,15 +210,15 @@ def email_detail(request, mail_id):
     is_manual = not mail_id.isdigit()
 
     if is_manual:
-        ticket   = get_object_or_404(Ticket, mail_id=mail_id)
+        ticket    = get_object_or_404(Ticket, mail_id=mail_id)
         all_staff = Staff.objects.all()
+        cc_list   = [addr.strip() for addr in ticket.cc.split(",")] if ticket.cc else []
 
         return render(request, "email_detail.html", {
             "subject":    ticket.subject,
             "from_email": ticket.sender,
             "date":       ticket.date,
-            "cc":         ticket.cc,
-            "bcc":        ticket.bcc,
+            "cc_list":    cc_list,
             "body":       ticket.body,
             "html_body":  "",
             "has_html":   False,
@@ -238,7 +237,6 @@ def email_detail(request, mail_id):
         from_email = ""
         date       = ""
         cc         = ""
-        bcc        = ""
         text_body  = ""
         html_body  = ""
         attachments = []
@@ -256,7 +254,6 @@ def email_detail(request, mail_id):
             from_email = msg.get("From")
             date       = msg.get("Date")
             cc         = msg.get("CC", "")
-            bcc        = msg.get("BCC", "")
 
             if msg.is_multipart():
                 for part in msg.walk():
@@ -300,7 +297,6 @@ def email_detail(request, mail_id):
                 "date":    date,
                 "body":    text_body or html_body,
                 "cc":      cc,
-                "bcc":     bcc,
             }
         )
 
@@ -314,6 +310,7 @@ def email_detail(request, mail_id):
                 )
 
         all_staff = Staff.objects.all()
+        cc_list   = [addr.strip() for addr in cc.split(",")] if cc else []
 
         safe_html = ""
         if html_body:
@@ -323,8 +320,7 @@ def email_detail(request, mail_id):
             "subject":    subject,
             "from_email": from_email,
             "date":       date,
-            "cc":         cc,
-            "bcc":        bcc,
+            "cc_list":    cc_list,
             "body":       text_body,
             "html_body":  safe_html,
             "has_html":   bool(safe_html.strip()),
