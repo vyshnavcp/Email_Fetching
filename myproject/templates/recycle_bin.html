@@ -4,48 +4,8 @@
 
 {% block css %}
 <style>
-    .search-box{
-    margin-bottom:20px;
-}
 
-.search-box input{
-    width:350px;
-    padding:12px 16px;
-    border:1px solid #ddd;
-    border-radius:10px;
-    outline:none;
-    font-size:14px;
-}
-.pagination{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:10px;
-  margin-top:30px;
-  flex-wrap:wrap;
-}
-
-.pagination a{
-  text-decoration:none;
-  padding:10px 16px;
-  border-radius:10px;
-  background:#f2efe7;
-  color:#333;
-  font-size:14px;
-  font-weight:600;
-  transition:.2s;
-}
-
-.pagination a:hover{
-  background:#ddd6c7;
-}
-
-.pagination a.active{
-  background:#c9a84c;
-  color:white;
-}
 :root{
-  --bg:#f7f5f0;
   --card:#fffefb;
   --border:#e4dfd3;
   --gold:#c9a84c;
@@ -60,13 +20,6 @@
   padding:50px 24px;
 }
 
-.top-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:end;
-  margin-bottom:30px;
-}
-
 .title{
   font-size:38px;
   font-weight:700;
@@ -75,6 +28,25 @@
 .sub{
   color:var(--muted);
   margin-top:5px;
+}
+
+.search-box{
+  margin:25px 0;
+}
+
+.search-box input{
+  width:350px;
+  padding:12px 16px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  outline:none;
+  font-size:14px;
+}
+
+.bulk-actions{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
 }
 
 table{
@@ -91,14 +63,11 @@ th{
   padding:18px;
   text-align:left;
   font-size:13px;
-  color:var(--muted);
-  text-transform:uppercase;
 }
 
 td{
   padding:18px;
   border-bottom:1px solid var(--border);
-  font-size:14px;
 }
 
 tbody tr:hover{
@@ -127,7 +96,6 @@ tbody tr:hover{
   cursor:pointer;
   font-size:13px;
   font-weight:600;
-  transition:.2s;
 }
 
 .btn-restore{
@@ -135,32 +103,42 @@ tbody tr:hover{
   color:var(--green);
 }
 
-.btn-restore:hover{
-  background:var(--green);
-  color:white;
-}
-
 .btn-delete{
   background:#fff0ee;
   color:var(--red);
 }
 
-.btn-delete:hover{
-  background:var(--red);
+.pagination{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:30px;
+  flex-wrap:wrap;
+}
+
+.pagination a{
+  text-decoration:none;
+  padding:10px 16px;
+  border-radius:10px;
+  background:#f2efe7;
+  color:#333;
+  cursor:pointer;
+}
+
+.pagination a.active{
+  background:#c9a84c;
   color:white;
 }
 
 .empty{
   text-align:center;
-  padding:80px 20px;
-  color:var(--muted);
+  padding:60px;
+  color:#999;
 }
 
-.empty i{
-  font-size:50px;
-  display:block;
-  margin-bottom:10px;
-  opacity:.3;
+.check-col{
+  width:50px;
+  text-align:center;
 }
 
 </style>
@@ -172,118 +150,162 @@ tbody tr:hover{
 
 <div class="shell">
 
-  <div class="top-header">
-    <div>
-      <h1 class="title">Recycle Bin</h1>
-      <div class="sub">
-        Deleted tickets can be restored or permanently deleted.
-      </div>
+    <h1 class="title">Recycle Bin</h1>
+
+    <div class="sub">
+        Deleted tickets can be restored or permanently deleted
     </div>
-  </div>
-<div class="search-box">
 
-    <input
-        type="text"
-        id="searchInput"
-        placeholder="Search ticket number, subject, sender..."
-    >
+    <!-- SEARCH -->
+    <div class="search-box">
 
-</div>
-  <table>
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search ticket number, subject, sender..."
+        >
 
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Ticket No</th>
-        <th>Subject</th>
-        <th>Sender</th>
-        <th>Deleted Date</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
+    </div>
 
-    <tbody id="ticket-body">
+    <!-- BULK ACTIONS -->
+    <div class="bulk-actions">
 
-        {% for ticket in page_obj %}
+        <button
+            class="btn btn-restore"
+            onclick="bulkRestore()"
+        >
+            Restore Selected
+        </button>
 
-        <tr id="row-{{ ticket.id }}">
+        <button
+            class="btn btn-delete"
+            onclick="bulkDelete()"
+        >
+            Delete Selected
+        </button>
 
-            <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
+    </div>
 
-            <td class="ticket-no">
-                {{ ticket.ticket_number }}
-            </td>
+    <!-- TABLE -->
+    <table>
 
-            <td>
-                {{ ticket.subject }}
-            </td>
+        <thead>
 
-            <td>
-                {{ ticket.sender }}
-            </td>
+            <tr>
 
-            <td class="date">
-                {{ ticket.deleted_at|date:"d M Y h:i A" }}
-            </td>
+                <th class="check-col">
+                    <input type="checkbox" id="select-all">
+                </th>
 
-            <td>
+                <th>#</th>
+                <th>Ticket No</th>
+                <th>Subject</th>
+                <th>Sender</th>
+                <th>Deleted Date</th>
+                <th>Actions</th>
 
-                <div class="actions">
+            </tr>
 
-                    <button
-                        class="btn btn-restore"
-                        onclick="restoreTicket({{ ticket.id }})"
+        </thead>
+
+        <tbody id="ticket-body">
+
+            {% for ticket in page_obj %}
+
+            <tr id="row-{{ ticket.id }}">
+
+                <td class="check-col">
+
+                    <input
+                        type="checkbox"
+                        class="ticket-check"
+                        value="{{ ticket.id }}"
                     >
-                        Restore
-                    </button>
 
-                    <button
-                        class="btn btn-delete"
-                        onclick="permanentDelete({{ ticket.id }})"
-                    >
-                        Delete Permanently
-                    </button>
+                </td>
 
-                </div>
+                <td>
+                    {{ page_obj.start_index|add:forloop.counter0 }}
+                </td>
 
-            </td>
+                <td class="ticket-no">
+                    {{ ticket.ticket_number }}
+                </td>
 
-        </tr>
+                <td>
+                    {{ ticket.subject }}
+                </td>
 
-        {% empty %}
+                <td>
+                    {{ ticket.sender }}
+                </td>
 
-        <tr>
-            <td colspan="6" class="empty">
-                No Deleted Tickets
-            </td>
-        </tr>
+                <td class="date">
+                    {{ ticket.deleted_at|date:"d M Y h:i A" }}
+                </td>
 
-        {% endfor %}
+                <td>
+
+                    <div class="actions">
+
+                        <button
+                            class="btn btn-restore"
+                            onclick="restoreTicket({{ ticket.id }})"
+                        >
+                            Restore
+                        </button>
+
+                        <button
+                            class="btn btn-delete"
+                            onclick="permanentDelete({{ ticket.id }})"
+                        >
+                            Delete
+                        </button>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+
+                <td colspan="7" class="empty">
+                    No Deleted Tickets
+                </td>
+
+            </tr>
+
+            {% endfor %}
 
         </tbody>
 
-  </table>
-  <div class="pagination" id="pagination">
+    </table>
 
-{% if page_obj.has_previous %}
-<a href="?page={{ page_obj.previous_page_number }}">Prev</a>
-{% endif %}
+    <!-- PAGINATION -->
+    <div class="pagination" id="pagination">
 
-{% for num in page_obj.paginator.page_range %}
+        {% for num in page_obj.paginator.page_range %}
 
-    {% if page_obj.number == num %}
-        <a class="active">{{ num }}</a>
-    {% else %}
-        <a href="?page={{ num }}">{{ num }}</a>
-    {% endif %}
+            {% if page_obj.number == num %}
 
-{% endfor %}
+                <a class="active">
+                    {{ num }}
+                </a>
 
-{% if page_obj.has_next %}
-<a href="?page={{ page_obj.next_page_number }}">Next</a>
-{% endif %}
+            {% else %}
 
-</div>
+                <a onclick="loadRecycleBin({{ num }})">
+                    {{ num }}
+                </a>
+
+            {% endif %}
+
+        {% endfor %}
+
+    </div>
 
 </div>
 
@@ -296,6 +318,9 @@ tbody tr:hover{
 <script>
 
 const CSRF = "{{ csrf_token }}";
+
+
+
 function loadRecycleBin(page=1){
 
     $.ajax({
@@ -304,9 +329,11 @@ function loadRecycleBin(page=1){
 
         method: "GET",
 
-        data: {
+        data:{
+
             search: $("#searchInput").val(),
             page: page
+
         },
 
         headers:{
@@ -319,13 +346,23 @@ function loadRecycleBin(page=1){
 
             if(response.tickets.length > 0){
 
-                response.tickets.forEach(function(ticket,index){
+                response.tickets.forEach(function(ticket){
 
                     rows += `
 
                     <tr id="row-${ticket.id}">
 
-                        <td>${index + 1}</td>
+                        <td class="check-col">
+
+                            <input
+                                type="checkbox"
+                                class="ticket-check"
+                                value="${ticket.id}"
+                            >
+
+                        </td>
+
+                        <td>${ticket.number}</td>
 
                         <td class="ticket-no">
                             ${ticket.ticket_number}
@@ -358,7 +395,7 @@ function loadRecycleBin(page=1){
                                     class="btn btn-delete"
                                     onclick="permanentDelete(${ticket.id})"
                                 >
-                                    Delete Permanently
+                                    Delete
                                 </button>
 
                             </div>
@@ -374,11 +411,15 @@ function loadRecycleBin(page=1){
             }else{
 
                 rows = `
-                    <tr>
-                        <td colspan="6" class="empty">
-                            No Deleted Tickets
-                        </td>
-                    </tr>
+
+                <tr>
+
+                    <td colspan="7" class="empty">
+                        No Deleted Tickets
+                    </td>
+
+                </tr>
+
                 `;
 
             }
@@ -392,34 +433,36 @@ function loadRecycleBin(page=1){
             if(response.has_previous){
 
                 pagination += `
-                    <a href="javascript:void(0)"
-                       onclick="loadRecycleBin(${response.current_page - 1})">
-                       Prev
+                    <a onclick="loadRecycleBin(${response.current_page - 1})">
+                        Prev
                     </a>
                 `;
+
             }
 
             for(let i=1; i<=response.total_pages; i++){
 
                 pagination += `
-                    <a
-                        href="javascript:void(0)"
-                        onclick="loadRecycleBin(${i})"
-                        class="${i == response.current_page ? 'active' : ''}"
-                    >
-                        ${i}
-                    </a>
+
+                <a
+                    onclick="loadRecycleBin(${i})"
+                    class="${i == response.current_page ? 'active' : ''}"
+                >
+                    ${i}
+                </a>
+
                 `;
+
             }
 
             if(response.has_next){
 
                 pagination += `
-                    <a href="javascript:void(0)"
-                       onclick="loadRecycleBin(${response.current_page + 1})">
-                       Next
+                    <a onclick="loadRecycleBin(${response.current_page + 1})">
+                        Next
                     </a>
                 `;
+
             }
 
             $("#pagination").html(pagination);
@@ -430,15 +473,17 @@ function loadRecycleBin(page=1){
 
 }
 
-function restoreTicket(ticketId){
 
-   
+
+// SINGLE RESTORE
+
+function restoreTicket(ticketId){
 
     $.ajax({
 
-        url: `/restore-ticket/${ticketId}/`,
+        url:`/restore-ticket/${ticketId}/`,
 
-        method: "POST",
+        method:"POST",
 
         headers:{
             "X-CSRFToken": CSRF
@@ -448,18 +493,9 @@ function restoreTicket(ticketId){
 
             if(res.success){
 
-               loadRecycleBin();
-
-            }else{
-
-                alert("Restore failed.");
+                loadRecycleBin();
 
             }
-        },
-
-        error:function(){
-
-            alert("Server error.");
 
         }
 
@@ -468,16 +504,16 @@ function restoreTicket(ticketId){
 }
 
 
+
+// SINGLE DELETE
 
 function permanentDelete(ticketId){
 
-   
-
     $.ajax({
 
-        url: `/permanent-delete/${ticketId}/`,
+        url:`/permanent-delete/${ticketId}/`,
 
-        method: "POST",
+        method:"POST",
 
         headers:{
             "X-CSRFToken": CSRF
@@ -487,31 +523,141 @@ function permanentDelete(ticketId){
 
             if(res.success){
 
-                $(`#row-${ticketId}`).fadeOut(300);
-
-            }else{
-
-                alert("Delete failed.");
+                loadRecycleBin();
 
             }
-
-        },
-
-        error:function(){
-
-            alert("Server error.");
 
         }
 
     });
 
 }
+
+
+
+// GET SELECTED IDS
+
+function getSelectedTickets(){
+
+    let ids = [];
+
+    $(".ticket-check:checked").each(function(){
+
+        ids.push($(this).val());
+
+    });
+
+    return ids;
+
+}
+
+
+
+// BULK RESTORE
+
+function bulkRestore(){
+
+    let ids = getSelectedTickets();
+
+    if(ids.length == 0){
+        return;
+    }
+
+    $.ajax({
+
+        url:"/bulk-restore/",
+
+        method:"POST",
+
+        headers:{
+            "X-CSRFToken": CSRF
+        },
+
+        data:{
+            ids: ids
+        },
+
+        traditional:true,
+
+        success:function(res){
+
+            if(res.success){
+
+                loadRecycleBin();
+
+            }
+
+        }
+
+    });
+
+}
+
+
+
+// BULK DELETE
+
+function bulkDelete(){
+
+    let ids = getSelectedTickets();
+
+    if(ids.length == 0){
+        return;
+    }
+
+    $.ajax({
+
+        url:"/bulk-delete/",
+
+        method:"POST",
+
+        headers:{
+            "X-CSRFToken": CSRF
+        },
+
+        data:{
+            ids: ids
+        },
+
+        traditional:true,
+
+        success:function(res){
+
+            if(res.success){
+
+                loadRecycleBin();
+
+            }
+
+        }
+
+    });
+
+}
+
+
+
+// SELECT ALL
+
+$(document).on("change", "#select-all", function(){
+
+    $(".ticket-check").prop(
+        "checked",
+        $(this).is(":checked")
+    );
+
+});
+
+
+
+// LIVE SEARCH
 
 $("#searchInput").on("keyup", function(){
 
     loadRecycleBin(1);
 
 });
+
 </script>
 
 {% endblock %}

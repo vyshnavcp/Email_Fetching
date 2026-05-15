@@ -114,6 +114,7 @@ select:focus {
   margin-bottom: 16px;
   font-size: 14px;
   color: var(--ink);
+  flex-wrap: wrap;
 }
  
 .bulk-bar.visible { display: flex; }
@@ -147,6 +148,22 @@ select:focus {
 }
  
 .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+ 
+.btn-close-ticket {
+  background: #f0f0f0;
+  color: #444;
+  border: 1px solid #ddd;
+}
+ 
+.btn-close-ticket:hover { background: #333; color: #fff; border-color: #333; }
+ 
+.btn-unassign {
+  background: #fff3e0;
+  color: var(--orange);
+  border: 1px solid #ffe0b2;
+}
+ 
+.btn-unassign:hover { background: var(--orange); color: #fff; border-color: var(--orange); }
  
 .btn-delete-all {
   background: #fff0ee;
@@ -309,8 +326,8 @@ tbody tr:active { background: var(--cream); }
   padding: 0 10px;
 }
  
-.page-btn:hover   { border-color: var(--gold); color: var(--gold); }
-.page-btn.active  { background: var(--gold); border-color: var(--gold); color: #fff; font-weight: 700; }
+.page-btn:hover    { border-color: var(--gold); color: var(--gold); }
+.page-btn.active   { background: var(--gold); border-color: var(--gold); color: #fff; font-weight: 700; }
 .page-btn:disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
  
 .page-ellipsis {
@@ -374,6 +391,7 @@ tbody tr:active { background: var(--cream); }
   input, select { width: 100%; }
   table { display: block; overflow-x: auto; }
   .pagination-bar { flex-direction: column; align-items: flex-start; }
+  .bulk-bar { flex-direction: column; align-items: flex-start; }
 }
 </style>
 {% endblock %}
@@ -387,7 +405,6 @@ tbody tr:active { background: var(--cream); }
       <div class="eyebrow">Management</div>
       <h1 class="title">All Tickets</h1>
     </div>
-    <!-- Delete All button (top-right) -->
     <button class="btn btn-delete-all" onclick="confirmDeleteAll()">
       <i class="ti ti-trash"></i> Delete All
     </button>
@@ -424,7 +441,6 @@ tbody tr:active { background: var(--cream); }
       <input type="date" id="to_date">
     </div>
  
-    <!-- Per-page selector -->
     <select id="per-page">
       <option value="10" selected>10 / page</option>
       <option value="25">25 / page</option>
@@ -433,11 +449,10 @@ tbody tr:active { background: var(--cream); }
     </select>
   </div>
  
-  <!-- BULK ACTION BAR (shown when rows selected) -->
+  <!-- BULK ACTION BAR -->
   <div class="bulk-bar" id="bulk-bar">
     <span id="selected-count">0</span> ticket(s) selected
  
-    <!-- Assign staff dropdown -->
     <select id="bulk-assign-staff">
       <option value="">Assign Staff</option>
       {% for s in staffs %}
@@ -445,8 +460,16 @@ tbody tr:active { background: var(--cream); }
       {% endfor %}
     </select>
  
-    <button class="btn btn-outline" onclick="bulkAssignTickets()">
+    <button class="btn btn-outline" onclick="bulkAction('assign')">
       <i class="ti ti-user-check"></i> Assign
+    </button>
+ 
+    <button class="btn btn-unassign" onclick="bulkAction('unassign')">
+      <i class="ti ti-user-off"></i> Unassign
+    </button>
+ 
+    <button class="btn btn-close-ticket" onclick="bulkAction('close')">
+      <i class="ti ti-lock"></i> Close
     </button>
  
     <button class="btn btn-danger" onclick="confirmDeleteSelected()">
@@ -544,7 +567,7 @@ tbody tr:active { background: var(--cream); }
                 </td>
                 <td class="date">${offset + index + 1}</td>
                 <td class="ticket-no" onclick="window.location='${detailUrl}'">${ticket.ticket_number}</td>
-                <td class="subject"  onclick="window.location='${detailUrl}'">${ticket.subject}</td>
+                <td class="subject"   onclick="window.location='${detailUrl}'">${ticket.subject}</td>
                 <td onclick="window.location='${detailUrl}'">${ticket.sender}</td>
                 <td onclick="window.location='${detailUrl}'">${ccHtml}</td>
                 <td onclick="window.location='${detailUrl}'"><span class="badge ${ticket.status}">${ticket.status}</span></td>
@@ -590,7 +613,6 @@ tbody tr:active { background: var(--cream); }
     const from = (page - 1) * per_page + 1;
     const to   = Math.min(page * per_page, total);
  
-    // Build page numbers with ellipsis
     let pages = [];
     if (total_pages <= 7) {
       for (let i = 1; i <= total_pages; i++) pages.push(i);
@@ -605,9 +627,7 @@ tbody tr:active { background: var(--cream); }
     }
  
     let btns = pages.map(p => {
-      if (p === "…") {
-        return `<span class="page-ellipsis">…</span>`;
-      }
+      if (p === "…") return `<span class="page-ellipsis">…</span>`;
       return `<button class="page-btn ${p === page ? 'active' : ''}" onclick="loadTickets(${p})">${p}</button>`;
     }).join("");
  
@@ -737,26 +757,33 @@ tbody tr:active { background: var(--cream); }
     });
   }
  
-  // ── Bulk assign ───────────────────────────────────────────────
-  function bulkAssignTickets() {
+  // ── Bulk action (assign / unassign / close) ───────────────────
+  function bulkAction(action) {
     const ids     = getSelectedIds();
     const staffId = $("#bulk-assign-staff").val();
  
-    if (!ids.length) { alert("Select tickets first."); return; }
-    if (!staffId)    { alert("Select a staff member."); return; }
+    if (!ids.length) {
+      alert("Select tickets first.");
+      return;
+    }
+ 
+    if (action === "assign" && !staffId) {
+      alert("Select a staff member to assign.");
+      return;
+    }
  
     $.ajax({
-      url: "{% url 'bulk_assign_tickets' %}",
+      url: "{% url 'bulk_action_tickets' %}",
       method: "POST",
       contentType: "application/json",
       headers: { "X-CSRFToken": CSRF },
-      data: JSON.stringify({ ids: ids, staff_id: staffId }),
+      data: JSON.stringify({ ids: ids, action: action, staff_id: staffId || null }),
       success: function(res) {
         if (res.success) {
           clearSelection();
           loadTickets(currentPage);
         } else {
-          alert(res.error || "Assign failed.");
+          alert(res.error || "Action failed.");
         }
       },
       error: function() {
