@@ -235,7 +235,42 @@ tbody tr:hover{
     display:block;
     opacity:.3;
 }
+/* TOAST MESSAGE */
 
+.toast{
+    position:fixed;
+    right:30px;
+    bottom:30px;
+    background:#111;
+    color:white;
+    padding:14px 20px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    z-index:99999;
+    transform:translateY(100px);
+    opacity:0;
+    transition:.35s;
+    box-shadow:0 12px 35px rgba(0,0,0,.18);
+}
+
+.toast.show{
+    transform:translateY(0);
+    opacity:1;
+}
+
+.toast.success{
+    border-left:4px solid var(--green);
+}
+
+.toast.error{
+    border-left:4px solid var(--red);
+}
+
+.toast i{
+    font-size:20px;
+}
 </style>
 {% endblock %}
 {% block content %}
@@ -322,9 +357,50 @@ tbody tr:hover{
     </div>
 
 </div>
+<div class="toast" id="toast">
+
+    <i class="ti ti-check" id="toast-icon"></i>
+
+    <span id="toast-msg">
+        Success
+    </span>
+
+</div>
 {% endblock %}
 {% block js %}
 <script>
+
+function showToast(message, type="success"){
+
+    const toast = $("#toast");
+
+    $("#toast-msg").text(message);
+
+    if(type == "success"){
+
+        $("#toast-icon").attr("class","ti ti-check");
+
+    }else{
+
+        $("#toast-icon").attr("class","ti ti-alert-circle");
+
+    }
+
+    toast.removeClass("success error");
+
+    toast.addClass(type);
+
+    toast.addClass("show");
+
+    setTimeout(function(){
+
+        toast.removeClass("show");
+
+    },3000);
+
+}
+
+
 
 function loadStaffs(){
 
@@ -389,7 +465,7 @@ function loadStaffs(){
                         <td>
 
                             <button
-                                onclick="changeStatus(${staff.id})"
+                                onclick="changeStatus(${staff.id}, '${staff.status}')"
                                 class="action-btn ${staff.status == 'active' ? 'btn-inactive' : 'btn-active'}"
                             >
 
@@ -436,7 +512,8 @@ function loadStaffs(){
 }
 
 
-function changeStatus(staffId){
+
+function changeStatus(staffId, currentStatus){
 
     $.ajax({
 
@@ -444,7 +521,26 @@ function changeStatus(staffId){
 
         success: function(){
 
+            showToast(
+
+                currentStatus == "active"
+                ? "Staff marked as inactive"
+                : "Staff marked as active",
+
+                "success"
+
+            );
+
             loadStaffs();
+
+        },
+
+        error:function(){
+
+            showToast(
+                "Something went wrong",
+                "error"
+            );
 
         }
 
@@ -453,7 +549,9 @@ function changeStatus(staffId){
 }
 
 
+
 loadStaffs();
+
 
 
 $("#search").keyup(function(){
@@ -461,6 +559,7 @@ $("#search").keyup(function(){
     loadStaffs();
 
 });
+
 
 
 $("#status").change(function(){

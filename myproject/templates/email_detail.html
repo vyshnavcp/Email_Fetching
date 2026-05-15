@@ -5,12 +5,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-
+ 
   <meta http-equiv="Content-Security-Policy" content="img-src 'self' data: blob: /media/">
-
+ 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
     :root {
       --ink: #0f0e0b;
       --paper: #f7f5f0;
@@ -29,7 +29,7 @@
       --red: #c0392b;
       --red-light: #fde8e8;
     }
-
+ 
     body {
       font-family: 'DM Sans', sans-serif;
       background: var(--paper);
@@ -37,7 +37,7 @@
       color: var(--ink);
       padding: 48px 24px 80px;
     }
-
+ 
     body::before {
       content: '';
       position: fixed;
@@ -47,7 +47,7 @@
       z-index: 0;
       opacity: 0.6;
     }
-
+ 
     .shell {
       max-width: 760px;
       margin: 0 auto;
@@ -55,12 +55,12 @@
       z-index: 1;
       animation: fadeUp 0.4s ease both;
     }
-
+ 
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-
+ 
     .back {
       display: inline-flex;
       align-items: center;
@@ -75,16 +75,16 @@
       background: var(--card);
       transition: color 0.2s, border-color 0.2s;
     }
-
+ 
     .back:hover { color: var(--ink); border-color: #ccc9be; }
-
+ 
     .layout {
       display: grid;
       grid-template-columns: 1fr 260px;
       gap: 16px;
       align-items: start;
     }
-
+ 
     .email-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -92,12 +92,12 @@
       overflow: hidden;
       box-shadow: 0 4px 24px rgba(0,0,0,0.05);
     }
-
+ 
     .email-header {
       padding: 28px 32px 24px;
       border-bottom: 1px solid var(--border);
     }
-
+ 
     .eyebrow {
       font-size: 10px;
       font-weight: 500;
@@ -107,7 +107,7 @@
       display: block;
       margin-bottom: 10px;
     }
-
+ 
     .subject {
       font-family: 'Playfair Display', Georgia, serif;
       font-size: 22px;
@@ -116,13 +116,13 @@
       color: var(--ink);
       margin-bottom: 20px;
     }
-
+ 
     .meta {
       display: flex;
       align-items: flex-start;
       gap: 12px;
     }
-
+ 
     .avatar {
       width: 40px;
       height: 40px;
@@ -138,15 +138,15 @@
       color: var(--muted);
       flex-shrink: 0;
     }
-
+ 
     .meta-info { display: flex; flex-direction: column; gap: 4px; }
-
+ 
     .meta-from {
       font-size: 13px;
       font-weight: 500;
       color: var(--ink);
     }
-
+ 
     .meta-date {
       font-size: 11px;
       font-weight: 300;
@@ -155,7 +155,7 @@
       align-items: center;
       gap: 4px;
     }
-
+ 
     .meta-cc {
       display: flex;
       align-items: flex-start;
@@ -163,7 +163,7 @@
       flex-wrap: wrap;
       margin-top: 2px;
     }
-
+ 
     .meta-cc-label {
       font-size: 10px;
       font-weight: 600;
@@ -173,9 +173,9 @@
       flex-shrink: 0;
       margin-top: 3px;
     }
-
+ 
     .cc-chips { display: flex; flex-wrap: wrap; gap: 4px; }
-
+ 
     .cc-chip {
       display: inline-flex;
       align-items: center;
@@ -186,7 +186,7 @@
       color: var(--muted);
       border: 1px solid var(--border);
     }
-
+ 
     .email-body-text {
       padding: 28px 32px;
       line-height: 1.8;
@@ -195,9 +195,9 @@
       font-weight: 300;
       color: #2a2820;
     }
-
+ 
     .email-iframe-wrapper { padding: 20px 24px; }
-
+ 
     .email-iframe {
       width: 100%;
       min-height: 120px;
@@ -207,7 +207,7 @@
       overflow: hidden;
       transition: height 0.25s ease;
     }
-
+ 
     .view-toggle {
       display: flex;
       align-items: center;
@@ -216,7 +216,7 @@
       border-bottom: 1px solid var(--border);
       background: var(--paper);
     }
-
+ 
     .toggle-label {
       font-size: 10px;
       font-weight: 500;
@@ -225,7 +225,7 @@
       color: var(--muted);
       margin-right: 4px;
     }
-
+ 
     .toggle-btn {
       font-size: 11px;
       font-weight: 500;
@@ -238,18 +238,18 @@
       transition: all 0.2s;
       font-family: 'DM Sans', sans-serif;
     }
-
+ 
     .toggle-btn.active {
       background: var(--ink);
       color: var(--gold-light);
       border-color: var(--ink);
     }
-
+ 
     .toggle-btn:hover:not(.active) {
       border-color: var(--gold);
       color: var(--ink);
     }
-
+ 
     .email-footer {
       padding: 14px 32px;
       border-top: 1px solid var(--border);
@@ -258,7 +258,7 @@
       align-items: center;
       gap: 8px;
     }
-
+ 
     .footer-label {
       font-size: 10px;
       font-weight: 500;
@@ -266,7 +266,7 @@
       text-transform: uppercase;
       color: var(--muted);
     }
-
+ 
     .tag {
       display: inline-flex;
       align-items: center;
@@ -278,12 +278,12 @@
       color: #7a5c10;
       border: 1px solid #e0c97a;
     }
-
+ 
     .attachments-section {
       padding: 20px 32px 28px;
       border-top: 1px solid var(--border);
     }
-
+ 
     .attachments-title {
       font-size: 10px;
       font-weight: 500;
@@ -295,17 +295,17 @@
       align-items: center;
       gap: 6px;
     }
-
+ 
     .attachment-item { margin-bottom: 16px; }
     .attachment-item:last-child { margin-bottom: 0; }
-
+ 
     .att-filename {
       font-size: 11px;
       color: var(--muted);
       margin-bottom: 7px;
       font-weight: 400;
     }
-
+ 
     .att-image {
       max-width: 100%;
       max-height: 320px;
@@ -316,9 +316,9 @@
       cursor: zoom-in;
       transition: opacity 0.2s;
     }
-
+ 
     .att-image:hover { opacity: 0.9; }
-
+ 
     .att-pdf {
       width: 100%;
       height: 420px;
@@ -326,7 +326,7 @@
       border-radius: 10px;
       display: block;
     }
-
+ 
     .att-download {
       display: inline-flex;
       align-items: center;
@@ -342,12 +342,12 @@
       transition: border-color 0.2s, background 0.2s;
       margin-top: 8px;
     }
-
+ 
     .att-download:hover {
       border-color: var(--gold);
       background: var(--gold-light);
     }
-
+ 
     .lightbox {
       display: none;
       position: fixed;
@@ -358,16 +358,16 @@
       justify-content: center;
       cursor: zoom-out;
     }
-
+ 
     .lightbox.open { display: flex; }
-
+ 
     .lightbox img {
       max-width: 92vw;
       max-height: 92vh;
       border-radius: 10px;
       box-shadow: 0 24px 80px rgba(0,0,0,0.6);
     }
-
+ 
     .lightbox-close {
       position: absolute;
       top: 18px;
@@ -379,28 +379,28 @@
       line-height: 1;
       transition: opacity 0.2s;
     }
-
+ 
     .lightbox-close:hover { opacity: 1; }
-
+ 
     .sidebar {
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
-
+ 
     .sidebar-card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 16px;
       overflow: hidden;
     }
-
+ 
     .sidebar-card-header {
       padding: 14px 18px;
       border-bottom: 1px solid var(--border);
       background: var(--paper);
     }
-
+ 
     .sidebar-card-title {
       font-size: 10px;
       font-weight: 500;
@@ -408,31 +408,31 @@
       text-transform: uppercase;
       color: var(--muted);
     }
-
+ 
     .sidebar-card-body { padding: 16px 18px; }
-
+ 
     .info-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
     }
-
+ 
     .info-row:last-child { margin-bottom: 0; }
-
+ 
     .info-label {
       font-size: 11px;
       font-weight: 500;
       color: var(--muted);
     }
-
+ 
     .info-value {
       font-size: 12px;
       font-weight: 500;
       color: var(--ink);
       text-align: right;
     }
-
+ 
     .ticket-chip {
       font-size: 11px;
       font-weight: 600;
@@ -443,7 +443,7 @@
       color: var(--muted);
       border: 1px solid var(--border);
     }
-
+ 
     .status-pill {
       font-size: 10px;
       font-weight: 600;
@@ -452,11 +452,11 @@
       padding: 3px 10px;
       border-radius: 20px;
     }
-
+ 
     .status-unassigned { background: var(--blue-light);  color: var(--blue);  border: 1px solid var(--blue-border); }
     .status-assigned   { background: var(--gold-light);  color: #7a5c10;      border: 1px solid #e0c97a; }
     .status-closed     { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
-
+ 
     .staff-chip {
       display: inline-flex;
       align-items: center;
@@ -465,7 +465,7 @@
       font-weight: 500;
       color: var(--ink);
     }
-
+ 
     .staff-avatar-sm {
       width: 22px;
       height: 22px;
@@ -479,10 +479,10 @@
       font-weight: 700;
       color: var(--muted);
     }
-
+ 
     .form-group { margin-bottom: 12px; }
     .form-group:last-child { margin-bottom: 0; }
-
+ 
     .form-label {
       display: block;
       font-size: 10px;
@@ -492,7 +492,7 @@
       color: var(--muted);
       margin-bottom: 6px;
     }
-
+ 
     select {
       width: 100%;
       padding: 9px 12px;
@@ -506,9 +506,9 @@
       cursor: pointer;
       transition: border-color 0.2s;
     }
-
+ 
     select:focus { border-color: var(--gold); }
-
+ 
     .assign-btn {
       width: 100%;
       padding: 10px;
@@ -527,17 +527,17 @@
       margin-top: 14px;
       transition: background 0.2s, transform 0.1s;
     }
-
+ 
     .assign-btn:hover  { background: #2a2820; }
     .assign-btn:active { transform: scale(0.97); }
-
+ 
     .no-staff {
       font-size: 12px;
       color: var(--muted);
       text-align: center;
       padding: 8px 0;
     }
-
+ 
     .history-btn {
       display: flex;
       align-items: center;
@@ -555,14 +555,14 @@
       border: 1px solid var(--blue-border);
       transition: all 0.2s ease;
     }
-
+ 
     .history-btn:hover {
       background: var(--blue);
       color: white;
       border-color: var(--blue);
       transform: translateY(-1px);
     }
-
+ 
     .no-content {
       padding: 40px 32px;
       text-align: center;
@@ -570,28 +570,176 @@
       font-size: 13px;
       font-style: italic;
     }
-
+ 
     @media (max-width: 640px) {
       .layout { grid-template-columns: 1fr; }
       .email-header { padding: 20px; }
       .email-body-text,
       .email-iframe-wrapper { padding: 20px; }
     }
+ 
+    /* ══════════════════════════════════════
+       CONFIRMATION MODAL
+    ══════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(3px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 8888;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+    }
+ 
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+ 
+    .modal-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 32px 28px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.16);
+      transform: translateY(16px) scale(0.97);
+      transition: transform 0.22s ease, opacity 0.22s ease;
+      opacity: 0;
+      text-align: center;
+    }
+ 
+    .modal-overlay.show .modal-box {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+ 
+    .modal-icon-wrap {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 18px;
+      font-size: 26px;
+    }
+ 
+    .modal-icon-wrap.type-assign  { background: #f0dfa0; }
+    .modal-icon-wrap.type-close   { background: var(--green-light); }
+    .modal-icon-wrap.type-unassign{ background: var(--red-light); }
+ 
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+ 
+    .modal-desc {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 26px;
+    }
+ 
+    .modal-desc strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+ 
+    /* summary box inside modal */
+    .modal-summary {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+ 
+    .modal-summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+ 
+    .modal-summary-row:last-child { margin-bottom: 0; }
+ 
+    .modal-summary-label {
+      color: var(--muted);
+      font-weight: 400;
+    }
+ 
+    .modal-summary-value {
+      color: var(--ink);
+      font-weight: 500;
+    }
+ 
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+ 
+    .modal-btn {
+      border: none;
+      padding: 10px 26px;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+ 
+    .modal-btn:hover  { opacity: 0.88; }
+    .modal-btn:active { transform: scale(0.97); }
+ 
+    .modal-btn-cancel {
+      background: var(--cream);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+ 
+    .modal-btn-confirm-assign {
+      background: var(--ink);
+      color: var(--gold-light);
+    }
+ 
+    .modal-btn-confirm-close {
+      background: var(--green);
+      color: #fff;
+    }
+ 
+    .modal-btn-confirm-unassign {
+      background: var(--red);
+      color: #fff;
+    }
   </style>
 </head>
-
+ 
 <body>
 <div class="shell">
-
+ 
   <a href="{% url 'inbox' %}" class="back">
     <i class="ti ti-arrow-left"></i> Back to Inbox
   </a>
-
+ 
   <div class="layout">
-
+ 
     <!-- ── Left: Email Card ── -->
     <div class="email-card">
-
+ 
       <div class="email-header">
         <span class="eyebrow">Message</span>
         <div class="subject">{{ subject }}</div>
@@ -616,7 +764,7 @@
           </div>
         </div>
       </div>
-
+ 
       {% if has_html and body %}
       <div class="view-toggle">
         <span class="toggle-label">View as</span>
@@ -628,7 +776,7 @@
         </button>
       </div>
       {% endif %}
-
+ 
       {% if has_html %}
       <div class="email-iframe-wrapper" id="html-view">
         <iframe
@@ -641,7 +789,7 @@
         ></iframe>
       </div>
       {% endif %}
-
+ 
       {% if body %}
       <div
         class="email-body-text"
@@ -649,30 +797,30 @@
         {% if has_html %}style="display:none;"{% endif %}
       >{{ body }}</div>
       {% endif %}
-
+ 
       {% if not has_html and not body %}
       <div class="no-content">
         <i class="ti ti-mail-off" style="font-size:24px; display:block; margin-bottom:8px;"></i>
         No message content available.
       </div>
       {% endif %}
-
+ 
       <div class="email-footer">
         <span class="footer-label">Via</span>
         <span class="tag"><i class="ti ti-mail"></i> Gmail IMAP</span>
       </div>
-
+ 
       {% if ticket.attachments.all %}
       <div class="attachments-section">
         <div class="attachments-title">
           <i class="ti ti-paperclip" style="font-size:11px;"></i>
           Attachments ({{ ticket.attachments.count }})
         </div>
-
+ 
         {% for att in ticket.attachments.all %}
         <div class="attachment-item">
           <div class="att-filename">{{ att.filename }}</div>
-
+ 
           {% if "image" in att.content_type %}
             <img
               src="{{ att.file.url }}"
@@ -683,7 +831,7 @@
             <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download">
               <i class="ti ti-download"></i> Download image
             </a>
-
+ 
           {% elif "pdf" in att.content_type %}
             <iframe
               src="{{ att.file.url }}"
@@ -693,46 +841,46 @@
             <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download">
               <i class="ti ti-download"></i> Download PDF
             </a>
-
+ 
           {% else %}
             <a href="{{ att.file.url }}" download="{{ att.filename }}" class="att-download">
               <i class="ti ti-download"></i> {{ att.filename }}
             </a>
           {% endif %}
-
+ 
         </div>
         {% endfor %}
       </div>
       {% endif %}
-
+ 
     </div>
-
+ 
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
       <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
       <img id="lightbox-img" src="" alt="Preview">
     </div>
-
+ 
     <!-- ── Right: Sidebar ── -->
     <div class="sidebar">
-
+ 
       <div class="sidebar-card">
         <div class="sidebar-card-header">
           <span class="sidebar-card-title">Ticket Info</span>
         </div>
         <div class="sidebar-card-body">
-
+ 
           <div class="info-row">
             <span class="info-label">Number</span>
             <span class="ticket-chip">{{ ticket.ticket_number }}</span>
           </div>
-
+ 
           <div class="info-row">
             <span class="info-label">Status</span>
             <span class="status-pill status-{{ ticket.status }}">
               {{ ticket.get_status_display }}
             </span>
           </div>
-
+ 
           <div class="info-row">
             <span class="info-label">Assigned to</span>
             {% if ticket.assigned_to %}
@@ -748,107 +896,169 @@
               </span>
             {% endif %}
           </div>
-
+ 
           <a href="{% url 'ticket_history' ticket.id %}" class="history-btn">
             <i class="ti ti-history"></i> View Full History
           </a>
-
+ 
         </div>
       </div>
-
+ 
       <div class="sidebar-card">
         <div class="sidebar-card-header">
           <span class="sidebar-card-title">Assign to Staff</span>
         </div>
         <div class="sidebar-card-body">
-
+ 
           {% if all_staff %}
-          <form method="POST" action="{% url 'assign_ticket' ticket.id %}">
+          <!-- Hidden real form — submitted by JS after confirmation -->
+          <form
+            id="assign-form"
+            method="POST"
+            action="{% url 'assign_ticket' ticket.id %}"
+            style="display:none;"
+          >
             {% csrf_token %}
-
-            <div class="form-group">
-              <label class="form-label">Staff member</label>
-              <select name="staff_id">
-                <option value="">— Select staff —</option>
-                {% for staff in all_staff %}
-                <option value="{{ staff.id }}"
-                  {% if ticket.assigned_to.id == staff.id %}selected{% endif %}>
-                  {{ staff.name }}
-                </option>
-                {% endfor %}
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Update status</label>
-              <select name="status">
-                {% for val, label in ticket.STATUS_CHOICES %}
-                <option value="{{ val }}"
-                  {% if ticket.status == val %}selected{% endif %}>
-                  {{ label }}
-                </option>
-                {% endfor %}
-              </select>
-            </div>
-
-            <button type="submit" class="assign-btn">
-              <i class="ti ti-user-check"></i> Save Assignment
-            </button>
-
+            <input type="hidden" name="staff_id" id="hidden-staff-id">
+            <input type="hidden" name="status"   id="hidden-status">
           </form>
+ 
+          <!-- Visible controls (NOT a real form) -->
+          <div class="form-group">
+            <label class="form-label">Staff member</label>
+            <select id="sel-staff">
+              <option value="">— Select staff —</option>
+              {% for staff in all_staff %}
+              <option
+                value="{{ staff.id }}"
+                data-name="{{ staff.name }}"
+                {% if ticket.assigned_to.id == staff.id %}selected{% endif %}
+              >
+                {{ staff.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+ 
+          <div class="form-group">
+            <label class="form-label">Update status</label>
+            <select id="sel-status">
+              {% for val, label in ticket.STATUS_CHOICES %}
+              <option
+                value="{{ val }}"
+                data-label="{{ label }}"
+                {% if ticket.status == val %}selected{% endif %}
+              >
+                {{ label }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+ 
+          <!-- Trigger button — opens modal -->
+          <button type="button" class="assign-btn" onclick="openAssignModal()">
+            <i class="ti ti-user-check"></i> Save Assignment
+          </button>
+ 
           {% else %}
             <p class="no-staff">No staff added yet.<br>Add staff via Django Admin.</p>
           {% endif %}
-
+ 
         </div>
       </div>
-
+ 
     </div>
-
+ 
   </div>
 </div>
-
+ 
+ 
+<!-- ══════════════════════════════════════
+     CONFIRMATION MODAL
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="assignModal">
+  <div class="modal-box">
+ 
+    <div class="modal-icon-wrap" id="modal-icon-wrap">
+      <!-- icon injected by JS -->
+    </div>
+ 
+    <div class="modal-title" id="modal-title">Confirm Assignment</div>
+ 
+    <div class="modal-desc" id="modal-desc">
+      Please review the changes below before saving.
+    </div>
+ 
+    <div class="modal-summary" id="modal-summary">
+      <!-- rows injected by JS -->
+    </div>
+ 
+    <div class="modal-footer">
+ 
+      <button
+        class="modal-btn modal-btn-cancel"
+        onclick="closeAssignModal()"
+      >
+        Cancel
+      </button>
+ 
+      <button
+        class="modal-btn"
+        id="modal-confirm-btn"
+        onclick="submitAssignment()"
+      >
+        Confirm
+      </button>
+ 
+    </div>
+ 
+  </div>
+</div>
+ 
+ 
 <script>
+  /* ── LIGHTBOX ── */
   function openLightbox(url) {
     document.getElementById('lightbox-img').src = url;
     document.getElementById('lightbox').classList.add('open');
   }
-
+ 
   function closeLightbox() {
     document.getElementById('lightbox').classList.remove('open');
     document.getElementById('lightbox-img').src = '';
   }
-
+ 
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'Escape') {
+      closeLightbox();
+      closeAssignModal();
+    }
   });
-
+ 
+  /* ── HTML / TEXT TOGGLE ── */
   function showHTML() {
     document.getElementById('html-view').style.display = 'block';
     document.getElementById('text-view').style.display = 'none';
     document.getElementById('btn-html').classList.add('active');
     document.getElementById('btn-text').classList.remove('active');
   }
-
+ 
   function showText() {
     document.getElementById('html-view').style.display = 'none';
     document.getElementById('text-view').style.display = 'block';
     document.getElementById('btn-text').classList.add('active');
     document.getElementById('btn-html').classList.remove('active');
   }
-
+ 
   {% if has_html %}
   (function () {
     var iframe = document.getElementById('email-iframe');
     if (!iframe) return;
-
     var htmlContent = "{{ html_body|escapejs }}";
-
     var doc = iframe.contentDocument || iframe.contentWindow.document;
     doc.open();
     doc.write(htmlContent);
     doc.close();
-
     function resizeIframe() {
       try {
         var body = doc.body;
@@ -860,13 +1070,118 @@
         iframe.style.height = (height + 24) + 'px';
       } catch (e) {}
     }
-
     iframe.addEventListener('load', resizeIframe);
     setTimeout(resizeIframe, 300);
     setTimeout(resizeIframe, 900);
   })();
   {% endif %}
+ 
+ 
+  /* ══════════════════════════════════════
+     ASSIGNMENT CONFIRMATION MODAL
+  ══════════════════════════════════════ */
+ 
+  // Status label map (filled once from selects)
+  var STATUS_LABELS = {
+    {% for val, label in ticket.STATUS_CHOICES %}
+    "{{ val }}": "{{ label }}"{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  };
+ 
+  function openAssignModal() {
+ 
+    var staffSel  = document.getElementById('sel-staff');
+    var statusSel = document.getElementById('sel-status');
+ 
+    var staffId    = staffSel.value;
+    var staffName  = staffSel.options[staffSel.selectedIndex].dataset.name || '—';
+    var statusVal  = statusSel.value;
+    var statusLabel = statusSel.options[statusSel.selectedIndex].dataset.label || statusVal;
+ 
+    // Determine action type for styling
+    var iconWrap   = document.getElementById('modal-icon-wrap');
+    var title      = document.getElementById('modal-title');
+    var desc       = document.getElementById('modal-desc');
+    var confirmBtn = document.getElementById('modal-confirm-btn');
+ 
+    // Remove old type classes
+    iconWrap.className = 'modal-icon-wrap';
+    confirmBtn.className = 'modal-btn';
+ 
+    if (!staffId) {
+      // Unassign / status-only change
+      if (statusVal === 'closed') {
+        iconWrap.classList.add('type-close');
+        iconWrap.innerHTML = '✅';
+        title.textContent  = 'Close this Ticket?';
+        desc.innerHTML     = 'The ticket will be marked as <strong>Closed</strong> and removed from the active queue.';
+        confirmBtn.classList.add('modal-btn-confirm-close');
+        confirmBtn.textContent = 'Yes, Close Ticket';
+      } else {
+        iconWrap.classList.add('type-unassign');
+        iconWrap.innerHTML = '🔄';
+        title.textContent  = 'Update Status?';
+        desc.innerHTML     = 'No staff member is selected. Only the status will be updated.';
+        confirmBtn.classList.add('modal-btn-confirm-unassign');
+        confirmBtn.textContent = 'Yes, Update';
+      }
+    } else {
+      if (statusVal === 'closed') {
+        iconWrap.classList.add('type-close');
+        iconWrap.innerHTML = '✅';
+        title.textContent  = 'Assign & Close Ticket?';
+        desc.innerHTML     = 'This will assign the ticket and mark it as <strong>Closed</strong>.';
+        confirmBtn.classList.add('modal-btn-confirm-close');
+        confirmBtn.textContent = 'Yes, Assign & Close';
+      } else {
+        iconWrap.classList.add('type-assign');
+        iconWrap.innerHTML = '👤';
+        title.textContent  = 'Confirm Assignment';
+        desc.innerHTML     = 'Please review the changes below before saving.';
+        confirmBtn.classList.add('modal-btn-confirm-assign');
+        confirmBtn.textContent = 'Yes, Save';
+      }
+    }
+ 
+    // Build summary rows
+    var summary = document.getElementById('modal-summary');
+    summary.innerHTML =
+      '<div class="modal-summary-row">' +
+        '<span class="modal-summary-label">Ticket</span>' +
+        '<span class="modal-summary-value">{{ ticket.ticket_number }}</span>' +
+      '</div>' +
+      '<div class="modal-summary-row">' +
+        '<span class="modal-summary-label">Assign to</span>' +
+        '<span class="modal-summary-value">' + (staffId ? staffName : 'Unassigned') + '</span>' +
+      '</div>' +
+      '<div class="modal-summary-row">' +
+        '<span class="modal-summary-label">Status</span>' +
+        '<span class="modal-summary-value">' + statusLabel + '</span>' +
+      '</div>';
+ 
+    document.getElementById('assignModal').classList.add('show');
+  }
+ 
+  function closeAssignModal() {
+    document.getElementById('assignModal').classList.remove('show');
+  }
+ 
+  function submitAssignment() {
+    // Copy values to hidden form and submit
+    document.getElementById('hidden-staff-id').value =
+      document.getElementById('sel-staff').value;
+    document.getElementById('hidden-status').value =
+      document.getElementById('sel-status').value;
+ 
+    closeAssignModal();
+    document.getElementById('assign-form').submit();
+  }
+ 
+  // Close modal on backdrop click
+  document.getElementById('assignModal').addEventListener('click', function(e) {
+    if (e.target === this) closeAssignModal();
+  });
 </script>
-
+ 
 </body>
 </html>
