@@ -1,10 +1,10 @@
 {% extends "main.html" %}
 {% block title %}Recycle Bin{% endblock %}
 {% load static %}
-
+ 
 {% block css %}
 <style>
-
+ 
 :root{
   --card:#fffefb;
   --border:#e4dfd3;
@@ -13,27 +13,27 @@
   --red:#c0392b;
   --green:#2e7d32;
 }
-
+ 
 .shell{
   max-width:1300px;
   margin:auto;
   padding:50px 24px;
 }
-
+ 
 .title{
   font-size:38px;
   font-weight:700;
 }
-
+ 
 .sub{
   color:var(--muted);
   margin-top:5px;
 }
-
+ 
 .search-box{
   margin:25px 0;
 }
-
+ 
 .search-box input{
   width:350px;
   padding:12px 16px;
@@ -42,13 +42,13 @@
   outline:none;
   font-size:14px;
 }
-
+ 
 .bulk-actions{
   display:flex;
   gap:10px;
   margin-bottom:20px;
 }
-
+ 
 table{
   width:100%;
   border-collapse:collapse;
@@ -57,38 +57,38 @@ table{
   border-radius:18px;
   overflow:hidden;
 }
-
+ 
 th{
   background:#f2efe7;
   padding:18px;
   text-align:left;
   font-size:13px;
 }
-
+ 
 td{
   padding:18px;
   border-bottom:1px solid var(--border);
 }
-
+ 
 tbody tr:hover{
   background:#faf8f3;
 }
-
+ 
 .ticket-no{
   color:var(--gold);
   font-weight:700;
 }
-
+ 
 .date{
   color:var(--muted);
   font-size:13px;
 }
-
+ 
 .actions{
   display:flex;
   gap:10px;
 }
-
+ 
 .btn{
   border:none;
   padding:8px 14px;
@@ -97,17 +97,17 @@ tbody tr:hover{
   font-size:13px;
   font-weight:600;
 }
-
+ 
 .btn-restore{
   background:#edf7ee;
   color:var(--green);
 }
-
+ 
 .btn-delete{
   background:#fff0ee;
   color:var(--red);
 }
-
+ 
 .pagination{
   display:flex;
   justify-content:center;
@@ -115,7 +115,7 @@ tbody tr:hover{
   margin-top:30px;
   flex-wrap:wrap;
 }
-
+ 
 .pagination a{
   text-decoration:none;
   padding:10px 16px;
@@ -124,540 +124,770 @@ tbody tr:hover{
   color:#333;
   cursor:pointer;
 }
-
+ 
 .pagination a.active{
   background:#c9a84c;
   color:white;
 }
-
+ 
 .empty{
   text-align:center;
   padding:60px;
   color:#999;
 }
-
+ 
 .check-col{
   width:50px;
   text-align:center;
 }
-
+ 
+/* ── MODAL OVERLAY ── */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(3px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease;
+}
+ 
+.modal-overlay.show{
+  opacity:1;
+  pointer-events:all;
+}
+ 
+/* ── MODAL BOX ── */
+.modal-box{
+  background:#fff;
+  border-radius:20px;
+  padding:36px 32px 28px;
+  width:100%;
+  max-width:420px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.18);
+  transform:translateY(18px) scale(0.97);
+  transition:transform .22s ease, opacity .22s ease;
+  opacity:0;
+  text-align:center;
+}
+ 
+.modal-overlay.show .modal-box{
+  transform:translateY(0) scale(1);
+  opacity:1;
+}
+ 
+/* icon circle */
+.modal-icon{
+  width:64px;
+  height:64px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto 18px;
+  font-size:28px;
+}
+ 
+.modal-icon.restore{ background:#edf7ee; }
+.modal-icon.delete { background:#fff0ee; }
+ 
+.modal-title{
+  font-size:20px;
+  font-weight:700;
+  margin-bottom:8px;
+  color:#1a1a1a;
+}
+ 
+.modal-body{
+  font-size:14px;
+  color:var(--muted);
+  line-height:1.6;
+  margin-bottom:28px;
+}
+ 
+.modal-body strong{
+  color:#333;
+}
+ 
+.modal-footer{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+}
+ 
+.modal-btn{
+  border:none;
+  padding:11px 28px;
+  border-radius:12px;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:opacity .15s;
+}
+ 
+.modal-btn:hover{ opacity:.85; }
+ 
+.modal-btn-cancel{
+  background:#f2efe7;
+  color:#555;
+}
+ 
+.modal-btn-confirm-restore{
+  background:var(--green);
+  color:#fff;
+}
+ 
+.modal-btn-confirm-delete{
+  background:var(--red);
+  color:#fff;
+}
+ 
 </style>
 {% endblock %}
-
-
-
+ 
+ 
+ 
 {% block content %}
-
+ 
 <div class="shell">
-
+ 
     <h1 class="title">Recycle Bin</h1>
-
+ 
     <div class="sub">
         Deleted tickets can be restored or permanently deleted
     </div>
-
+ 
     <!-- SEARCH -->
     <div class="search-box">
-
+ 
         <input
             type="text"
             id="searchInput"
             placeholder="Search ticket number, subject, sender..."
         >
-
+ 
     </div>
-
+ 
     <!-- BULK ACTIONS -->
     <div class="bulk-actions">
-
+ 
         <button
             class="btn btn-restore"
-            onclick="bulkRestore()"
+            onclick="confirmBulkRestore()"
         >
             Restore Selected
         </button>
-
+ 
         <button
             class="btn btn-delete"
-            onclick="bulkDelete()"
+            onclick="confirmBulkDelete()"
         >
             Delete Selected
         </button>
-
+ 
     </div>
-
+ 
     <!-- TABLE -->
     <table>
-
+ 
         <thead>
-
+ 
             <tr>
-
+ 
                 <th class="check-col">
                     <input type="checkbox" id="select-all">
                 </th>
-
+ 
                 <th>#</th>
                 <th>Ticket No</th>
                 <th>Subject</th>
                 <th>Sender</th>
                 <th>Deleted Date</th>
                 <th>Actions</th>
-
+ 
             </tr>
-
+ 
         </thead>
-
+ 
         <tbody id="ticket-body">
-
+ 
             {% for ticket in page_obj %}
-
+ 
             <tr id="row-{{ ticket.id }}">
-
+ 
                 <td class="check-col">
-
+ 
                     <input
                         type="checkbox"
                         class="ticket-check"
                         value="{{ ticket.id }}"
                     >
-
+ 
                 </td>
-
+ 
                 <td>
                     {{ page_obj.start_index|add:forloop.counter0 }}
                 </td>
-
+ 
                 <td class="ticket-no">
                     {{ ticket.ticket_number }}
                 </td>
-
+ 
                 <td>
                     {{ ticket.subject }}
                 </td>
-
+ 
                 <td>
                     {{ ticket.sender }}
                 </td>
-
+ 
                 <td class="date">
                     {{ ticket.deleted_at|date:"d M Y h:i A" }}
                 </td>
-
+ 
                 <td>
-
+ 
                     <div class="actions">
-
+ 
                         <button
                             class="btn btn-restore"
-                            onclick="restoreTicket({{ ticket.id }})"
+                            onclick="confirmRestore({{ ticket.id }}, '{{ ticket.ticket_number }}')"
                         >
                             Restore
                         </button>
-
+ 
                         <button
                             class="btn btn-delete"
-                            onclick="permanentDelete({{ ticket.id }})"
+                            onclick="confirmDelete({{ ticket.id }}, '{{ ticket.ticket_number }}')"
                         >
                             Delete
                         </button>
-
+ 
                     </div>
-
+ 
                 </td>
-
+ 
             </tr>
-
+ 
             {% empty %}
-
+ 
             <tr>
-
+ 
                 <td colspan="7" class="empty">
                     No Deleted Tickets
                 </td>
-
+ 
             </tr>
-
+ 
             {% endfor %}
-
+ 
         </tbody>
-
+ 
     </table>
-
+ 
     <!-- PAGINATION -->
     <div class="pagination" id="pagination">
-
+ 
         {% for num in page_obj.paginator.page_range %}
-
+ 
             {% if page_obj.number == num %}
-
+ 
                 <a class="active">
                     {{ num }}
                 </a>
-
+ 
             {% else %}
-
+ 
                 <a onclick="loadRecycleBin({{ num }})">
                     {{ num }}
                 </a>
-
+ 
             {% endif %}
-
+ 
         {% endfor %}
-
+ 
     </div>
-
+ 
 </div>
-
+ 
+ 
+<!-- ══════════════════════════════════════
+     RESTORE CONFIRMATION MODAL
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="restoreModal">
+  <div class="modal-box">
+ 
+    <div class="modal-icon restore">♻️</div>
+ 
+    <div class="modal-title" id="restoreTitle">Restore Ticket?</div>
+ 
+    <div class="modal-body" id="restoreBody">
+      Are you sure you want to restore this ticket?
+    </div>
+ 
+    <div class="modal-footer">
+ 
+      <button
+        class="modal-btn modal-btn-cancel"
+        onclick="closeModal('restoreModal')"
+      >
+        Cancel
+      </button>
+ 
+      <button
+        class="modal-btn modal-btn-confirm-restore"
+        id="restoreConfirmBtn"
+      >
+        Yes, Restore
+      </button>
+ 
+    </div>
+ 
+  </div>
+</div>
+ 
+ 
+<!-- ══════════════════════════════════════
+     DELETE CONFIRMATION MODAL
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+ 
+    <div class="modal-icon delete">🗑️</div>
+ 
+    <div class="modal-title" id="deleteTitle">Permanently Delete?</div>
+ 
+    <div class="modal-body" id="deleteBody">
+      This action <strong>cannot be undone</strong>. Are you sure you want to permanently delete this ticket?
+    </div>
+ 
+    <div class="modal-footer">
+ 
+      <button
+        class="modal-btn modal-btn-cancel"
+        onclick="closeModal('deleteModal')"
+      >
+        Cancel
+      </button>
+ 
+      <button
+        class="modal-btn modal-btn-confirm-delete"
+        id="deleteConfirmBtn"
+      >
+        Yes, Delete
+      </button>
+ 
+    </div>
+ 
+  </div>
+</div>
+ 
 {% endblock %}
-
-
-
+ 
+ 
+ 
 {% block js %}
-
+ 
 <script>
-
+ 
 const CSRF = "{{ csrf_token }}";
-
-
-
+ 
+ 
+/* ── MODAL HELPERS ── */
+ 
+function openModal(id){
+  document.getElementById(id).classList.add("show");
+}
+ 
+function closeModal(id){
+  document.getElementById(id).classList.remove("show");
+}
+ 
+// Close modal when clicking the dark backdrop
+document.querySelectorAll(".modal-overlay").forEach(function(overlay){
+  overlay.addEventListener("click", function(e){
+    if(e.target === overlay){
+      overlay.classList.remove("show");
+    }
+  });
+});
+ 
+ 
+/* ── SINGLE RESTORE ── */
+ 
+function confirmRestore(ticketId, ticketNumber){
+ 
+  document.getElementById("restoreTitle").textContent = "Restore Ticket?";
+ 
+  document.getElementById("restoreBody").innerHTML =
+    `Are you sure you want to restore ticket <strong>${ticketNumber}</strong>?<br>
+     It will be moved back to the active inbox.`;
+ 
+  // Wire up confirm button
+  const btn = document.getElementById("restoreConfirmBtn");
+  btn.onclick = function(){
+    closeModal("restoreModal");
+    restoreTicket(ticketId);
+  };
+ 
+  openModal("restoreModal");
+}
+ 
+ 
+/* ── SINGLE DELETE ── */
+ 
+function confirmDelete(ticketId, ticketNumber){
+ 
+  document.getElementById("deleteTitle").textContent = "Permanently Delete?";
+ 
+  document.getElementById("deleteBody").innerHTML =
+    `This action <strong>cannot be undone</strong>.<br>
+     Are you sure you want to permanently delete ticket <strong>${ticketNumber}</strong>?`;
+ 
+  const btn = document.getElementById("deleteConfirmBtn");
+  btn.onclick = function(){
+    closeModal("deleteModal");
+    permanentDelete(ticketId);
+  };
+ 
+  openModal("deleteModal");
+}
+ 
+ 
+/* ── BULK RESTORE ── */
+ 
+function confirmBulkRestore(){
+ 
+  const ids = getSelectedTickets();
+ 
+  if(ids.length === 0){
+    alert("Please select at least one ticket.");
+    return;
+  }
+ 
+  document.getElementById("restoreTitle").textContent = "Restore Selected Tickets?";
+ 
+  document.getElementById("restoreBody").innerHTML =
+    `Are you sure you want to restore <strong>${ids.length}</strong> selected ticket(s)?<br>
+     They will be moved back to the active inbox.`;
+ 
+  const btn = document.getElementById("restoreConfirmBtn");
+  btn.onclick = function(){
+    closeModal("restoreModal");
+    bulkRestore(ids);
+  };
+ 
+  openModal("restoreModal");
+}
+ 
+ 
+/* ── BULK DELETE ── */
+ 
+function confirmBulkDelete(){
+ 
+  const ids = getSelectedTickets();
+ 
+  if(ids.length === 0){
+    alert("Please select at least one ticket.");
+    return;
+  }
+ 
+  document.getElementById("deleteTitle").textContent = "Permanently Delete Selected?";
+ 
+  document.getElementById("deleteBody").innerHTML =
+    `This action <strong>cannot be undone</strong>.<br>
+     Are you sure you want to permanently delete <strong>${ids.length}</strong> selected ticket(s)?`;
+ 
+  const btn = document.getElementById("deleteConfirmBtn");
+  btn.onclick = function(){
+    closeModal("deleteModal");
+    bulkDelete(ids);
+  };
+ 
+  openModal("deleteModal");
+}
+ 
+ 
+/* ── AJAX: LOAD TABLE ── */
+ 
 function loadRecycleBin(page=1){
-
+ 
     $.ajax({
-
+ 
         url: "",
-
+ 
         method: "GET",
-
+ 
         data:{
-
             search: $("#searchInput").val(),
             page: page
-
         },
-
+ 
         headers:{
             "X-Requested-With":"XMLHttpRequest"
         },
-
+ 
         success:function(response){
-
+ 
             let rows = "";
-
+ 
             if(response.tickets.length > 0){
-
+ 
                 response.tickets.forEach(function(ticket){
-
+ 
                     rows += `
-
+ 
                     <tr id="row-${ticket.id}">
-
+ 
                         <td class="check-col">
-
                             <input
                                 type="checkbox"
                                 class="ticket-check"
                                 value="${ticket.id}"
                             >
-
                         </td>
-
+ 
                         <td>${ticket.number}</td>
-
+ 
                         <td class="ticket-no">
                             ${ticket.ticket_number}
                         </td>
-
-                        <td>
-                            ${ticket.subject}
-                        </td>
-
-                        <td>
-                            ${ticket.sender}
-                        </td>
-
+ 
+                        <td>${ticket.subject}</td>
+ 
+                        <td>${ticket.sender}</td>
+ 
                         <td class="date">
                             ${ticket.deleted_at}
                         </td>
-
+ 
                         <td>
-
                             <div class="actions">
-
+ 
                                 <button
                                     class="btn btn-restore"
-                                    onclick="restoreTicket(${ticket.id})"
+                                    onclick="confirmRestore(${ticket.id}, '${ticket.ticket_number}')"
                                 >
                                     Restore
                                 </button>
-
+ 
                                 <button
                                     class="btn btn-delete"
-                                    onclick="permanentDelete(${ticket.id})"
+                                    onclick="confirmDelete(${ticket.id}, '${ticket.ticket_number}')"
                                 >
                                     Delete
                                 </button>
-
+ 
                             </div>
-
                         </td>
-
+ 
                     </tr>
-
+ 
                     `;
-
+ 
                 });
-
+ 
             }else{
-
+ 
                 rows = `
-
                 <tr>
-
                     <td colspan="7" class="empty">
                         No Deleted Tickets
                     </td>
-
                 </tr>
-
                 `;
-
+ 
             }
-
+ 
             $("#ticket-body").html(rows);
-
-            // PAGINATION
-
+ 
+            // Pagination
             let pagination = "";
-
+ 
             if(response.has_previous){
-
                 pagination += `
                     <a onclick="loadRecycleBin(${response.current_page - 1})">
                         Prev
                     </a>
                 `;
-
             }
-
+ 
             for(let i=1; i<=response.total_pages; i++){
-
                 pagination += `
-
                 <a
                     onclick="loadRecycleBin(${i})"
                     class="${i == response.current_page ? 'active' : ''}"
                 >
                     ${i}
                 </a>
-
                 `;
-
             }
-
+ 
             if(response.has_next){
-
                 pagination += `
                     <a onclick="loadRecycleBin(${response.current_page + 1})">
                         Next
                     </a>
                 `;
-
             }
-
+ 
             $("#pagination").html(pagination);
-
         }
-
+ 
     });
-
+ 
 }
-
-
-
-// SINGLE RESTORE
-
+ 
+ 
+/* ── AJAX: SINGLE RESTORE ── */
+ 
 function restoreTicket(ticketId){
-
+ 
     $.ajax({
-
+ 
         url:`/restore-ticket/${ticketId}/`,
-
+ 
         method:"POST",
-
+ 
         headers:{
             "X-CSRFToken": CSRF
         },
-
+ 
         success:function(res){
-
             if(res.success){
-
                 loadRecycleBin();
-
             }
-
         }
-
+ 
     });
-
+ 
 }
-
-
-
-// SINGLE DELETE
-
+ 
+ 
+/* ── AJAX: SINGLE DELETE ── */
+ 
 function permanentDelete(ticketId){
-
+ 
     $.ajax({
-
+ 
         url:`/permanent-delete/${ticketId}/`,
-
+ 
         method:"POST",
-
+ 
         headers:{
             "X-CSRFToken": CSRF
         },
-
+ 
         success:function(res){
-
             if(res.success){
-
                 loadRecycleBin();
-
             }
-
         }
-
+ 
     });
-
+ 
 }
-
-
-
-// GET SELECTED IDS
-
+ 
+ 
+/* ── GET SELECTED IDS ── */
+ 
 function getSelectedTickets(){
-
+ 
     let ids = [];
-
+ 
     $(".ticket-check:checked").each(function(){
-
         ids.push($(this).val());
-
     });
-
+ 
     return ids;
-
+ 
 }
-
-
-
-// BULK RESTORE
-
-function bulkRestore(){
-
-    let ids = getSelectedTickets();
-
-    if(ids.length == 0){
-        return;
-    }
-
+ 
+ 
+/* ── AJAX: BULK RESTORE ── */
+ 
+function bulkRestore(ids){
+ 
     $.ajax({
-
+ 
         url:"/bulk-restore/",
-
+ 
         method:"POST",
-
+ 
         headers:{
             "X-CSRFToken": CSRF
         },
-
+ 
         data:{
             ids: ids
         },
-
+ 
         traditional:true,
-
+ 
         success:function(res){
-
             if(res.success){
-
                 loadRecycleBin();
-
             }
-
         }
-
+ 
     });
-
+ 
 }
-
-
-
-// BULK DELETE
-
-function bulkDelete(){
-
-    let ids = getSelectedTickets();
-
-    if(ids.length == 0){
-        return;
-    }
-
+ 
+ 
+/* ── AJAX: BULK DELETE ── */
+ 
+function bulkDelete(ids){
+ 
     $.ajax({
-
+ 
         url:"/bulk-delete/",
-
+ 
         method:"POST",
-
+ 
         headers:{
             "X-CSRFToken": CSRF
         },
-
+ 
         data:{
             ids: ids
         },
-
+ 
         traditional:true,
-
+ 
         success:function(res){
-
             if(res.success){
-
                 loadRecycleBin();
-
             }
-
         }
-
+ 
     });
-
+ 
 }
-
-
-
-// SELECT ALL
-
+ 
+ 
+/* ── SELECT ALL ── */
+ 
 $(document).on("change", "#select-all", function(){
-
+ 
     $(".ticket-check").prop(
         "checked",
         $(this).is(":checked")
     );
-
+ 
 });
-
-
-
-// LIVE SEARCH
-
+ 
+ 
+/* ── LIVE SEARCH ── */
+ 
 $("#searchInput").on("keyup", function(){
-
     loadRecycleBin(1);
-
 });
-
+ 
 </script>
-
+ 
 {% endblock %}

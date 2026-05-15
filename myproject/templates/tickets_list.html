@@ -362,12 +362,18 @@ tbody tr:active { background: var(--cream); }
   width: 90%;
   text-align: center;
   box-shadow: 0 20px 60px rgba(0,0,0,.12);
+  animation: modalIn .2s ease;
+}
+ 
+@keyframes modalIn {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
 }
  
 .modal-icon {
-  font-size: 36px;
-  color: var(--red);
-  margin-bottom: 12px;
+  font-size: 38px;
+  margin-bottom: 14px;
+  line-height: 1;
 }
  
 .modal-title {
@@ -381,9 +387,41 @@ tbody tr:active { background: var(--cream); }
   color: var(--muted);
   font-size: 14px;
   margin-bottom: 28px;
+  line-height: 1.6;
 }
  
 .modal-actions { display: flex; gap: 12px; justify-content: center; }
+ 
+/* ── Toast notification ── */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: #1a1a1a;
+  color: #fff;
+  padding: 14px 22px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 99999;
+  box-shadow: 0 8px 30px rgba(0,0,0,.2);
+  transform: translateY(80px);
+  opacity: 0;
+  transition: transform .3s ease, opacity .3s ease;
+  max-width: 340px;
+}
+ 
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+ 
+.toast.success { border-left: 4px solid var(--green); }
+.toast.error   { border-left: 4px solid var(--red);   }
+.toast i       { font-size: 18px; flex-shrink: 0; }
  
 @media (max-width: 900px) {
   .top-header { flex-direction: column; gap: 18px; align-items: flex-start; }
@@ -510,14 +548,26 @@ tbody tr:active { background: var(--cream); }
 <!-- ── CONFIRM MODAL ── -->
 <div class="modal-overlay" id="confirm-modal">
   <div class="modal-box">
-    <div class="modal-icon"><i class="ti ti-alert-triangle"></i></div>
+    <div class="modal-icon" id="modal-icon">
+      <i class="ti ti-alert-triangle" style="color: var(--red);"></i>
+    </div>
     <div class="modal-title" id="modal-title">Are you sure?</div>
     <div class="modal-desc"  id="modal-desc">This action cannot be undone.</div>
     <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-danger"  id="modal-confirm-btn">Delete</button>
+      <button class="btn btn-outline" onclick="closeModal()">
+        <i class="ti ti-x"></i> Cancel
+      </button>
+      <button class="btn btn-danger" id="modal-confirm-btn">
+        Confirm
+      </button>
     </div>
   </div>
+</div>
+ 
+<!-- ── TOAST ── -->
+<div class="toast" id="toast">
+  <i class="ti ti-check" id="toast-icon"></i>
+  <span id="toast-msg">Done</span>
 </div>
  
 {% endblock %}
@@ -529,6 +579,20 @@ tbody tr:active { background: var(--cream); }
   const CSRF = "{{ csrf_token }}";
   let allTicketIds = [];
   let currentPage  = 1;
+ 
+  // ── Toast ─────────────────────────────────────────────────────
+  function showToast(message, type = "success") {
+    const toast   = $("#toast");
+    const icon    = $("#toast-icon");
+    const msg     = $("#toast-msg");
+ 
+    toast.removeClass("success error show");
+    icon.attr("class", type === "success" ? "ti ti-check" : "ti ti-alert-circle");
+    msg.text(message);
+    toast.addClass(type).addClass("show");
+ 
+    setTimeout(() => toast.removeClass("show"), 3200);
+  }
  
   // ── Load tickets ──────────────────────────────────────────────
   function loadTickets(page) {
@@ -688,13 +752,39 @@ tbody tr:active { background: var(--cream); }
   });
  
   // ── Modal helpers ─────────────────────────────────────────────
-  function openModal(title, desc, onConfirm) {
+  function openModal({ title, desc, confirmText, type, onConfirm }) {
+    const configs = {
+      danger:  { icon: "ti-alert-triangle", color: "var(--red)",    btnClass: "btn-danger"       },
+      warning: { icon: "ti-user-check",     color: "var(--orange)", btnClass: "btn-warning-solid" },
+      info:    { icon: "ti-lock",           color: "#555",          btnClass: "btn-info-solid"    },
+    };
+    const cfg = configs[type] || configs.danger;
+ 
+    // update icon
+    $("#modal-icon").html(`<i class="ti ${cfg.icon}" style="color:${cfg.color};"></i>`);
+ 
+    // update confirm button style
+    const confirmBtn = $("#modal-confirm-btn");
+    confirmBtn
+      .removeClass("btn-danger")
+      .css({
+        "background": type === "danger"  ? "var(--red)"
+                    : type === "warning" ? "var(--orange)"
+                    : "#333",
+        "color": "#fff",
+        "border": "none",
+      })
+      .addClass("btn-danger"); // keep .btn base class working
+ 
     $("#modal-title").text(title);
     $("#modal-desc").text(desc);
-    $("#modal-confirm-btn").off("click").on("click", function() {
+    confirmBtn.html(`${confirmText || "Confirm"}`);
+ 
+    confirmBtn.off("click").on("click", function() {
       closeModal();
       onConfirm();
     });
+ 
     $("#confirm-modal").addClass("open");
   }
  
@@ -702,38 +792,50 @@ tbody tr:active { background: var(--cream); }
     $("#confirm-modal").removeClass("open");
   }
  
+  // Close on backdrop click
   $("#confirm-modal").on("click", function(e) {
     if ($(e.target).is("#confirm-modal")) closeModal();
   });
  
+  // Close on Escape key
+  $(document).on("keydown", function(e) {
+    if (e.key === "Escape") closeModal();
+  });
+ 
   // ── Delete: single row ────────────────────────────────────────
   function confirmDeleteOne(id, ticketNo) {
-    openModal(
-      "Delete Ticket?",
-      `Ticket ${ticketNo} will be permanently deleted. This cannot be undone.`,
-      function() { doDelete([id]); }
-    );
+    openModal({
+      title:       "Delete Ticket?",
+      desc:        `Ticket ${ticketNo} will be permanently deleted. This action cannot be undone.`,
+      confirmText: "Delete",
+      type:        "danger",
+      onConfirm:   () => doDelete([id]),
+    });
   }
  
   // ── Delete: selected ──────────────────────────────────────────
   function confirmDeleteSelected() {
     const ids = getSelectedIds();
     if (!ids.length) return;
-    openModal(
-      "Delete Selected?",
-      `${ids.length} ticket(s) will be permanently deleted. This cannot be undone.`,
-      function() { doDelete(ids); }
-    );
+    openModal({
+      title:       "Delete Selected Tickets?",
+      desc:        `${ids.length} ticket(s) will be permanently deleted. This action cannot be undone.`,
+      confirmText: "Delete",
+      type:        "danger",
+      onConfirm:   () => doDelete(ids),
+    });
   }
  
   // ── Delete: all (current page) ────────────────────────────────
   function confirmDeleteAll() {
     if (!allTicketIds.length) return;
-    openModal(
-      "Delete All Tickets?",
-      `All ${allTicketIds.length} tickets on this page will be permanently deleted. This cannot be undone.`,
-      function() { doDelete(allTicketIds); }
-    );
+    openModal({
+      title:       "Delete All Tickets?",
+      desc:        `All ${allTicketIds.length} tickets on this page will be permanently deleted. This action cannot be undone.`,
+      confirmText: "Delete All",
+      type:        "danger",
+      onConfirm:   () => doDelete(allTicketIds),
+    });
   }
  
   // ── Actual DELETE call ────────────────────────────────────────
@@ -746,32 +848,66 @@ tbody tr:active { background: var(--cream); }
       data: JSON.stringify({ ids: ids }),
       success: function(res) {
         if (res.success) {
+          showToast(`${ids.length} ticket(s) deleted successfully.`, "success");
           loadTickets(currentPage);
         } else {
-          alert("Delete failed: " + (res.error || "Unknown error"));
+          showToast("Delete failed: " + (res.error || "Unknown error"), "error");
         }
       },
       error: function() {
-        alert("Server error while deleting.");
+        showToast("Server error while deleting.", "error");
       }
     });
   }
  
-  // ── Bulk action (assign / unassign / close) ───────────────────
+  // ── Bulk action — show confirm first ─────────────────────────
   function bulkAction(action) {
-    const ids     = getSelectedIds();
-    const staffId = $("#bulk-assign-staff").val();
+    const ids      = getSelectedIds();
+    const staffId  = $("#bulk-assign-staff").val();
+    const staffName = $("#bulk-assign-staff option:selected").text();
  
     if (!ids.length) {
-      alert("Select tickets first.");
+      showToast("Please select at least one ticket.", "error");
       return;
     }
  
     if (action === "assign" && !staffId) {
-      alert("Select a staff member to assign.");
+      showToast("Please select a staff member to assign.", "error");
       return;
     }
  
+    const confirmConfigs = {
+      assign: {
+        title:       "Assign Tickets?",
+        desc:        `Assign ${ids.length} ticket(s) to ${staffName}?`,
+        confirmText: "Yes, Assign",
+        type:        "warning",
+      },
+      unassign: {
+        title:       "Unassign Tickets?",
+        desc:        `${ids.length} ticket(s) will be unassigned and moved back to the queue.`,
+        confirmText: "Yes, Unassign",
+        type:        "warning",
+      },
+      close: {
+        title:       "Close Tickets?",
+        desc:        `${ids.length} ticket(s) will be marked as closed. Staff will no longer be able to reply.`,
+        confirmText: "Yes, Close",
+        type:        "info",
+      },
+    };
+ 
+    const cfg = confirmConfigs[action];
+    if (!cfg) return;
+ 
+    openModal({
+      ...cfg,
+      onConfirm: () => doBulkAction(action, ids, staffId),
+    });
+  }
+ 
+  // ── Actual bulk-action API call ───────────────────────────────
+  function doBulkAction(action, ids, staffId) {
     $.ajax({
       url: "{% url 'bulk_action_tickets' %}",
       method: "POST",
@@ -780,14 +916,20 @@ tbody tr:active { background: var(--cream); }
       data: JSON.stringify({ ids: ids, action: action, staff_id: staffId || null }),
       success: function(res) {
         if (res.success) {
+          const messages = {
+            assign:   `${ids.length} ticket(s) assigned successfully.`,
+            unassign: `${ids.length} ticket(s) unassigned successfully.`,
+            close:    `${ids.length} ticket(s) closed successfully.`,
+          };
+          showToast(messages[action] || "Action completed.", "success");
           clearSelection();
           loadTickets(currentPage);
         } else {
-          alert(res.error || "Action failed.");
+          showToast(res.error || "Action failed.", "error");
         }
       },
       error: function() {
-        alert("Server error.");
+        showToast("Server error. Please try again.", "error");
       }
     });
   }
