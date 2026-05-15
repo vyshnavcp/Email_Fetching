@@ -38,6 +38,8 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
+from django.core.mail import send_mail
+from django.conf import settings
 # Create your views here.
 
 MY_EMAIL = settings.EMAIL_HOST_USER
@@ -338,39 +340,79 @@ def email_detail(request, mail_id):
     except Exception as e:
         return HttpResponse(f"Error: {str(e)}")
  
- 
+
+
 def assign_ticket(request, ticket_id):
+
     if not request.session.get("token"):
         return redirect("login")
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
     if request.method == "POST":
+
         staff_id = request.POST.get("staff_id")
 
         old_staff = ticket.assigned_to
 
         if staff_id:
+
             new_staff = get_object_or_404(Staff, id=staff_id)
+
             ticket.assigned_to = new_staff
             ticket.status = "assigned"
             ticket.save()
 
             # 🟢 HISTORY LOGIC
             if not old_staff:
+
                 TicketHistory.objects.create(
                     ticket=ticket,
                     staff=new_staff,
                     action="assigned",
                     description=f"Assigned to {new_staff.name}"
                 )
+
             else:
+
                 TicketHistory.objects.create(
                     ticket=ticket,
                     staff=new_staff,
                     action="reassigned",
                     description=f"Reassigned from {old_staff.name} to {new_staff.name}"
                 )
+
+            # 🟢 SEND EMAIL TO STAFF
+            subject = f"Ticket Assigned - {ticket.ticket_number}"
+
+            message = f"""
+Hello {new_staff.name},
+
+A ticket has been assigned to you.
+
+Ticket Number: {ticket.ticket_number}
+
+Subject:
+{ticket.subject}
+
+Customer:
+{ticket.sender}
+
+Status:
+{ticket.get_status_display()}
+
+Please login to the system to handle this ticket.
+
+Thank you.
+"""
+
+            send_mail(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,
+                [new_staff.email],
+                fail_silently=False,
+            )
 
     return redirect("email_detail", mail_id=ticket.mail_id)
  
