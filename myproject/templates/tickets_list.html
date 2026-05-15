@@ -1,10 +1,10 @@
 {% extends "main.html" %}
 {% block title %}Tickets List{% endblock %}
 {% load static %}
-
+ 
 {% block css %}
 <style>
-
+ 
 :root {
   --ink: #0f0e0b;
   --paper: #f7f5f0;
@@ -18,7 +18,7 @@
   --green: #2e7d32;
   --orange: #ef6c00;
 }
-
+ 
 .shell {
   max-width: 1400px;
   margin: auto;
@@ -26,7 +26,7 @@
   position: relative;
   z-index: 1;
 }
-
+ 
 .top-header {
   display: flex;
   justify-content: space-between;
@@ -35,31 +35,32 @@
   padding-bottom: 20px;
   border-bottom: 1px solid var(--border);
 }
-
+ 
 .eyebrow {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: .18em;
   color: var(--gold);
 }
-
+ 
 .title {
   font-family: 'Playfair Display', serif;
   font-size: 38px;
   font-weight: 700;
 }
-
+ 
 .top-bar {
   display: flex;
   gap: 14px;
   flex-wrap: wrap;
   margin-bottom: 28px;
+  align-items: center;
 }
-
+ 
 .search-box {
   position: relative;
 }
-
+ 
 .search-box i {
   position: absolute;
   left: 14px;
@@ -67,7 +68,7 @@
   transform: translateY(-50%);
   color: var(--muted);
 }
-
+ 
 input,
 select {
   background: var(--card);
@@ -80,17 +81,81 @@ select {
   min-width: 180px;
   color: var(--ink);
 }
-
+ 
 input {
   padding-left: 42px;
 }
-
+ 
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  min-width: unset;
+  padding: 0;
+  cursor: pointer;
+  accent-color: var(--gold);
+  border-radius: 4px;
+}
+ 
 input:focus,
 select:focus {
   border-color: var(--gold);
   box-shadow: 0 0 0 3px rgba(201,168,76,.12);
 }
-
+ 
+/* ── Bulk-action bar ── */
+.bulk-bar {
+  display: none;
+  align-items: center;
+  gap: 14px;
+  background: #fff8e7;
+  border: 1px solid var(--gold-light);
+  border-radius: 12px;
+  padding: 10px 18px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--ink);
+}
+ 
+.bulk-bar.visible { display: flex; }
+ 
+.bulk-bar span { font-weight: 600; color: var(--gold); }
+ 
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: .2s;
+}
+ 
+.btn-danger {
+  background: var(--red);
+  color: #fff;
+}
+ 
+.btn-danger:hover { background: #a93226; }
+ 
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+ 
+.btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+ 
+.btn-delete-all {
+  background: #fff0ee;
+  color: var(--red);
+  border: 1px solid #f5c6c2;
+}
+ 
+.btn-delete-all:hover { background: var(--red); color: #fff; }
+ 
 table {
   width: 100%;
   border-collapse: collapse;
@@ -99,7 +164,7 @@ table {
   overflow: hidden;
   border: 1px solid var(--border);
 }
-
+ 
 table th {
   background: var(--cream);
   padding: 18px;
@@ -109,50 +174,49 @@ table th {
   text-transform: uppercase;
   letter-spacing: .08em;
 }
-
+ 
+table th.check-col,
+table td.check-col {
+  width: 44px;
+  text-align: center;
+  padding-left: 16px;
+  padding-right: 8px;
+}
+ 
 table td {
   padding: 18px;
   border-bottom: 1px solid var(--border);
   font-size: 14px;
 }
-
+ 
 tbody tr {
   transition: background .2s, box-shadow .2s;
   cursor: pointer;
 }
-
+ 
 tbody tr:hover {
   background: #faf8f3;
   box-shadow: inset 3px 0 0 var(--gold);
 }
-
-tbody tr:hover .ticket-no {
+ 
+tbody tr.selected {
+  background: #fdf7e3;
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+ 
+tbody tr:hover .ticket-no,
+tbody tr.selected .ticket-no {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-
-tbody tr:active {
-  background: var(--cream);
-}
-
-.ticket-no {
-  font-weight: 700;
-  color: var(--gold);
-}
-
-.subject {
-  font-weight: 500;
-}
-
-.staff {
-  color: var(--muted);
-}
-
-.date {
-  color: var(--muted);
-  font-size: 13px;
-}
-
+ 
+tbody tr:active { background: var(--cream); }
+ 
+.ticket-no { font-weight: 700; color: var(--gold); }
+.subject   { font-weight: 500; }
+.staff     { color: var(--muted); }
+.date      { color: var(--muted); font-size: 13px; }
+ 
 .badge {
   padding: 6px 12px;
   border-radius: 20px;
@@ -160,17 +224,17 @@ tbody tr:active {
   font-size: 12px;
   font-weight: 500;
 }
-
+ 
 .assigned   { background: var(--green);  }
 .unassigned { background: var(--orange); }
 .closed     { background: var(--red);    }
-
+ 
 .cc-list {
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
-
+ 
 .cc-addr {
   font-size: 12px;
   color: var(--muted);
@@ -179,100 +243,174 @@ tbody tr:active {
   text-overflow: ellipsis;
   max-width: 200px;
 }
-
-.cc-empty {
-  color: var(--border);
-  font-size: 13px;
-}
-
+ 
+.cc-empty { color: var(--border); font-size: 13px; }
+ 
 .no-data {
   text-align: center;
   padding: 80px 20px;
   color: var(--muted);
 }
-
+ 
 .no-data i {
   font-size: 42px;
   margin-bottom: 12px;
   display: block;
   opacity: .3;
 }
-
+ 
+/* ── Row action delete button ── */
+.row-del-btn {
+  background: none;
+  border: none;
+  color: var(--border);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: .2s;
+  line-height: 1;
+}
+ 
+.row-del-btn:hover { color: var(--red); background: #fff0ee; }
+ 
+/* ── Confirm Modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,14,11,.45);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+ 
+.modal-overlay.open { display: flex; }
+ 
+.modal-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px 40px;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,.12);
+}
+ 
+.modal-icon {
+  font-size: 36px;
+  color: var(--red);
+  margin-bottom: 12px;
+}
+ 
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+ 
+.modal-desc {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+ 
+.modal-actions { display: flex; gap: 12px; justify-content: center; }
+ 
 @media (max-width: 900px) {
-
-  .top-header {
-    flex-direction: column;
-    gap: 18px;
-    align-items: flex-start;
-  }
-
-  .top-bar {
-    flex-direction: column;
-  }
-
-  input, select {
-    width: 100%;
-  }
-
-  table {
-    display: block;
-    overflow-x: auto;
-  }
-
+  .top-header { flex-direction: column; gap: 18px; align-items: flex-start; }
+  .top-bar { flex-direction: column; }
+  input, select { width: 100%; }
+  table { display: block; overflow-x: auto; }
 }
 </style>
 {% endblock %}
-
-
+ 
+ 
 {% block content %}
 <div class="shell">
-
+ 
   <div class="top-header">
     <div>
       <div class="eyebrow">Management</div>
       <h1 class="title">All Tickets</h1>
     </div>
+    <!-- Delete All button (top-right) -->
+    <button class="btn btn-delete-all" onclick="confirmDeleteAll()">
+      <i class="ti ti-trash"></i> Delete All
+    </button>
   </div>
-
+ 
   <!-- FILTERS -->
   <div class="top-bar">
-
     <div class="search-box">
       <i class="ti ti-search"></i>
-      <input type="text" id="search"
-             placeholder="Search Ticket No, Subject, Sender, Staff">
+      <input type="text" id="search" placeholder="Search Ticket No, Subject, Sender, Staff">
     </div>
-
+ 
     <select id="status">
       <option value="">All Status</option>
       <option value="assigned">Assigned</option>
       <option value="unassigned">Unassigned</option>
       <option value="closed">Closed</option>
     </select>
-
+ 
     <select id="staff">
       <option value="">All Staff</option>
       {% for s in staffs %}
         <option value="{{ s.id }}">{{ s.name }}</option>
       {% endfor %}
     </select>
-
+ 
     <div class="search-box">
       <i class="ti ti-calendar"></i>
       <input type="date" id="from_date">
     </div>
-
+ 
     <div class="search-box">
       <i class="ti ti-calendar"></i>
       <input type="date" id="to_date">
     </div>
+  </div>
+ 
+  <!-- BULK ACTION BAR (shown when rows selected) -->
+  <div class="bulk-bar" id="bulk-bar">
+
+    <span id="selected-count">0</span> ticket(s) selected
+
+    <!-- Assign staff dropdown -->
+    <select id="bulk-assign-staff">
+      <option value="">Assign Staff</option>
+
+      {% for s in staffs %}
+        <option value="{{ s.id }}">{{ s.name }}</option>
+      {% endfor %}
+    </select>
+
+    <button class="btn btn-outline" onclick="bulkAssignTickets()">
+      <i class="ti ti-user-check"></i> Assign
+    </button>
+
+    <button class="btn btn-danger" onclick="confirmDeleteSelected()">
+      <i class="ti ti-trash"></i> Delete Selected
+    </button>
+
+    <button class="btn btn-outline" onclick="clearSelection()">
+      <i class="ti ti-x"></i> Clear
+    </button>
 
   </div>
-
+ 
   <!-- TABLE -->
   <table>
     <thead>
       <tr>
+        <th class="check-col">
+          <input type="checkbox" id="select-all" title="Select All">
+        </th>
+        <th>#</th>
         <th>Ticket No</th>
         <th>Subject</th>
         <th>Sender</th>
@@ -280,24 +418,41 @@ tbody tr:active {
         <th>Status</th>
         <th>Assigned Staff</th>
         <th>Date</th>
+        <th></th>
       </tr>
     </thead>
     <tbody id="ticket-body"></tbody>
   </table>
-
+ 
 </div>
+ 
+<!-- ── CONFIRM MODAL ── -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal-box">
+    <div class="modal-icon"><i class="ti ti-alert-triangle"></i></div>
+    <div class="modal-title" id="modal-title">Are you sure?</div>
+    <div class="modal-desc"  id="modal-desc">This action cannot be undone.</div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger"  id="modal-confirm-btn">Delete</button>
+    </div>
+  </div>
+</div>
+ 
 {% endblock %}
-
-
+ 
+ 
 {% block js %}
 <script>
-
+ 
+  const CSRF = "{{ csrf_token }}";
+  let allTicketIds = [];   // all ids currently rendered
+  let pendingDelete = { type: null, ids: [] };
+ 
+  // ── Load tickets ──────────────────────────────────────────────
   function loadTickets() {
-
     $.ajax({
-
       url: "{% url 'filter_tickets' %}",
-
       data: {
         search:    $("#search").val(),
         status:    $("#status").val(),
@@ -305,63 +460,236 @@ tbody tr:active {
         from_date: $("#from_date").val(),
         to_date:   $("#to_date").val(),
       },
-
       success: function(response) {
-
         let rows = "";
-
+        allTicketIds = [];
+ 
         if (response.tickets.length > 0) {
-
-          response.tickets.forEach(function(ticket) {
-
+ 
+          response.tickets.forEach(function(ticket, index) {
+            allTicketIds.push(ticket.id);
+ 
             var detailUrl = "/email/" + ticket.mail_id + "/";
-
+ 
             var ccHtml = ticket.cc && ticket.cc.length
               ? `<div class="cc-list">${ticket.cc.map(addr => `<span class="cc-addr" title="${addr}">${addr}</span>`).join('')}</div>`
               : `<span class="cc-empty">—</span>`;
-
+ 
             rows += `
-              <tr onclick="window.location='${detailUrl}'" title="View ticket ${ticket.ticket_number}">
-                <td class="ticket-no">${ticket.ticket_number}</td>
-                <td class="subject">${ticket.subject}</td>
-                <td>${ticket.sender}</td>
-                <td>${ccHtml}</td>
-                <td><span class="badge ${ticket.status}">${ticket.status}</span></td>
-                <td class="staff">${ticket.staff}</td>
-                <td class="date">${ticket.date}</td>
+              <tr data-id="${ticket.id}">
+                <td class="check-col" onclick="event.stopPropagation()">
+                  <input type="checkbox" class="row-check" value="${ticket.id}" onchange="onCheckChange()">
+                </td>
+                <td class="date">${index + 1}</td>
+                <td class="ticket-no" onclick="window.location='${detailUrl}'">${ticket.ticket_number}</td>
+                <td class="subject"  onclick="window.location='${detailUrl}'">${ticket.subject}</td>
+                <td onclick="window.location='${detailUrl}'">${ticket.sender}</td>
+                <td onclick="window.location='${detailUrl}'">${ccHtml}</td>
+                <td onclick="window.location='${detailUrl}'"><span class="badge ${ticket.status}">${ticket.status}</span></td>
+                <td class="staff" onclick="window.location='${detailUrl}'">${ticket.staff}</td>
+                <td class="date"  onclick="window.location='${detailUrl}'">${ticket.date}</td>
+                <td onclick="event.stopPropagation()">
+                  <button class="row-del-btn" onclick="confirmDeleteOne(${ticket.id}, '${ticket.ticket_number}')" title="Delete ticket">
+                    <i class="ti ti-trash"></i>
+                  </button>
+                </td>
               </tr>
             `;
-
           });
-
+ 
         } else {
-
           rows = `
             <tr>
-              <td colspan="7" class="no-data">
+              <td colspan="10" class="no-data">
                 <i class="ti ti-ticket-off"></i>
                 No Tickets Found
               </td>
             </tr>
           `;
+        }
+ 
+        $("#ticket-body").html(rows);
+        $("#select-all").prop("checked", false);
+        updateBulkBar();
+      }
+    });
+  }
+ 
+  // ── Checkbox logic ────────────────────────────────────────────
+  function getSelectedIds() {
+    return $(".row-check:checked").map(function() {
+      return parseInt($(this).val());
+    }).get();
+  }
+ 
+  function onCheckChange() {
+    const total    = $(".row-check").length;
+    const checked  = $(".row-check:checked").length;
+    $("#select-all").prop("checked", total > 0 && total === checked);
+ 
+    // highlight selected rows
+    $(".row-check").each(function() {
+      $(this).closest("tr").toggleClass("selected", $(this).is(":checked"));
+    });
+ 
+    updateBulkBar();
+  }
+ 
+  function updateBulkBar() {
+    const count = $(".row-check:checked").length;
+    $("#selected-count").text(count);
+    $("#bulk-bar").toggleClass("visible", count > 0);
+  }
+ 
+  function clearSelection() {
+    $(".row-check").prop("checked", false);
+    $("tbody tr").removeClass("selected");
+    $("#select-all").prop("checked", false);
+    updateBulkBar();
+  }
+ 
+  $("#select-all").on("change", function() {
+    const checked = $(this).is(":checked");
+    $(".row-check").prop("checked", checked);
+    $("tbody tr").toggleClass("selected", checked);
+    updateBulkBar();
+  });
+ 
+  // ── Modal helpers ─────────────────────────────────────────────
+  function openModal(title, desc, onConfirm) {
+    $("#modal-title").text(title);
+    $("#modal-desc").text(desc);
+    $("#modal-confirm-btn").off("click").on("click", function() {
+      closeModal();
+      onConfirm();
+    });
+    $("#confirm-modal").addClass("open");
+  }
+ 
+  function closeModal() {
+    $("#confirm-modal").removeClass("open");
+  }
+ 
+  // click outside modal to close
+  $("#confirm-modal").on("click", function(e) {
+    if ($(e.target).is("#confirm-modal")) closeModal();
+  });
+ 
+  // ── Delete: single row ────────────────────────────────────────
+  function confirmDeleteOne(id, ticketNo) {
+    openModal(
+      "Delete Ticket?",
+      `Ticket ${ticketNo} will be permanently deleted. This cannot be undone.`,
+      function() { doDelete([id]); }
+    );
+  }
+ 
+  // ── Delete: selected ──────────────────────────────────────────
+  function confirmDeleteSelected() {
+    const ids = getSelectedIds();
+    if (!ids.length) return;
+    openModal(
+      "Delete Selected?",
+      `${ids.length} ticket(s) will be permanently deleted. This cannot be undone.`,
+      function() { doDelete(ids); }
+    );
+  }
+ 
+  // ── Delete: all ───────────────────────────────────────────────
+  function confirmDeleteAll() {
+    if (!allTicketIds.length) return;
+    openModal(
+      "Delete All Tickets?",
+      `All ${allTicketIds.length} tickets currently shown will be permanently deleted. This cannot be undone.`,
+      function() { doDelete(allTicketIds); }
+    );
+  }
+ 
+  // ── Actual DELETE call ────────────────────────────────────────
+  function doDelete(ids) {
+    $.ajax({
+      url: "{% url 'delete_tickets' %}",
+      method: "POST",
+      contentType: "application/json",
+      headers: { "X-CSRFToken": CSRF },
+      data: JSON.stringify({ ids: ids }),
+      success: function(res) {
+        if (res.success) {
+          loadTickets();   // refresh table
+        } else {
+          alert("Delete failed: " + (res.error || "Unknown error"));
+        }
+      },
+      error: function() {
+        alert("Server error while deleting.");
+      }
+    });
+  }
+ function bulkAssignTickets() {
+
+    const ids = getSelectedIds();
+
+    const staffId = $("#bulk-assign-staff").val();
+
+    if (!ids.length) {
+        alert("Select tickets first.");
+        return;
+    }
+
+    if (!staffId) {
+        alert("Select a staff.");
+        return;
+    }
+
+    $.ajax({
+
+        url: "{% url 'bulk_assign_tickets' %}",
+
+        method: "POST",
+
+        contentType: "application/json",
+
+        headers: {
+            "X-CSRFToken": CSRF
+        },
+
+        data: JSON.stringify({
+            ids: ids,
+            staff_id: staffId
+        }),
+
+        success: function(res) {
+
+            if (res.success) {
+
+                clearSelection();
+
+                loadTickets();
+
+            } else {
+
+                alert(res.error || "Assign failed.");
+
+            }
+        },
+
+        error: function() {
+
+            alert("Server error.");
 
         }
 
-        $("#ticket-body").html(rows);
-
-      }
-
     });
 
-  }
-
+}
+  // ── Init ──────────────────────────────────────────────────────
   loadTickets();
-
+ 
   $("#search").keyup(function()     { loadTickets(); });
   $("#status").change(function()    { loadTickets(); });
   $("#staff").change(function()     { loadTickets(); });
   $("#from_date").change(function() { loadTickets(); });
   $("#to_date").change(function()   { loadTickets(); });
-
+ 
 </script>
 {% endblock %}

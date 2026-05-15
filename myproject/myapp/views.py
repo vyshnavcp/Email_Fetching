@@ -1,3 +1,4 @@
+from django.http import request
 from myapp.models import Ticket
 from django.template.loader import render_to_string
 from myapp.models import SentEmail
@@ -32,6 +33,9 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 from django.core.files.storage import default_storage
+import json
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 # Create your views here.
 
 MY_EMAIL = settings.EMAIL_HOST_USER
@@ -744,9 +748,10 @@ def tickets_list(request):
         'staffs': staffs
     })
  
+
  
 def filter_tickets(request):
-    tickets = Ticket.objects.select_related("assigned_to").all().order_by("-created_at")
+    tickets = Ticket.objects.select_related("assigned_to").all().order_by("created_at") 
  
     # SEARCH
     search = request.GET.get("search", "").strip()
@@ -759,17 +764,17 @@ def filter_tickets(request):
             Q(cc__icontains=search)
         )
  
-    # STATUS
+
     status = request.GET.get("status", "").strip()
     if status:
         tickets = tickets.filter(status=status)
  
-    # STAFF
+   
     staff = request.GET.get("staff", "").strip()
     if staff:
         tickets = tickets.filter(assigned_to_id=staff)
  
-    # DATE RANGE
+   
     from_date = request.GET.get("from_date", "").strip()
     to_date   = request.GET.get("to_date", "").strip()
     if from_date:
@@ -779,11 +784,11 @@ def filter_tickets(request):
  
     data = []
     for ticket in tickets:
-        # Parse CC into a clean list
         cc_raw  = ticket.cc or ""
         cc_list = [e.strip() for e in cc_raw.split(",") if e.strip()]
  
         data.append({
+            "id":            ticket.id,          # ← needed for delete
             "mail_id":       ticket.mail_id,
             "ticket_number": ticket.ticket_number,
             "subject":       ticket.subject,
@@ -791,11 +796,76 @@ def filter_tickets(request):
             "status":        ticket.status,
             "staff":         ticket.assigned_to.name if ticket.assigned_to else "Not Assigned",
             "date":          ticket.created_at.strftime("%d-%m-%Y"),
-            "cc":            cc_list,          # list of addresses
-            "cc_raw":        cc_raw,           # plain string for display/copy
+            "cc":            cc_list,
+            "cc_raw":        cc_raw,
         })
  
     return JsonResponse({"tickets": data})
+ 
+
+@require_POST
+def delete_tickets(request):
+    try:
+        body = json.loads(request.body)
+        ids  = body.get("ids", [])
+ 
+        if not ids:
+            return JsonResponse({"success": False, "error": "No IDs provided."}, status=400)
+ 
+        # Validate that ids is a list of integers
+        ids = [int(i) for i in ids]
+ 
+        deleted_count, _ = Ticket.objects.filter(id__in=ids).delete()
+ 
+        return JsonResponse({"success": True, "deleted": deleted_count})
+ 
+    except (json.JSONDecodeError, ValueError, TypeError) as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    
+@require_POST
+def bulk_assign_tickets(request):
+
+    try:
+        body = json.loads(request.body)
+
+        ids = body.get("ids", [])
+        staff_id = body.get("staff_id")
+
+        if not ids:
+            return JsonResponse({
+                "success": False,
+                "error": "No tickets selected."
+            })
+
+        if not staff_id:
+            return JsonResponse({
+                "success": False,
+                "error": "No staff selected."
+            })
+
+        staff = Staff.objects.get(id=staff_id)
+
+        Ticket.objects.filter(id__in=ids).update(
+            assigned_to=staff,
+            status="assigned"
+        )
+
+        return JsonResponse({
+            "success": True
+        })
+
+    except Staff.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "error": "Staff not found."
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            "success": False,
+            "error": str(e)
+        })
+
   
 def send_email(request):
     if request.method == "POST":
