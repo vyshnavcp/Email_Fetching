@@ -870,11 +870,40 @@ def bulk_assign_tickets(request):
         })
 
 def recycle_bin(request):
-    tickets = Ticket.objects.filter(is_deleted=True).order_by('deleted_at')
-    paginator = Paginator(tickets,10)
-    page_number=request.GET.get('page')
-    page_obj=paginator.get_page(page_number)
-    return render(request,'recycle_bin.html',{'tickets':tickets,'page_obj': page_obj})
+    search = request.GET.get("search", "")
+    tickets = Ticket.objects.filter( is_deleted=True ).order_by('deleted_at')
+    if search:
+
+        tickets = tickets.filter(
+
+            Q(ticket_number__icontains=search) |
+            Q(subject__icontains=search) |
+            Q(sender__icontains=search)
+
+        )
+    paginator = Paginator(tickets, 10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        data = []
+        for ticket in page_obj:
+            data.append({
+                "id": ticket.id,
+                "ticket_number": ticket.ticket_number,
+                "subject": ticket.subject,
+                "sender": ticket.sender,
+                "deleted_at": ticket.deleted_at.strftime("%d %b %Y %I:%M %p")
+            })
+        return JsonResponse({
+            "tickets": data,
+            "has_next": page_obj.has_next(),
+            "has_previous": page_obj.has_previous(),
+            "current_page": page_obj.number,
+            "total_pages": paginator.num_pages
+        })
+    return render(request, "recycle_bin.html", {
+        "page_obj": page_obj
+    })
 
 @require_POST
 def restore_ticket(request, ticket_id):

@@ -4,6 +4,18 @@
 
 {% block css %}
 <style>
+    .search-box{
+    margin-bottom:20px;
+}
+
+.search-box input{
+    width:350px;
+    padding:12px 16px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    outline:none;
+    font-size:14px;
+}
 .pagination{
   display:flex;
   justify-content:center;
@@ -168,7 +180,15 @@ tbody tr:hover{
       </div>
     </div>
   </div>
+<div class="search-box">
 
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search ticket number, subject, sender..."
+    >
+
+</div>
   <table>
 
     <thead>
@@ -182,99 +202,86 @@ tbody tr:hover{
       </tr>
     </thead>
 
-    <tbody>
+    <tbody id="ticket-body">
 
-      {% for ticket in tickets %}
+        {% for ticket in page_obj %}
 
-      <tr id="row-{{ ticket.id }}">
+        <tr id="row-{{ ticket.id }}">
 
-        <td>{{ forloop.counter }}</td>
+            <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
 
-        <td class="ticket-no">
-          {{ ticket.ticket_number }}
-        </td>
+            <td class="ticket-no">
+                {{ ticket.ticket_number }}
+            </td>
 
-        <td>
-          {{ ticket.subject }}
-        </td>
+            <td>
+                {{ ticket.subject }}
+            </td>
 
-        <td>
-          {{ ticket.sender }}
-        </td>
+            <td>
+                {{ ticket.sender }}
+            </td>
 
-        <td class="date">
-          {{ ticket.deleted_at|date:"d M Y h:i A" }}
-        </td>
+            <td class="date">
+                {{ ticket.deleted_at|date:"d M Y h:i A" }}
+            </td>
 
-        <td>
+            <td>
 
-          <div class="actions">
+                <div class="actions">
 
-            <button
-              class="btn btn-restore"
-              onclick="restoreTicket({{ ticket.id }})"
-            >
-              Restore
-            </button>
+                    <button
+                        class="btn btn-restore"
+                        onclick="restoreTicket({{ ticket.id }})"
+                    >
+                        Restore
+                    </button>
 
-            <button
-              class="btn btn-delete"
-              onclick="permanentDelete({{ ticket.id }})"
-            >
-              Delete Permanently
-            </button>
+                    <button
+                        class="btn btn-delete"
+                        onclick="permanentDelete({{ ticket.id }})"
+                    >
+                        Delete Permanently
+                    </button>
 
-          </div>
+                </div>
 
-        </td>
+            </td>
 
-      </tr>
+        </tr>
 
-      {% empty %}
+        {% empty %}
 
-      <tr>
-        <td colspan="6" class="empty">
-          <i class="ti ti-trash-off"></i>
-          No Deleted Tickets
-        </td>
-      </tr>
+        <tr>
+            <td colspan="6" class="empty">
+                No Deleted Tickets
+            </td>
+        </tr>
 
-      {% endfor %}
+        {% endfor %}
 
-    </tbody>
+        </tbody>
 
   </table>
-  <div class="pagination">
+  <div class="pagination" id="pagination">
 
-    {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}">
-            Prev
-        </a>
+{% if page_obj.has_previous %}
+<a href="?page={{ page_obj.previous_page_number }}">Prev</a>
+{% endif %}
+
+{% for num in page_obj.paginator.page_range %}
+
+    {% if page_obj.number == num %}
+        <a class="active">{{ num }}</a>
+    {% else %}
+        <a href="?page={{ num }}">{{ num }}</a>
     {% endif %}
 
-    {% for num in page_obj.paginator.page_range %}
+{% endfor %}
 
-        {% if page_obj.number == num %}
-
-            <a class="active">
-                {{ num }}
-            </a>
-
-        {% else %}
-
-            <a href="?page={{ num }}">
-                {{ num }}
-            </a>
-
-        {% endif %}
-
-    {% endfor %}
-
-    {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}">
-            Next
-        </a>
-    {% endif %}
+{% if page_obj.has_next %}
+<a href="?page={{ page_obj.next_page_number }}">Next</a>
+{% endif %}
 
 </div>
 
@@ -289,12 +296,143 @@ tbody tr:hover{
 <script>
 
 const CSRF = "{{ csrf_token }}";
+function loadRecycleBin(page=1){
+
+    $.ajax({
+
+        url: "",
+
+        method: "GET",
+
+        data: {
+            search: $("#searchInput").val(),
+            page: page
+        },
+
+        headers:{
+            "X-Requested-With":"XMLHttpRequest"
+        },
+
+        success:function(response){
+
+            let rows = "";
+
+            if(response.tickets.length > 0){
+
+                response.tickets.forEach(function(ticket,index){
+
+                    rows += `
+
+                    <tr id="row-${ticket.id}">
+
+                        <td>${index + 1}</td>
+
+                        <td class="ticket-no">
+                            ${ticket.ticket_number}
+                        </td>
+
+                        <td>
+                            ${ticket.subject}
+                        </td>
+
+                        <td>
+                            ${ticket.sender}
+                        </td>
+
+                        <td class="date">
+                            ${ticket.deleted_at}
+                        </td>
+
+                        <td>
+
+                            <div class="actions">
+
+                                <button
+                                    class="btn btn-restore"
+                                    onclick="restoreTicket(${ticket.id})"
+                                >
+                                    Restore
+                                </button>
+
+                                <button
+                                    class="btn btn-delete"
+                                    onclick="permanentDelete(${ticket.id})"
+                                >
+                                    Delete Permanently
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    `;
+
+                });
+
+            }else{
+
+                rows = `
+                    <tr>
+                        <td colspan="6" class="empty">
+                            No Deleted Tickets
+                        </td>
+                    </tr>
+                `;
+
+            }
+
+            $("#ticket-body").html(rows);
+
+            // PAGINATION
+
+            let pagination = "";
+
+            if(response.has_previous){
+
+                pagination += `
+                    <a href="javascript:void(0)"
+                       onclick="loadRecycleBin(${response.current_page - 1})">
+                       Prev
+                    </a>
+                `;
+            }
+
+            for(let i=1; i<=response.total_pages; i++){
+
+                pagination += `
+                    <a
+                        href="javascript:void(0)"
+                        onclick="loadRecycleBin(${i})"
+                        class="${i == response.current_page ? 'active' : ''}"
+                    >
+                        ${i}
+                    </a>
+                `;
+            }
+
+            if(response.has_next){
+
+                pagination += `
+                    <a href="javascript:void(0)"
+                       onclick="loadRecycleBin(${response.current_page + 1})">
+                       Next
+                    </a>
+                `;
+            }
+
+            $("#pagination").html(pagination);
+
+        }
+
+    });
+
+}
 
 function restoreTicket(ticketId){
 
-    if(!confirm("Restore this ticket?")){
-        return;
-    }
+   
 
     $.ajax({
 
@@ -310,7 +448,7 @@ function restoreTicket(ticketId){
 
             if(res.success){
 
-                $(`#row-${ticketId}`).fadeOut(300);
+               loadRecycleBin();
 
             }else{
 
@@ -333,9 +471,7 @@ function restoreTicket(ticketId){
 
 function permanentDelete(ticketId){
 
-    if(!confirm("Permanently delete this ticket?\nThis cannot be undone.")){
-        return;
-    }
+   
 
     $.ajax({
 
@@ -371,6 +507,11 @@ function permanentDelete(ticketId){
 
 }
 
+$("#searchInput").on("keyup", function(){
+
+    loadRecycleBin(1);
+
+});
 </script>
 
 {% endblock %}
