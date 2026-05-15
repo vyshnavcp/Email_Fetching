@@ -1,0 +1,376 @@
+{% extends "main.html" %}
+{% block title %}Recycle Bin{% endblock %}
+{% load static %}
+
+{% block css %}
+<style>
+.pagination{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+  margin-top:30px;
+  flex-wrap:wrap;
+}
+
+.pagination a{
+  text-decoration:none;
+  padding:10px 16px;
+  border-radius:10px;
+  background:#f2efe7;
+  color:#333;
+  font-size:14px;
+  font-weight:600;
+  transition:.2s;
+}
+
+.pagination a:hover{
+  background:#ddd6c7;
+}
+
+.pagination a.active{
+  background:#c9a84c;
+  color:white;
+}
+:root{
+  --bg:#f7f5f0;
+  --card:#fffefb;
+  --border:#e4dfd3;
+  --gold:#c9a84c;
+  --muted:#7b7668;
+  --red:#c0392b;
+  --green:#2e7d32;
+}
+
+.shell{
+  max-width:1300px;
+  margin:auto;
+  padding:50px 24px;
+}
+
+.top-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  margin-bottom:30px;
+}
+
+.title{
+  font-size:38px;
+  font-weight:700;
+}
+
+.sub{
+  color:var(--muted);
+  margin-top:5px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+}
+
+th{
+  background:#f2efe7;
+  padding:18px;
+  text-align:left;
+  font-size:13px;
+  color:var(--muted);
+  text-transform:uppercase;
+}
+
+td{
+  padding:18px;
+  border-bottom:1px solid var(--border);
+  font-size:14px;
+}
+
+tbody tr:hover{
+  background:#faf8f3;
+}
+
+.ticket-no{
+  color:var(--gold);
+  font-weight:700;
+}
+
+.date{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+}
+
+.btn{
+  border:none;
+  padding:8px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:600;
+  transition:.2s;
+}
+
+.btn-restore{
+  background:#edf7ee;
+  color:var(--green);
+}
+
+.btn-restore:hover{
+  background:var(--green);
+  color:white;
+}
+
+.btn-delete{
+  background:#fff0ee;
+  color:var(--red);
+}
+
+.btn-delete:hover{
+  background:var(--red);
+  color:white;
+}
+
+.empty{
+  text-align:center;
+  padding:80px 20px;
+  color:var(--muted);
+}
+
+.empty i{
+  font-size:50px;
+  display:block;
+  margin-bottom:10px;
+  opacity:.3;
+}
+
+</style>
+{% endblock %}
+
+
+
+{% block content %}
+
+<div class="shell">
+
+  <div class="top-header">
+    <div>
+      <h1 class="title">Recycle Bin</h1>
+      <div class="sub">
+        Deleted tickets can be restored or permanently deleted.
+      </div>
+    </div>
+  </div>
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Ticket No</th>
+        <th>Subject</th>
+        <th>Sender</th>
+        <th>Deleted Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      {% for ticket in tickets %}
+
+      <tr id="row-{{ ticket.id }}">
+
+        <td>{{ forloop.counter }}</td>
+
+        <td class="ticket-no">
+          {{ ticket.ticket_number }}
+        </td>
+
+        <td>
+          {{ ticket.subject }}
+        </td>
+
+        <td>
+          {{ ticket.sender }}
+        </td>
+
+        <td class="date">
+          {{ ticket.deleted_at|date:"d M Y h:i A" }}
+        </td>
+
+        <td>
+
+          <div class="actions">
+
+            <button
+              class="btn btn-restore"
+              onclick="restoreTicket({{ ticket.id }})"
+            >
+              Restore
+            </button>
+
+            <button
+              class="btn btn-delete"
+              onclick="permanentDelete({{ ticket.id }})"
+            >
+              Delete Permanently
+            </button>
+
+          </div>
+
+        </td>
+
+      </tr>
+
+      {% empty %}
+
+      <tr>
+        <td colspan="6" class="empty">
+          <i class="ti ti-trash-off"></i>
+          No Deleted Tickets
+        </td>
+      </tr>
+
+      {% endfor %}
+
+    </tbody>
+
+  </table>
+  <div class="pagination">
+
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}">
+            Prev
+        </a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+
+        {% if page_obj.number == num %}
+
+            <a class="active">
+                {{ num }}
+            </a>
+
+        {% else %}
+
+            <a href="?page={{ num }}">
+                {{ num }}
+            </a>
+
+        {% endif %}
+
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">
+            Next
+        </a>
+    {% endif %}
+
+</div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block js %}
+
+<script>
+
+const CSRF = "{{ csrf_token }}";
+
+function restoreTicket(ticketId){
+
+    if(!confirm("Restore this ticket?")){
+        return;
+    }
+
+    $.ajax({
+
+        url: `/restore-ticket/${ticketId}/`,
+
+        method: "POST",
+
+        headers:{
+            "X-CSRFToken": CSRF
+        },
+
+        success:function(res){
+
+            if(res.success){
+
+                $(`#row-${ticketId}`).fadeOut(300);
+
+            }else{
+
+                alert("Restore failed.");
+
+            }
+        },
+
+        error:function(){
+
+            alert("Server error.");
+
+        }
+
+    });
+
+}
+
+
+
+function permanentDelete(ticketId){
+
+    if(!confirm("Permanently delete this ticket?\nThis cannot be undone.")){
+        return;
+    }
+
+    $.ajax({
+
+        url: `/permanent-delete/${ticketId}/`,
+
+        method: "POST",
+
+        headers:{
+            "X-CSRFToken": CSRF
+        },
+
+        success:function(res){
+
+            if(res.success){
+
+                $(`#row-${ticketId}`).fadeOut(300);
+
+            }else{
+
+                alert("Delete failed.");
+
+            }
+
+        },
+
+        error:function(){
+
+            alert("Server error.");
+
+        }
+
+    });
+
+}
+
+</script>
+
+{% endblock %}

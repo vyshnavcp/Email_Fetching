@@ -88,6 +88,9 @@
           <a href="{% url 'tickets_list' %}" class="nav-child">
             <i class="ti ti-list-details"></i> Ticket List 
           </a>
+          <a href="{% url 'recycle_bin' %}" class="nav-child">
+                  <i class="ti ti-trash"></i>Recycle Bin
+              </a>
           {% endif %}
           {% if request.session.role == "staff" %}
             <a href="{% url 'staff_asigned_ticket' %}" class="nav-child">
@@ -98,6 +101,7 @@
             <a href="{% url 'create_ticket' %}" class="nav-child">
                 <i class="ti ti-plus"></i> Create Ticket
             </a>
+            
             {% endif %}
         </div>
       </div>
@@ -118,6 +122,7 @@
               <a href="{% url 'email_list' %}" class="nav-child">
                   <i class="ti ti-list-details"></i>Email List
               </a>
+              
               {% endif %}
           </div>
 

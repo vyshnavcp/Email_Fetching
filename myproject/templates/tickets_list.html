@@ -274,6 +274,55 @@ tbody tr:active { background: var(--cream); }
  
 .row-del-btn:hover { color: var(--red); background: #fff0ee; }
  
+/* ── Pagination ── */
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+ 
+.page-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+ 
+.page-btn {
+  min-width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: .2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+}
+ 
+.page-btn:hover   { border-color: var(--gold); color: var(--gold); }
+.page-btn.active  { background: var(--gold); border-color: var(--gold); color: #fff; font-weight: 700; }
+.page-btn:disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
+ 
+.page-ellipsis {
+  min-width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+ 
 /* ── Confirm Modal ── */
 .modal-overlay {
   display: none;
@@ -324,6 +373,7 @@ tbody tr:active { background: var(--cream); }
   .top-bar { flex-direction: column; }
   input, select { width: 100%; }
   table { display: block; overflow-x: auto; }
+  .pagination-bar { flex-direction: column; align-items: flex-start; }
 }
 </style>
 {% endblock %}
@@ -373,34 +423,39 @@ tbody tr:active { background: var(--cream); }
       <i class="ti ti-calendar"></i>
       <input type="date" id="to_date">
     </div>
+ 
+    <!-- Per-page selector -->
+    <select id="per-page">
+      <option value="10" selected>10 / page</option>
+      <option value="25">25 / page</option>
+      <option value="50">50 / page</option>
+      <option value="100">100 / page</option>
+    </select>
   </div>
  
   <!-- BULK ACTION BAR (shown when rows selected) -->
   <div class="bulk-bar" id="bulk-bar">
-
     <span id="selected-count">0</span> ticket(s) selected
-
+ 
     <!-- Assign staff dropdown -->
     <select id="bulk-assign-staff">
       <option value="">Assign Staff</option>
-
       {% for s in staffs %}
         <option value="{{ s.id }}">{{ s.name }}</option>
       {% endfor %}
     </select>
-
+ 
     <button class="btn btn-outline" onclick="bulkAssignTickets()">
       <i class="ti ti-user-check"></i> Assign
     </button>
-
+ 
     <button class="btn btn-danger" onclick="confirmDeleteSelected()">
       <i class="ti ti-trash"></i> Delete Selected
     </button>
-
+ 
     <button class="btn btn-outline" onclick="clearSelection()">
       <i class="ti ti-x"></i> Clear
     </button>
-
   </div>
  
   <!-- TABLE -->
@@ -424,6 +479,9 @@ tbody tr:active { background: var(--cream); }
     <tbody id="ticket-body"></tbody>
   </table>
  
+  <!-- PAGINATION -->
+  <div class="pagination-bar" id="pagination-bar"></div>
+ 
 </div>
  
 <!-- ── CONFIRM MODAL ── -->
@@ -446,11 +504,12 @@ tbody tr:active { background: var(--cream); }
 <script>
  
   const CSRF = "{{ csrf_token }}";
-  let allTicketIds = [];   // all ids currently rendered
-  let pendingDelete = { type: null, ids: [] };
+  let allTicketIds = [];
+  let currentPage  = 1;
  
   // ── Load tickets ──────────────────────────────────────────────
-  function loadTickets() {
+  function loadTickets(page) {
+    currentPage = page || 1;
     $.ajax({
       url: "{% url 'filter_tickets' %}",
       data: {
@@ -459,12 +518,15 @@ tbody tr:active { background: var(--cream); }
         staff:     $("#staff").val(),
         from_date: $("#from_date").val(),
         to_date:   $("#to_date").val(),
+        page:      currentPage,
+        per_page:  $("#per-page").val(),
       },
       success: function(response) {
         let rows = "";
         allTicketIds = [];
  
         if (response.tickets.length > 0) {
+          const offset = (response.page - 1) * response.per_page;
  
           response.tickets.forEach(function(ticket, index) {
             allTicketIds.push(ticket.id);
@@ -480,7 +542,7 @@ tbody tr:active { background: var(--cream); }
                 <td class="check-col" onclick="event.stopPropagation()">
                   <input type="checkbox" class="row-check" value="${ticket.id}" onchange="onCheckChange()">
                 </td>
-                <td class="date">${index + 1}</td>
+                <td class="date">${offset + index + 1}</td>
                 <td class="ticket-no" onclick="window.location='${detailUrl}'">${ticket.ticket_number}</td>
                 <td class="subject"  onclick="window.location='${detailUrl}'">${ticket.subject}</td>
                 <td onclick="window.location='${detailUrl}'">${ticket.sender}</td>
@@ -511,9 +573,60 @@ tbody tr:active { background: var(--cream); }
         $("#ticket-body").html(rows);
         $("#select-all").prop("checked", false);
         updateBulkBar();
+        renderPagination(response);
       }
     });
   }
+ 
+  // ── Render pagination controls ────────────────────────────────
+  function renderPagination(response) {
+    const { page, total_pages, total, per_page } = response;
+ 
+    if (!total_pages || total_pages <= 1) {
+      $("#pagination-bar").html("");
+      return;
+    }
+ 
+    const from = (page - 1) * per_page + 1;
+    const to   = Math.min(page * per_page, total);
+ 
+    // Build page numbers with ellipsis
+    let pages = [];
+    if (total_pages <= 7) {
+      for (let i = 1; i <= total_pages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (page > 3) pages.push("…");
+      for (let i = Math.max(2, page - 1); i <= Math.min(total_pages - 1, page + 1); i++) {
+        pages.push(i);
+      }
+      if (page < total_pages - 2) pages.push("…");
+      pages.push(total_pages);
+    }
+ 
+    let btns = pages.map(p => {
+      if (p === "…") {
+        return `<span class="page-ellipsis">…</span>`;
+      }
+      return `<button class="page-btn ${p === page ? 'active' : ''}" onclick="loadTickets(${p})">${p}</button>`;
+    }).join("");
+ 
+    $("#pagination-bar").html(`
+      <div>Showing <strong>${from}–${to}</strong> of <strong>${total}</strong> tickets</div>
+      <div class="page-btns">
+        <button class="page-btn" onclick="loadTickets(${page - 1})" ${page === 1 ? 'disabled' : ''}>
+          <i class="ti ti-chevron-left"></i>
+        </button>
+        ${btns}
+        <button class="page-btn" onclick="loadTickets(${page + 1})" ${page === total_pages ? 'disabled' : ''}>
+          <i class="ti ti-chevron-right"></i>
+        </button>
+      </div>
+    `);
+  }
+ 
+  // ── Reset to page 1 on filter change ─────────────────────────
+  function resetAndLoad() { loadTickets(1); }
  
   // ── Checkbox logic ────────────────────────────────────────────
   function getSelectedIds() {
@@ -523,11 +636,10 @@ tbody tr:active { background: var(--cream); }
   }
  
   function onCheckChange() {
-    const total    = $(".row-check").length;
-    const checked  = $(".row-check:checked").length;
+    const total   = $(".row-check").length;
+    const checked = $(".row-check:checked").length;
     $("#select-all").prop("checked", total > 0 && total === checked);
  
-    // highlight selected rows
     $(".row-check").each(function() {
       $(this).closest("tr").toggleClass("selected", $(this).is(":checked"));
     });
@@ -570,7 +682,6 @@ tbody tr:active { background: var(--cream); }
     $("#confirm-modal").removeClass("open");
   }
  
-  // click outside modal to close
   $("#confirm-modal").on("click", function(e) {
     if ($(e.target).is("#confirm-modal")) closeModal();
   });
@@ -595,12 +706,12 @@ tbody tr:active { background: var(--cream); }
     );
   }
  
-  // ── Delete: all ───────────────────────────────────────────────
+  // ── Delete: all (current page) ────────────────────────────────
   function confirmDeleteAll() {
     if (!allTicketIds.length) return;
     openModal(
       "Delete All Tickets?",
-      `All ${allTicketIds.length} tickets currently shown will be permanently deleted. This cannot be undone.`,
+      `All ${allTicketIds.length} tickets on this page will be permanently deleted. This cannot be undone.`,
       function() { doDelete(allTicketIds); }
     );
   }
@@ -615,7 +726,7 @@ tbody tr:active { background: var(--cream); }
       data: JSON.stringify({ ids: ids }),
       success: function(res) {
         if (res.success) {
-          loadTickets();   // refresh table
+          loadTickets(currentPage);
         } else {
           alert("Delete failed: " + (res.error || "Unknown error"));
         }
@@ -625,71 +736,44 @@ tbody tr:active { background: var(--cream); }
       }
     });
   }
- function bulkAssignTickets() {
-
-    const ids = getSelectedIds();
-
-    const staffId = $("#bulk-assign-staff").val();
-
-    if (!ids.length) {
-        alert("Select tickets first.");
-        return;
-    }
-
-    if (!staffId) {
-        alert("Select a staff.");
-        return;
-    }
-
-    $.ajax({
-
-        url: "{% url 'bulk_assign_tickets' %}",
-
-        method: "POST",
-
-        contentType: "application/json",
-
-        headers: {
-            "X-CSRFToken": CSRF
-        },
-
-        data: JSON.stringify({
-            ids: ids,
-            staff_id: staffId
-        }),
-
-        success: function(res) {
-
-            if (res.success) {
-
-                clearSelection();
-
-                loadTickets();
-
-            } else {
-
-                alert(res.error || "Assign failed.");
-
-            }
-        },
-
-        error: function() {
-
-            alert("Server error.");
-
-        }
-
-    });
-
-}
-  // ── Init ──────────────────────────────────────────────────────
-  loadTickets();
  
-  $("#search").keyup(function()     { loadTickets(); });
-  $("#status").change(function()    { loadTickets(); });
-  $("#staff").change(function()     { loadTickets(); });
-  $("#from_date").change(function() { loadTickets(); });
-  $("#to_date").change(function()   { loadTickets(); });
+  // ── Bulk assign ───────────────────────────────────────────────
+  function bulkAssignTickets() {
+    const ids     = getSelectedIds();
+    const staffId = $("#bulk-assign-staff").val();
+ 
+    if (!ids.length) { alert("Select tickets first."); return; }
+    if (!staffId)    { alert("Select a staff member."); return; }
+ 
+    $.ajax({
+      url: "{% url 'bulk_assign_tickets' %}",
+      method: "POST",
+      contentType: "application/json",
+      headers: { "X-CSRFToken": CSRF },
+      data: JSON.stringify({ ids: ids, staff_id: staffId }),
+      success: function(res) {
+        if (res.success) {
+          clearSelection();
+          loadTickets(currentPage);
+        } else {
+          alert(res.error || "Assign failed.");
+        }
+      },
+      error: function() {
+        alert("Server error.");
+      }
+    });
+  }
+ 
+  // ── Init ──────────────────────────────────────────────────────
+  loadTickets(1);
+ 
+  $("#search").keyup(function()     { resetAndLoad(); });
+  $("#status").change(function()    { resetAndLoad(); });
+  $("#staff").change(function()     { resetAndLoad(); });
+  $("#from_date").change(function() { resetAndLoad(); });
+  $("#to_date").change(function()   { resetAndLoad(); });
+  $("#per-page").change(function()  { resetAndLoad(); });
  
 </script>
 {% endblock %}

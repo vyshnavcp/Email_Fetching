@@ -47,6 +47,8 @@ class Ticket(models.Model):
     body  = models.TextField(blank=True)
     cc    = models.TextField(blank=True, default="")
     bcc   = models.TextField(blank=True, default="")
+    is_deleted= models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     assigned_to = models.ForeignKey(Staff, null=True, blank=True, on_delete=models.SET_NULL, related_name="tickets")
     created_by  = models.ForeignKey(Staff, null=True, blank=True, on_delete=models.SET_NULL, related_name="created_tickets")

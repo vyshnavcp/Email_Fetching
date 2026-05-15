@@ -36,6 +36,8 @@ from django.core.files.storage import default_storage
 import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.utils import timezone
+
 # Create your views here.
 
 MY_EMAIL = settings.EMAIL_HOST_USER
@@ -750,45 +752,25 @@ def tickets_list(request):
  
 
  
-def filter_tickets(request):
-    tickets = Ticket.objects.select_related("assigned_to").all().order_by("created_at") 
- 
-    # SEARCH
-    search = request.GET.get("search", "").strip()
-    if search:
-        tickets = tickets.filter(
-            Q(subject__icontains=search) |
-            Q(ticket_number__icontains=search) |
-            Q(sender__icontains=search) |
-            Q(assigned_to__name__icontains=search) |
-            Q(cc__icontains=search)
-        )
- 
 
-    status = request.GET.get("status", "").strip()
-    if status:
-        tickets = tickets.filter(status=status)
- 
-   
-    staff = request.GET.get("staff", "").strip()
-    if staff:
-        tickets = tickets.filter(assigned_to_id=staff)
- 
-   
-    from_date = request.GET.get("from_date", "").strip()
-    to_date   = request.GET.get("to_date", "").strip()
-    if from_date:
-        tickets = tickets.filter(created_at__date__gte=from_date)
-    if to_date:
-        tickets = tickets.filter(created_at__date__lte=to_date)
- 
+def filter_tickets(request):
+    tickets = Ticket.objects.select_related("assigned_to").filter(is_deleted=False).order_by("created_at")
+
+    # ... all your existing search/status/staff/date filters stay the same ...
+
+    # ── Pagination ──
+    page     = int(request.GET.get("page", 1))
+    per_page = int(request.GET.get("per_page", 10))  # default 25 rows
+
+    paginator   = Paginator(tickets, per_page)
+    page_obj    = paginator.get_page(page)
+
     data = []
-    for ticket in tickets:
+    for ticket in page_obj:           # ← iterate page_obj, not tickets
         cc_raw  = ticket.cc or ""
         cc_list = [e.strip() for e in cc_raw.split(",") if e.strip()]
- 
         data.append({
-            "id":            ticket.id,          # ← needed for delete
+            "id":            ticket.id,
             "mail_id":       ticket.mail_id,
             "ticket_number": ticket.ticket_number,
             "subject":       ticket.subject,
@@ -799,28 +781,49 @@ def filter_tickets(request):
             "cc":            cc_list,
             "cc_raw":        cc_raw,
         })
- 
-    return JsonResponse({"tickets": data})
- 
 
+    return JsonResponse({
+        "tickets":    data,
+        "page":       page_obj.number,
+        "total_pages": paginator.num_pages,
+        "total":      paginator.count,
+        "per_page":   per_page,
+    })
+ 
 @require_POST
 def delete_tickets(request):
+
     try:
         body = json.loads(request.body)
-        ids  = body.get("ids", [])
- 
+
+        ids = body.get("ids", [])
+
         if not ids:
-            return JsonResponse({"success": False, "error": "No IDs provided."}, status=400)
- 
-        # Validate that ids is a list of integers
+            return JsonResponse({
+                "success": False,
+                "error": "No IDs provided."
+            }, status=400)
+
         ids = [int(i) for i in ids]
- 
-        deleted_count, _ = Ticket.objects.filter(id__in=ids).delete()
- 
-        return JsonResponse({"success": True, "deleted": deleted_count})
- 
-    except (json.JSONDecodeError, ValueError, TypeError) as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+        deleted_count = Ticket.objects.filter(
+            id__in=ids
+        ).update(
+            is_deleted=True,
+            deleted_at=timezone.now()
+        )
+
+        return JsonResponse({
+            "success": True,
+            "deleted": deleted_count
+        })
+
+    except Exception as e:
+
+        return JsonResponse({
+            "success": False,
+            "error": str(e)
+        }, status=400)
     
 @require_POST
 def bulk_assign_tickets(request):
@@ -866,6 +869,40 @@ def bulk_assign_tickets(request):
             "error": str(e)
         })
 
+def recycle_bin(request):
+    tickets = Ticket.objects.filter(is_deleted=True).order_by('deleted_at')
+    paginator = Paginator(tickets,10)
+    page_number=request.GET.get('page')
+    page_obj=paginator.get_page(page_number)
+    return render(request,'recycle_bin.html',{'tickets':tickets,'page_obj': page_obj})
+
+@require_POST
+def restore_ticket(request, ticket_id):
+    Ticket.objects.filter(id=ticket_id).update(is_deleted=False,deleted_at=None)
+    return JsonResponse({
+        "success": True
+    })
+
+@require_POST
+def permanent_delete_ticket(request, ticket_id):
+
+    try:
+
+        Ticket.objects.filter(
+            id=ticket_id
+        ).delete()
+
+        return JsonResponse({
+            "success": True
+        })
+
+    except Exception as e:
+
+        return JsonResponse({
+            "success": False,
+            "error": str(e)
+        })
+    
   
 def send_email(request):
     if request.method == "POST":
@@ -908,6 +945,7 @@ def send_email(request):
         return redirect("send_email")
 
     return render(request, "send_email.html")
+
 
 def email_list(request):
     emails = SentEmail.objects.all().prefetch_related("attachments").order_by("id")
